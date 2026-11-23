@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bản Đồ Du Lịch, Đặc Sản & Nhà Hàng Ninh Bình miền Di Sản — FB-Connect Hub</title>
+<title>Ninh Bình – Miền Di Sản | FB-Connect Hub</title>
 <style>
   /* =========================================================================
      1. DESIGN TOKENS — TÔNG XANH FACEBOOK + VÀNG CỐ ĐÔ + NGỌC BÍCH TRÀNG AN
@@ -21,6 +21,7 @@
     --food: #7c3aed;
     --food-dark: #5b21b6;
     --food-light: #f3e8ff;
+    --zalo: #0068ff;
     --danger: #dc2626;
     --success: #059669;
     --bg: #f0f4f8;
@@ -79,7 +80,7 @@
     content: ""; position: absolute; inset: 3px; border-radius: 10px;
     border: 1px solid rgba(253, 230, 138, 0.55);
   }
-  .brand-text h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; white-space: nowrap; }
+  .brand-text h1 { font-size: 15.5px; font-weight: 800; letter-spacing: -0.3px; white-space: nowrap; }
   .brand-text h1 span { color: var(--fb); }
   .brand-text p { font-size: 11px; color: var(--muted); font-weight: 600; white-space: nowrap; }
 
@@ -88,8 +89,8 @@
     background: #eaf0f6; padding: 4px; border-radius: 14px;
   }
   .nav-btn {
-    padding: 8px 13px; border-radius: 10px; font-size: 13px; font-weight: 700;
-    color: var(--muted); display: inline-flex; align-items: center; gap: 6px;
+    padding: 7.5px 11px; border-radius: 10px; font-size: 12.5px; font-weight: 700;
+    color: var(--muted); display: inline-flex; align-items: center; gap: 5px;
     transition: all 0.16s ease; white-space: nowrap;
   }
   .nav-btn:hover { color: var(--text); }
@@ -99,15 +100,15 @@
   }
 
   .cart-trigger {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 8px 13px; border-radius: 12px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border-radius: 12px;
     background: var(--fb-light); color: var(--fb);
-    font-weight: 800; font-size: 13px; flex-shrink: 0;
+    font-weight: 800; font-size: 12.5px; flex-shrink: 0;
   }
   .cart-trigger:hover { background: #d5e8ff; }
   .cart-badge {
-    background: var(--fb); color: #fff; font-size: 11.5px; font-weight: 800;
-    min-width: 21px; height: 21px; padding: 0 6px; border-radius: 999px;
+    background: var(--fb); color: #fff; font-size: 11px; font-weight: 800;
+    min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
     display: inline-flex; align-items: center; justify-content: center;
   }
 
@@ -154,7 +155,7 @@
   .hero-stats { display: flex; gap: 8px; flex-wrap: wrap; position: relative; z-index: 1; }
   .stat-box {
     background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.22);
-    border-radius: 12px; padding: 8px 13px; text-align: center; min-width: 78px;
+    border-radius: 12px; padding: 8px 13px; text-align: center; min-width: 76px;
   }
   .stat-box .num { font-size: 19px; font-weight: 800; color: #fde68a; line-height: 1.1; }
   .stat-box .lbl { font-size: 10.5px; color: rgba(255,255,255,0.9); margin-top: 2px; }
@@ -173,18 +174,23 @@
   .btn-gold:hover { background: #b45309; }
   .btn-food { background: var(--food); color: #fff; }
   .btn-food:hover { background: var(--food-dark); }
+  .btn-zalo { background: var(--zalo); color: #fff; }
+  .btn-zalo:hover { background: #0052cc; }
+  .btn-dark { background: #1e293b; color: #fff; }
+  .btn-dark:hover { background: #0f172a; }
   .btn-danger { background: var(--danger); color: #fff; }
   .btn-soft { background: #eaf0f5; color: var(--text); }
   .btn-soft:hover { background: #dce5ee; }
   .btn-soft-fb { background: var(--fb-light); color: var(--fb); }
   .btn-soft-fb:hover { background: #d4e8ff; }
   .btn-soft-jade { background: var(--jade-light); color: var(--jade-dark); }
+  .btn-soft-jade:hover { background: #ccebe5; }
   .btn-soft-gold { background: var(--gold-light); color: #92400e; }
   .btn-soft-food { background: var(--food-light); color: var(--food-dark); }
   .btn-outline { background: #fff; border: 1px solid var(--border); color: var(--text); }
   .btn-outline:hover { border-color: var(--fb); color: var(--fb); }
   .btn-sm { padding: 6.5px 10px; font-size: 12px; border-radius: 9px; }
-  .btn-xs { padding: 4.5px 8px; font-size: 11px; border-radius: 7px; }
+  .btn-xs { padding: 5px 8px; font-size: 11px; border-radius: 7px; }
 
   .tag {
     display: inline-flex; align-items: center; gap: 4px;
@@ -250,14 +256,14 @@
   }
   .reg-chip.active { background: var(--fb); color: #fff; }
 
-  .map-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(330px, 1fr); }
+  .map-grid { display: grid; grid-template-columns: minmax(0, 1.52fr) minmax(350px, 1fr); }
   .map-stage {
     position: relative; background: linear-gradient(180deg, #e1f1fb 0%, #edf7f5 55%, #d8edf8 100%);
     border-right: 1px solid var(--border); overflow: hidden;
     display: flex; flex-direction: column;
   }
   .map-svg-wrap {
-    position: relative; width: 100%; height: 520px; overflow: hidden; cursor: grab;
+    position: relative; width: 100%; height: 530px; overflow: hidden; cursor: grab;
     touch-action: none;
   }
   .map-svg-wrap:active { cursor: grabbing; }
@@ -291,12 +297,12 @@
   .region-poly:hover { filter: brightness(0.96); }
   .region-poly.dimmed { opacity: 0.3; }
   .region-lbl {
-    font-size: 13px; font-weight: 800; fill: #15364a; text-anchor: middle; pointer-events: none;
-    paint-order: stroke; stroke: rgba(255,255,255,0.9); stroke-width: 4px;
+    font-size: 12px; font-weight: 800; fill: #15364a; text-anchor: middle; pointer-events: none;
+    paint-order: stroke; stroke: rgba(255,255,255,0.92); stroke-width: 4px;
   }
   .region-sub {
-    font-size: 9.5px; font-weight: 700; fill: #3f5c6e; text-anchor: middle; pointer-events: none;
-    paint-order: stroke; stroke: rgba(255,255,255,0.85); stroke-width: 3px;
+    font-size: 9px; font-weight: 700; fill: #3f5c6e; text-anchor: middle; pointer-events: none;
+    paint-order: stroke; stroke: rgba(255,255,255,0.88); stroke-width: 3px;
   }
   .river-lbl { font-size: 9.5px; font-style: italic; font-weight: 700; fill: #1d6b91; pointer-events: none; }
   .pin-g { cursor: pointer; }
@@ -305,14 +311,13 @@
   .route-line { stroke-dasharray: 10 6; animation: dash 1.2s linear infinite; }
   @keyframes dash { to { stroke-dashoffset: -32; } }
 
-  /* Panel chi tiết bên phải bản đồ */
   .map-detail {
-    padding: 15px 16px; background: #fff; max-height: 580px; overflow-y: auto;
-    display: flex; flex-direction: column; gap: 11px;
+    padding: 15px 16px; background: #fff; max-height: 590px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 10px;
   }
   .info-box {
     background: #f6f9fc; border: 1px solid var(--border); border-radius: 11px;
-    padding: 9px 11px; font-size: 12px; display: flex; flex-direction: column; gap: 4px;
+    padding: 9px 11px; font-size: 12px; display: flex; flex-direction: column; gap: 5px;
   }
   .gps-badge {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px;
@@ -320,13 +325,12 @@
   }
   .nearby-card { border: 1px solid var(--border); border-radius: 11px; padding: 9px 11px; background: #fcfefe; }
   .nearby-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    padding: 5.5px 8px; border-radius: 8px; background: #f2f6fa; margin-top: 5px;
-    font-size: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    padding: 6px 8px; border-radius: 8px; background: #f2f6fa; margin-top: 6px;
+    font-size: 12px;
   }
-  .nearby-row:hover { background: var(--fb-light); }
+  .nearby-row:hover { background: #e8f1fb; }
 
-  /* Tra cứu nhanh 47 danh thắng + Cung đường */
   .lm-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; }
   .lm-card {
     background: #fff; border: 1px solid var(--border); border-radius: 13px; padding: 11px 12px;
@@ -343,7 +347,7 @@
   }
 
   /* =========================================================================
-     5. TAB 2: CHỢ ĐẶC SẢN & NHÀ HÀNG (SMART GRADIENT CARDS)
+     5. TAB 2: CHỢ ĐẶC SẢN & NHÀ HÀNG
      ========================================================================= */
   .cards-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
   .smart-card {
@@ -361,9 +365,9 @@
   .card-price { font-size: 18.5px; font-weight: 800; color: var(--fb); }
 
   /* =========================================================================
-     6. TAB 3 (FB & CANVAS) & TAB 4 (ADMIN)
+     6. TAB 3 (FB & CANVAS), TAB 4 (FIREBASE & GITHUB) & TAB 5 (ADMIN)
      ========================================================================= */
-  .two-col { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .two-col { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
   .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
   .kpi-card {
     background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px;
@@ -373,10 +377,25 @@
     width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center;
     justify-content: center; font-size: 21px; flex-shrink: 0;
   }
-  .table-wrap { border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; }
+  .table-wrap { border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; max-height: 460px; }
   table.data-table { width: 100%; border-collapse: collapse; font-size: 12.2px; text-align: left; }
-  table.data-table th { background: #f3f7fa; padding: 9px 11px; font-weight: 700; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.data-table th { position: sticky; top: 0; background: #f3f7fa; padding: 9px 11px; font-weight: 700; border-bottom: 1px solid var(--border); white-space: nowrap; }
   table.data-table td { padding: 8px 11px; border-bottom: 1px solid #eef3f7; vertical-align: middle; }
+  .code-editor {
+    width: 100%; min-height: 360px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.8px; line-height: 1.5; background: #0f172a; color: #e2e8f0;
+    border: 1px solid #334155; border-radius: 12px; padding: 12px; tab-size: 2;
+  }
+  .code-editor:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56,189,248,0.2); }
+  .step-box {
+    background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 11px;
+    padding: 11px 13px; font-size: 12.2px; color: #334155; line-height: 1.55;
+  }
+  .pre-dark {
+    background: #0f172a; color: #e2e8f0; padding: 10px 12px; border-radius: 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.5px; overflow-x: auto; line-height: 1.45; margin-top: 6px;
+  }
 
   /* =========================================================================
      7. DRAWER GIỎ HÀNG, MODALS & TOAST
@@ -384,34 +403,44 @@
   .overlay { position: fixed; inset: 0; background: rgba(12,24,36,0.52); z-index: 60; display: none; }
   .overlay.open { display: block; }
   .drawer {
-    position: fixed; top: 0; right: 0; width: 100%; max-width: 420px; height: 100vh;
+    position: fixed; top: 0; right: 0; width: 100%; max-width: 430px; height: 100vh;
     background: #fff; z-index: 70; box-shadow: var(--shadow-lg);
     transform: translateX(100%); transition: transform 0.25s ease;
     display: flex; flex-direction: column;
   }
   .drawer.open { transform: translateX(0); }
   .modal-bg {
-    position: fixed; inset: 0; background: rgba(12,24,36,0.6); z-index: 80;
+    position: fixed; inset: 0; background: rgba(12,24,36,0.62); z-index: 85;
     display: none; align-items: center; justify-content: center; padding: 14px;
   }
   .modal-bg.open { display: flex; }
   .modal-box {
-    background: #fff; border-radius: 18px; width: 100%; max-width: 540px; max-height: 92vh;
+    background: #fff; border-radius: 18px; width: 100%; max-width: 520px; max-height: 92vh;
     display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-lg);
+    animation: fadeIn 0.18s ease;
   }
   .modal-head {
     padding: 13px 16px; border-bottom: 1px solid var(--border); background: #f8fafc;
     display: flex; align-items: center; justify-content: space-between;
   }
-  .modal-body { padding: 15px 16px; overflow-y: auto; }
+  .modal-body { padding: 16px; overflow-y: auto; }
   .modal-foot {
     padding: 11px 16px; border-top: 1px solid var(--border); background: #f8fafc;
-    display: flex; justify-content: flex-end; gap: 8px;
+    display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap;
+  }
+  .big-phone-box {
+    background: linear-gradient(135deg, #e4f5f2 0%, #e7f3ff 100%);
+    border: 2px solid var(--jade); border-radius: 14px; padding: 14px;
+    text-align: center; margin: 10px 0;
+  }
+  .big-phone-num {
+    font-size: 26px; font-weight: 900; letter-spacing: 1px; color: var(--jade-dark);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
 
   .toast-stack {
-    position: fixed; bottom: 16px; right: 16px; z-index: 95;
-    display: flex; flex-direction: column; gap: 8px; max-width: 350px; pointer-events: none;
+    position: fixed; bottom: 16px; right: 16px; z-index: 98;
+    display: flex; flex-direction: column; gap: 8px; max-width: 360px; pointer-events: none;
   }
   .toast {
     pointer-events: auto; background: #14222b; color: #fff; padding: 10px 14px; border-radius: 11px;
@@ -429,7 +458,7 @@
   /* =========================================================================
      8. RESPONSIVE
      ========================================================================= */
-  @media (max-width: 1100px) {
+  @media (max-width: 1140px) {
     .map-grid, .two-col { grid-template-columns: 1fr; }
     .map-stage { border-right: none; border-bottom: 1px solid var(--border); }
     .map-detail { max-height: none; }
@@ -437,7 +466,7 @@
     .cards-3, .routes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
-  @media (max-width: 780px) {
+  @media (max-width: 820px) {
     .nav-desktop { display: none; }
     .nav-mobile { display: flex; }
     .brand-text p, .cart-lbl { display: none; }
@@ -455,28 +484,33 @@
     <div class="brand" onclick="switchTab('map')">
       <div class="brand-logo">⛰️</div>
       <div class="brand-text">
-        <h1>Ninh Bình <span>Mới</span> — FB-Connect Hub</h1>
-        <p>Địa giới hành chính 2 cấp • 47 Danh thắng • 22 Đặc sản • 12 Nhà hàng</p>
+        <h1>Ninh Bình – <span>Miền Di Sản</span> | FB-Connect Hub</h1>
+        <p>Đất Cố Đô Ngàn Năm – Tinh Hoa Miền Di Sản • 129 Phường, Xã</p>
       </div>
     </div>
 
     <nav class="nav-desktop">
-      <button class="nav-btn active" id="nd-map" onclick="switchTab('map')">🗺️ Bản Đồ Hợp Nhất</button>
-      <button class="nav-btn" id="nd-market" onclick="switchTab('market')">🎁 Chợ Đặc Sản & 🍽️ Nhà Hàng</button>
-      <button class="nav-btn" id="nd-fb" onclick="switchTab('fb')">🚀 Kết Nối FB & Xưởng Ảnh Thẻ</button>
-      <button class="nav-btn" id="nd-admin" onclick="switchTab('admin')">🛡️ Quản Trị Admin</button>
+      <button class="nav-btn active" id="nd-map" onclick="switchTab('map')">🗺️ Bản Đồ Di Sản</button>
+      <button class="nav-btn" id="nd-market" onclick="switchTab('market')">🎁 Đặc Sản & 🍽️ Nhà Hàng</button>
+      <button class="nav-btn" id="nd-fb" onclick="switchTab('fb')">🚀 FB & Ảnh Thẻ</button>
+      <button class="nav-btn" id="nd-cloud" onclick="switchTab('cloud')">☁️ Firebase & GitHub</button>
+      <button class="nav-btn" id="nd-admin" onclick="switchTab('admin')">🛡️ Quản Trị</button>
     </nav>
 
-    <button class="cart-trigger" onclick="openCart()">
-      <span>🛒</span><span class="cart-lbl">Giỏ gom đơn</span>
-      <span class="cart-badge" id="cart-badge">0</span>
-    </button>
+    <div style="display:flex; align-items:center; gap:7px;">
+      <span id="cloud-status-pill" class="tag tag-slate" onclick="switchTab('cloud')" style="cursor:pointer;" title="Nhấn để cấu hình Firebase & GitHub">💾 Local</span>
+      <button class="cart-trigger" onclick="openCart()">
+        <span>🛒</span><span class="cart-lbl">Giỏ gom đơn</span>
+        <span class="cart-badge" id="cart-badge">0</span>
+      </button>
+    </div>
   </div>
 
   <nav class="nav-mobile">
     <button class="nav-btn active" id="nm-map" onclick="switchTab('map')"><span>🗺️</span><span>Bản Đồ</span></button>
-    <button class="nav-btn" id="nm-market" onclick="switchTab('market')"><span>🎁</span><span>Đặc Sản & Ăn</span></button>
-    <button class="nav-btn" id="nm-fb" onclick="switchTab('fb')"><span>🚀</span><span>FB & Ảnh Thẻ</span></button>
+    <button class="nav-btn" id="nm-market" onclick="switchTab('market')"><span>🎁</span><span>Đặc Sản</span></button>
+    <button class="nav-btn" id="nm-fb" onclick="switchTab('fb')"><span>🚀</span><span>FB & QR</span></button>
+    <button class="nav-btn" id="nm-cloud" onclick="switchTab('cloud')"><span>☁️</span><span>Cloud/Git</span></button>
     <button class="nav-btn" id="nm-admin" onclick="switchTab('admin')"><span>🛡️</span><span>Admin</span></button>
   </nav>
 </header>
@@ -485,20 +519,20 @@
 <main class="main-wrap">
 
   <!-- =======================================================================
-       TAB 1: BẢN ĐỒ HỢP NHẤT
+       TAB 1: BẢN ĐỒ DI SẢN & ẨM THỰC
        ======================================================================= -->
   <section id="tab-map" class="tab-panel active">
     <div class="hero">
       <div>
-        <div class="hero-pill"><span class="dot-live"></span> Chính quyền 2 cấp Tỉnh Ninh Bình (Phường / Xã trực thuộc Tỉnh)</div>
-        <h2>Bản Đồ Du Lịch, Ẩm Thực & <span class="gold">Đặc Sản Ninh Bình</span></h2>
-        <p>Hợp nhất 3 vùng di sản: <strong>Vùng Cố Đô Hoa Lư</strong> (Tỉnh lỵ), <strong>Vùng Tam Chúc – Phủ Lý</strong> và <strong>Vùng Thành Nam – Biển Đông</strong>. Chạm từng ghim để xem mô tả, gợi ý đặc sản & nhà hàng gần nhất và chốt đơn thẳng Facebook.</p>
+        <div class="hero-pill"><span class="dot-live"></span> <span>Đất Cố Đô Ngàn Năm – Tinh Hoa Miền Di Sản • 129 Phường, Xã</span></div>
+        <h2>Bản Đồ Du Lịch, Ẩm Thực & <span class="gold">Ninh Bình – Miền Di Sản</span></h2>
+        <p>Hội tụ 3 phân khu di sản đặc sắc: <strong>Vùng Di Sản Cố Đô Hoa Lư – Tràng An</strong> (39 ĐVHC), <strong>Vùng Tâm Linh Tam Chúc – Văn Hiến Sơn Nam</strong> (33 ĐVHC) và <strong>Vùng Văn Hóa Trần – Phủ Dầy & Biển Đông</strong> (57 ĐVHC). Chạm từng ghim để xem vị trí, đặc sản gần đó và kết nối trực tiếp.</p>
       </div>
       <div class="hero-stats">
         <div class="stat-box"><div class="num" id="st-lm">47</div><div class="lbl">Danh thắng</div></div>
         <div class="stat-box"><div class="num" id="st-sp">22</div><div class="lbl">Đặc sản</div></div>
         <div class="stat-box"><div class="num" id="st-rs">12</div><div class="lbl">Nhà hàng</div></div>
-        <div class="stat-box"><div class="num" id="st-wd">28</div><div class="lbl">Phường/Xã</div></div>
+        <div class="stat-box"><div class="num" id="st-wd">129</div><div class="lbl">Phường/Xã</div></div>
       </div>
     </div>
 
@@ -506,13 +540,13 @@
     <div class="map-card" id="map-anchor">
       <div class="map-top">
         <div>
-          <div style="font-size:15.5px; font-weight:800;">📍 Bản Đồ Tương Tác Tỉnh Ninh Bình (Zoom, Kéo Thả & Vẽ Cung Đường)</div>
+          <div style="font-size:15.5px; font-weight:800;">📍 Bản Đồ Tương Tác Ninh Bình – Miền Di Sản (Zoom, Kéo Thả & Vẽ Cung Đường)</div>
           <div id="gps-status" style="font-size:12px; color:var(--muted);">Bấm vào ghim trên bản đồ hoặc chọn điểm ở bảng tra cứu nhanh bên dưới.</div>
         </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap;">
           <button class="btn btn-jade btn-sm" onclick="locateGPS()">🎯 Định vị GPS</button>
           <button class="btn btn-soft-gold btn-sm" id="btn-custom-route-mode" onclick="toggleCustomRouteMode()">✏️ Tự chọn tuyến (<span id="custom-cnt">0</span>)</button>
-          <button class="btn btn-soft btn-sm" onclick="resetMapView()">🔄 Toàn tỉnh</button>
+          <button class="btn btn-soft btn-sm" onclick="resetMapView()">🔄 Toàn miền</button>
         </div>
       </div>
 
@@ -523,10 +557,10 @@
           <button class="layer-chip on-rs" id="ly-rs" onclick="toggleLayer('restaurants')">🍽️ Nhà hàng (<span id="cnt-rs">12</span>)</button>
         </div>
         <div class="chip-bar">
-          <button class="reg-chip active" id="rc-all" onclick="setMapRegion('all')">Tất cả 3 vùng</button>
-          <button class="reg-chip" id="rc-hoalu" onclick="setMapRegion('hoalu')">Cố Đô Hoa Lư</button>
-          <button class="reg-chip" id="rc-tamchuc" onclick="setMapRegion('tamchuc')">Tam Chúc – Phủ Lý</button>
-          <button class="reg-chip" id="rc-thanhnam" onclick="setMapRegion('thanhnam')">Thành Nam – Biển Đông</button>
+          <button class="reg-chip active" id="rc-all" onclick="setMapRegion('all')">Tất cả 3 phân khu</button>
+          <button class="reg-chip" id="rc-hoalu" onclick="setMapRegion('hoalu')">Hoa Lư – Tràng An</button>
+          <button class="reg-chip" id="rc-tamchuc" onclick="setMapRegion('tamchuc')">Tam Chúc – Sơn Nam</button>
+          <button class="reg-chip" id="rc-thanhnam" onclick="setMapRegion('thanhnam')">Trần – Phủ Dầy – Biển</button>
         </div>
       </div>
 
@@ -556,12 +590,10 @@
                 </filter>
               </defs>
               <g id="svg-viewport">
-                <!-- Biển Đông -->
                 <path d="M495,640 L920,640 L920,250 C875,310 845,380 795,435 C740,495 650,535 568,580 C530,602 510,620 495,640 Z" fill="url(#seaG)" opacity="0.82"/>
                 <text x="805" y="555" class="river-lbl" font-size="13" text-anchor="middle">Biển Đông</text>
-                <text x="805" y="572" class="river-lbl" font-size="10" text-anchor="middle">(Vịnh Bắc Bộ — Bờ biển Ninh Bình)</text>
+                <text x="805" y="572" class="river-lbl" font-size="10" text-anchor="middle">(Vịnh Bắc Bộ — Bờ biển Ninh Bình – Miền Di Sản)</text>
 
-                <!-- 3 Vùng sau hợp nhất -->
                 <g filter="url(#dropSh)">
                   <path id="poly-tamchuc" class="region-poly" fill="#e6f3d8" onclick="setMapRegion('tamchuc')"
                         d="M210,145 C235,88 318,58 412,68 C472,76 520,100 556,138 L492,202 L426,225 L340,222 L255,200 Z"/>
@@ -571,7 +603,6 @@
                         d="M426,225 L492,202 L556,138 C632,180 725,245 824,335 C844,375 830,415 796,435 C725,478 632,520 530,535 L530,462 L468,370 L438,292 Z"/>
                 </g>
 
-                <!-- Sông chính -->
                 <path d="M518,92 C605,155 695,222 820,364" fill="none" stroke="#0284c7" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
                 <path d="M338,76 C348,145 388,208 428,280 C458,345 500,442 544,548" fill="none" stroke="#0ea5e9" stroke-width="4.2" stroke-linecap="round" opacity="0.75"/>
                 <path d="M165,275 C245,278 308,275 402,265" fill="none" stroke="#38bdf8" stroke-width="3.2" stroke-linecap="round" opacity="0.8"/>
@@ -580,15 +611,13 @@
                 <text x="462" y="352" class="river-lbl" transform="rotate(62 462 352)">Sông Đáy</text>
                 <text x="232" y="266" class="river-lbl">Sông Hoàng Long</text>
 
-                <!-- Nhãn 3 Vùng -->
-                <text x="382" y="116" class="region-lbl">VÙNG TAM CHÚC – PHỦ LÝ</text>
-                <text x="382" y="130" class="region-sub">(Hà Nam cũ • Phủ Lý • Tam Chúc • Vũ Đại)</text>
-                <text x="238" y="352" class="region-lbl">VÙNG CỐ ĐÔ HOA LƯ</text>
-                <text x="238" y="366" class="region-sub">(Tỉnh lỵ • Tràng An • Gia Vân • Cúc Phương • Phát Diệm)</text>
-                <text x="650" y="320" class="region-lbl">VÙNG THÀNH NAM – BIỂN ĐÔNG</text>
-                <text x="650" y="334" class="region-sub">(Nam Định cũ • Đền Trần • Phủ Dầy • Xuân Thủy • Thịnh Long)</text>
+                <text x="382" y="114" class="region-lbl">TAM CHÚC – VĂN HIẾN SƠN NAM</text>
+                <text x="382" y="128" class="region-sub">(33 Phường/Xã • Phủ Lý • Tam Chúc • Vũ Đại)</text>
+                <text x="238" y="350" class="region-lbl">CỐ ĐÔ HOA LƯ – TRÀNG AN</text>
+                <text x="238" y="364" class="region-sub">(39 Phường/Xã • Tràng An • Gia Vân • Cúc Phương • Phát Diệm)</text>
+                <text x="650" y="318" class="region-lbl">VĂN HÓA TRẦN – PHỦ DẦY & BIỂN ĐÔNG</text>
+                <text x="650" y="332" class="region-sub">(57 Phường/Xã • Đền Trần • Phủ Dầy • Xuân Thủy • Thịnh Long)</text>
 
-                <!-- Lớp tuyến đường & Ghim -->
                 <g id="svg-routes"></g>
                 <g id="svg-pins"></g>
                 <g id="svg-user"></g>
@@ -613,7 +642,7 @@
     <div class="panel">
       <div class="panel-head">
         <div>
-          <div style="font-size:15.5px; font-weight:800;">🛣️ 6 Cung Đường Du Lịch Liên Vùng Ninh Bình</div>
+          <div style="font-size:15.5px; font-weight:800;">🛣️ 6 Cung Đường Du Lịch Liên Vùng Ninh Bình – Miền Di Sản</div>
           <div style="font-size:12px; color:var(--muted);">Bấm "Vẽ lên bản đồ" để xem lộ trình hoặc "Google Maps" để dẫn đường đa điểm ngay</div>
         </div>
       </div>
@@ -624,16 +653,16 @@
     <div class="panel">
       <div class="panel-head">
         <div>
-          <div style="font-size:15.5px; font-weight:800;">🔎 Tra Cứu Nhanh 47 Danh Lam Thắng Cảnh Theo Vùng & Chủ Đề</div>
+          <div style="font-size:15.5px; font-weight:800;">🔎 Tra Cứu Nhanh 47 Danh Lam Thắng Cảnh Theo Phân Khu & Chủ Đề</div>
           <div style="font-size:12px; color:var(--muted);">Bấm vào bất kỳ điểm nào để phóng tới ghim trên bản đồ (hoặc chọn thêm vào tuyến tự vẽ)</div>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <input type="text" id="lm-search" class="form-control" style="width:210px;" oninput="renderLandmarkQuickGrid()" placeholder="Tìm Tràng An, Lãng Vân, Đền Trần...">
-          <select id="lm-region-flt" class="form-control" style="width:175px;" onchange="renderLandmarkQuickGrid()">
-            <option value="all">🗺️ Tất cả 3 vùng</option>
-            <option value="hoalu">⛰️ Cố Đô Hoa Lư</option>
-            <option value="tamchuc">🌿 Tam Chúc – Phủ Lý</option>
-            <option value="thanhnam">🌊 Thành Nam – Biển Đông</option>
+          <select id="lm-region-flt" class="form-control" style="width:210px;" onchange="renderLandmarkQuickGrid()">
+            <option value="all">🗺️ Tất cả 3 phân khu</option>
+            <option value="hoalu">⛰️ Cố Đô Hoa Lư – Tràng An</option>
+            <option value="tamchuc">🌿 Tam Chúc – Văn Hiến Sơn Nam</option>
+            <option value="thanhnam">🌊 Văn Hóa Trần – Phủ Dầy & Biển</option>
           </select>
           <select id="lm-theme-flt" class="form-control" style="width:175px;" onchange="renderLandmarkQuickGrid()">
             <option value="all">✨ Tất cả chủ đề</option>
@@ -655,14 +684,14 @@
     <div class="panel">
       <div class="row-3" style="margin-bottom:10px;">
         <input type="text" id="mk-search" class="form-control" oninput="renderMarket()" placeholder="🔍 Tìm thịt dê, nem chua, rượu Kim Sơn, cá kho Vũ Đại, nhà hàng...">
-        <select id="mk-region" class="form-control" onchange="renderMarket()">
-          <option value="all">🗺️ Tất cả 3 vùng</option>
-          <option value="hoalu">⛰️ Vùng Cố Đô Hoa Lư</option>
-          <option value="tamchuc">🌿 Vùng Tam Chúc – Phủ Lý</option>
-          <option value="thanhnam">🌊 Vùng Thành Nam – Biển Đông</option>
+        <select id="mk-region" class="form-control" onchange="populateWardFilter(); renderMarket();">
+          <option value="all">🗺️ Tất cả 3 phân khu (129 Phường/Xã)</option>
+          <option value="hoalu">⛰️ Cố Đô Hoa Lư – Tràng An (39 ĐVHC)</option>
+          <option value="tamchuc">🌿 Tam Chúc – Văn Hiến Sơn Nam (33 ĐVHC)</option>
+          <option value="thanhnam">🌊 Văn Hóa Trần – Phủ Dầy & Biển (57 ĐVHC)</option>
         </select>
         <select id="mk-ward" class="form-control" onchange="renderMarket()">
-          <option value="all">📍 Tất cả Phường / Xã mới</option>
+          <option value="all">📍 Tất cả 129 Phường / Xã</option>
         </select>
       </div>
       <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px;">
@@ -671,7 +700,7 @@
           <button class="reg-chip" id="mk-t-sp" onclick="setMarketType('specialty')">🎁 Đặc sản (<span id="mk-cnt-sp">22</span>)</button>
           <button class="reg-chip" id="mk-t-rs" onclick="setMarketType('restaurant')">🍽️ Nhà hàng (<span id="mk-cnt-rs">12</span>)</button>
         </div>
-        <span style="font-size:12px; color:var(--muted);">💡 Smart Gradient Card — Chốt đơn / Đặt bàn thẳng qua Facebook Messenger không cần tải ảnh</span>
+        <span style="font-size:12px; color:var(--muted);">🛡️ Chỉ hiển thị SĐT & Facebook xác thực; cơ sở để trống có thể cập nhật trong Admin</span>
       </div>
     </div>
     <div class="cards-3" id="market-grid"></div>
@@ -684,16 +713,15 @@
     <div class="panel" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
       <div>
         <div style="font-size:16.5px; font-weight:800;">🚀 Trung Tâm Kết Nối Facebook, Xưởng Ảnh Thẻ Canvas & Mã QR Offline</div>
-        <div style="font-size:12px; color:var(--muted);">Chọn bất kỳ Đặc sản, Nhà hàng hoặc Danh thắng để vẽ Poster 900×900, soạn bài Facebook kèm link m.me/Maps & xuất Meta Catalog CSV</div>
+        <div style="font-size:12px; color:var(--muted);">Chọn Đặc sản, Nhà hàng hoặc Danh thắng để vẽ Poster 900×900, soạn bài Facebook kèm địa chỉ 129 Phường/Xã & xuất Meta Catalog CSV</div>
       </div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <select id="fb-item-select" class="form-control" style="max-width:340px; font-weight:700; background:var(--fb-light); color:var(--fb);" onchange="renderFBHub()"></select>
+        <select id="fb-item-select" class="form-control" style="max-width:350px; font-weight:700; background:var(--fb-light); color:var(--fb);" onchange="renderFBHub()"></select>
         <button class="btn btn-fb btn-sm" onclick="downloadMetaCSV()">📥 Xuất Meta Catalog CSV</button>
       </div>
     </div>
 
     <div class="two-col">
-      <!-- Cột trái: Xưởng vẽ Poster Canvas 900x900 -->
       <div class="panel">
         <div class="panel-head">
           <div style="font-size:15px; font-weight:800;">🎨 Xưởng Vẽ Ảnh Thẻ Poster (900×900 PNG)</div>
@@ -704,11 +732,10 @@
         </div>
       </div>
 
-      <!-- Cột phải: Bài đăng Facebook + Mã QR thuần JS -->
       <div>
         <div class="panel">
           <div class="panel-head">
-            <div style="font-size:15px; font-weight:800;">✍️ Bài Đăng Facebook Tự Động (Địa chỉ Phường/Xã mới)</div>
+            <div style="font-size:15px; font-weight:800;">✍️ Bài Đăng Facebook Tự Động (Địa chỉ 129 Phường/Xã)</div>
             <button class="btn btn-fb btn-sm" onclick="copyFBPost()">📋 Sao chép bài đăng</button>
           </div>
           <textarea id="fb-post-box" class="form-control" rows="9" readonly style="font-size:12.5px; line-height:1.55;"></textarea>
@@ -728,7 +755,7 @@
               <input type="text" id="qr-url" class="form-control" readonly style="font-family:monospace; font-size:11.5px; margin-bottom:8px;">
               <div style="display:flex; gap:7px; flex-wrap:wrap;">
                 <button class="btn btn-soft-fb btn-sm" onclick="copyText(document.getElementById('qr-url').value,'Đã sao chép link!')">📋 Copy Link</button>
-                <a id="qr-open" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-fb btn-sm">💬 Mở Messenger / Maps</a>
+                <a id="qr-open" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-fb btn-sm">🔗 Mở Liên Kết</a>
               </div>
             </div>
           </div>
@@ -738,40 +765,137 @@
   </section>
 
   <!-- =======================================================================
-       TAB 4: QUẢN TRỊ ADMIN (PIN: 2026)
+       TAB 4: FIREBASE CLOUD & TRÌNH CHỈNH SỬA CODE GITHUB PAGES
+       ======================================================================= -->
+  <section id="tab-cloud" class="tab-panel">
+    <div class="two-col">
+      <!-- CỘT 1: ĐỒNG BỘ FIREBASE REALTIME DATABASE REST API (KHÔNG CDN) -->
+      <div class="panel" style="border-top:4px solid #f59e0b;">
+        <div class="panel-head">
+          <div>
+            <div style="font-size:16px; font-weight:800;">☁️ Đồng Bộ Dữ Liệu Firebase Realtime Database</div>
+            <div style="font-size:12px; color:var(--muted);">Sử dụng REST API thuần <code>fetch()</code> — Không CDN, hoạt động 100% trên GitHub Pages</div>
+          </div>
+          <span id="fb-rtdb-badge" class="tag tag-slate">⚪ Chưa cấu hình Firebase</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">🔗 Firebase Realtime Database URL hoặc dán nguyên khối Firebase Config JSON:</label>
+          <textarea id="fb-rtdb-input" class="form-control" rows="4" style="font-family:monospace; font-size:11.8px;" placeholder='Ví dụ URL: https://ninh-binh-mien-di-san-default-rtdb.firebaseio.com&#10;Hoặc dán nguyên khối: {"apiKey":"...","databaseURL":"https://...-rtdb.firebaseio.com","projectId":"..."}'></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">🔑 Database Secret / Auth Token (Để trống nếu dùng Rules công khai):</label>
+          <input type="text" id="fb-rtdb-token" class="form-control" style="font-family:monospace; font-size:12px;" placeholder="Tùy chọn (nếu bảo vệ ghi bằng secret)">
+        </div>
+
+        <div style="display:flex; gap:7px; flex-wrap:wrap; margin-bottom:10px;">
+          <button class="btn btn-gold btn-sm" onclick="testAndSaveFirebase()">🔌 Kiểm tra kết nối Firebase</button>
+          <button class="btn btn-fb btn-sm" onclick="pushFirebaseREST()">⬆️ Đẩy toàn bộ dữ liệu lên Firebase (Push)</button>
+          <button class="btn btn-jade btn-sm" onclick="pullFirebaseREST()">⬇️ Tải dữ liệu từ Firebase về (Pull)</button>
+        </div>
+
+        <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:#334552; margin-bottom:12px; cursor:pointer;">
+          <input type="checkbox" id="fb-autosync-toggle" onchange="toggleAutoSync(this.checked)">
+          <span>⚡ Tự động đồng bộ lên Firebase mỗi khi Admin lưu thay đổi</span>
+        </label>
+
+        <div class="step-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <b>📖 Hướng dẫn 3 bước tạo Firebase miễn phí &amp; Security Rules:</b>
+            <button class="btn btn-soft-gold btn-xs" onclick="copyText(document.getElementById('rtdb-rules-pre').textContent,'Đã sao chép database.rules.json!')">📋 Copy Rules</button>
+          </div>
+          1. Truy cập <b>console.firebase.google.com</b> → Tạo Project mới → Mở <b>Build &gt; Realtime Database</b> → Bấm <b>Create Database</b> (chọn Singapore).<br>
+          2. Copy đường dẫn <code>https://...firebaseio.com</code> dán vào ô phía trên và bấm <b>Kiểm tra kết nối Firebase</b>.<br>
+          3. Chuyển sang tab <b>Rules</b> trong Realtime Database và dán cấu hình <code>database.rules.json</code> sau:
+          <pre id="rtdb-rules-pre" class="pre-dark">{
+  "rules": {
+    "ninhbinh_mien_di_san": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}</pre>
+        </div>
+      </div>
+
+      <!-- CỘT 2: TRÌNH CHỈNH SỬA CODE TRỰC TIẾP & ĐÓNG GÓI GITHUB PAGES -->
+      <div class="panel" style="border-top:4px solid #1e293b;">
+        <div class="panel-head">
+          <div>
+            <div style="font-size:16px; font-weight:800;">💻 Chỉnh Sửa Code &amp; Xuất Gói GitHub Pages</div>
+            <div style="font-size:12px; color:var(--muted);">Chỉnh sửa trực tiếp mã nguồn HTML/CSS/JS (đã nhúng sẵn cấu hình Firebase &amp; dữ liệu mới nhất)</div>
+          </div>
+          <span class="tag tag-fb">Single-File HTML</span>
+        </div>
+
+        <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
+          <input type="text" id="code-find-inp" class="form-control" style="flex:1; min-width:160px;" placeholder="🔍 Tìm chuỗi trong code (VD: DEFAULT_FIREBASE, PIN, Ninh Bình)..." onkeydown="if(event.key==='Enter') findInCodeEditor()">
+          <button class="btn btn-soft btn-sm" onclick="findInCodeEditor()">Tìm tiếp</button>
+          <button class="btn btn-soft-fb btn-sm" onclick="refreshCodeEditorFromState()">🔄 Nạp code mới nhất</button>
+        </div>
+
+        <textarea id="live-code-editor" class="code-editor" spellcheck="false"></textarea>
+
+        <div style="display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; margin-bottom:12px;">
+          <button class="btn btn-jade btn-sm" onclick="applyAndPreviewCode()">▶️ Áp dụng &amp; Xem trước ngay</button>
+          <button class="btn btn-soft btn-sm" onclick="restoreOriginalCode()">↩️ Khôi phục code gốc</button>
+          <button class="btn btn-dark btn-sm" onclick="downloadGitHubIndex()">⬇️ Tải file index.html (Chuẩn GitHub Pages)</button>
+        </div>
+
+        <div class="step-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <b>🐙 Triển khai lên GitHub Pages trong 1 phút:</b>
+            <div style="display:flex; gap:5px;">
+              <button class="btn btn-outline btn-xs" onclick="downloadGitHubReadme()">📄 Tải README.md</button>
+              <button class="btn btn-soft-fb btn-xs" onclick="copyText(document.getElementById('git-cli-pre').textContent,'Đã sao chép lệnh Git CLI!')">📋 Copy lệnh Git</button>
+            </div>
+          </div>
+          <pre id="git-cli-pre" class="pre-dark">git init
+git add index.html README.md
+git commit -m "Deploy Ninh Binh - Mien Di San FB-Connect Hub"
+git branch -M main
+git remote add origin https://github.com/USER/ninh-binh-mien-di-san.git
+git push -u origin main</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================================
+       TAB 5: QUẢN TRỊ ADMIN (PIN: 2026)
        ======================================================================= -->
   <section id="tab-admin" class="tab-panel">
-    <!-- Cổng đăng nhập PIN -->
-    <div id="admin-login-box" class="panel" style="max-width:420px; margin:30px auto; text-align:center; padding:28px;">
+    <div id="admin-login-box" class="panel" style="max-width:410px; margin:30px auto; text-align:center; padding:28px;">
       <div style="font-size:42px; margin-bottom:8px;">🛡️</div>
-      <h2 style="font-size:18px; font-weight:800;">Cổng Quản Trị Admin Ninh Bình</h2>
-      <p style="font-size:12.5px; color:var(--muted); margin:6px 0 16px;">Nhập mã PIN quản trị (mặc định: <b>2026</b>) để quản lý Danh thắng, Đặc sản, Nhà hàng, Phường/Xã mới & Sao lưu dữ liệu.</p>
+      <h2 style="font-size:18px; font-weight:800;">Cổng Quản Trị Ninh Bình – Miền Di Sản</h2>
+      <p style="font-size:12.5px; color:var(--muted); margin:6px 0 16px;">Nhập mã PIN quản trị (mặc định: <b>2026</b>) để quản lý &amp; cập nhật SĐT / Facebook xác thực cho nhà hàng, đặc sản, danh thắng và 129 Phường/Xã.</p>
       <input type="password" id="admin-pin-input" class="form-control" style="text-align:center; font-size:18px; letter-spacing:4px; margin-bottom:12px;" placeholder="••••" onkeydown="if(event.key==='Enter') loginAdmin()">
       <button class="btn btn-fb" style="width:100%;" onclick="loginAdmin()">🔓 Đăng Nhập Quản Trị</button>
     </div>
 
-    <!-- Giao diện quản trị sau khi đăng nhập -->
     <div id="admin-panel" class="hidden">
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-ic" style="background:var(--gold-light);">🏛️</div><div><div style="font-size:21px; font-weight:800;" id="kpi-lm">47</div><div style="font-size:12px; color:var(--muted);">Danh lam thắng cảnh</div></div></div>
         <div class="kpi-card"><div class="kpi-ic" style="background:var(--jade-light);">🎁</div><div><div style="font-size:21px; font-weight:800;" id="kpi-sp">22</div><div style="font-size:12px; color:var(--muted);">Đặc sản thương hiệu</div></div></div>
-        <div class="kpi-card"><div class="kpi-ic" style="background:var(--food-light);">🍽️</div><div><div style="font-size:21px; font-weight:800;" id="kpi-rs">12</div><div style="font-size:12px; color:var(--muted);">Nhà hàng ẩm thực</div></div></div>
-        <div class="kpi-card"><div class="kpi-ic" style="background:var(--fb-light);">📍</div><div><div style="font-size:21px; font-weight:800;" id="kpi-wd">28</div><div style="font-size:12px; color:var(--muted);">Phường / Xã mới</div></div></div>
+        <div class="kpi-card"><div class="kpi-ic" style="background:var(--food-light);">🍽️</div><div><div style="font-size:21px; font-weight:800;" id="kpi-rs">12</div><div style="font-size:12px; color:var(--muted);">Nhà hàng (SĐT/FB sạch)</div></div></div>
+        <div class="kpi-card"><div class="kpi-ic" style="background:var(--fb-light);">📍</div><div><div style="font-size:21px; font-weight:800;" id="kpi-wd">129</div><div style="font-size:12px; color:var(--muted);">Phường / Xã (32P, 97X)</div></div></div>
       </div>
 
       <div class="panel">
         <div class="panel-head">
           <div class="chip-bar">
-            <button class="reg-chip active" id="at-lm" onclick="setAdminTab('landmarks')">🏛️ Danh thắng</button>
+            <button class="reg-chip active" id="at-rs" onclick="setAdminTab('restaurants')">🍽️ Nhà hàng</button>
             <button class="reg-chip" id="at-sp" onclick="setAdminTab('specialties')">🎁 Đặc sản</button>
-            <button class="reg-chip" id="at-rs" onclick="setAdminTab('restaurants')">🍽️ Nhà hàng</button>
-            <button class="reg-chip" id="at-wd" onclick="setAdminTab('wards')">📍 Phường / Xã mới</button>
+            <button class="reg-chip" id="at-lm" onclick="setAdminTab('landmarks')">🏛️ Danh thắng</button>
+            <button class="reg-chip" id="at-wd" onclick="setAdminTab('wards')">📍 129 Phường / Xã</button>
           </div>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
             <button class="btn btn-jade btn-sm" onclick="openAdminForm()">+ Thêm mới</button>
+            <button class="btn btn-soft-gold btn-sm" onclick="switchTab('cloud')">☁️ Đồng bộ Firebase &amp; GitHub</button>
             <button class="btn btn-soft-fb btn-sm" onclick="exportBackupJSON()">⬇️ Sao lưu JSON</button>
             <label class="btn btn-soft btn-sm" style="cursor:pointer;">⬆️ Khôi phục JSON<input type="file" accept=".json" class="hidden" onchange="importBackupJSON(event)"></label>
-            <button class="btn btn-soft-gold btn-sm" onclick="openChangePinModal()">🔑 Đổi PIN</button>
+            <button class="btn btn-outline btn-sm" onclick="openChangePinModal()">🔑 Đổi PIN</button>
             <button class="btn btn-outline btn-sm" style="color:var(--danger);" onclick="askResetDefault()">🔄 Dữ liệu gốc</button>
             <button class="btn btn-soft btn-sm" onclick="logoutAdmin()">🔒 Thoát</button>
           </div>
@@ -792,7 +916,7 @@
 </main>
 
 <footer class="app-footer">
-  <strong>Bản Đồ Du Lịch, Đặc Sản & Nhà Hàng Ninh Bình — FB-Connect Hub</strong> • Chính quyền 2 cấp (Tỉnh Ninh Bình → Phường/Xã mới) • 100% HTML/CSS/JS thuần chạy mượt ngoại tuyến.
+  <strong>Ninh Bình – Miền Di Sản | FB-Connect Hub</strong> • Đất Cố Đô Ngàn Năm – Tinh Hoa Miền Di Sản • 129 Phường, Xã • Ngoại tuyến 100%, sẵn sàng Firebase &amp; GitHub Pages.
 </footer>
 
 <!-- ==================== DRAWER GIỎ HÀNG GOM ĐƠN MESSENGER ==================== -->
@@ -807,6 +931,54 @@
     <button class="btn btn-soft" style="width:100%; color:var(--danger);" onclick="clearCart()">🗑️ Xóa toàn bộ giỏ hàng</button>
   </div>
 </aside>
+
+<!-- ==================== MODAL LIÊN HỆ TRỰC TIẾP (CHỈ HIỆN KHI CÓ SĐT HỢP LỆ) ==================== -->
+<div id="call-modal" class="modal-bg">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-head">
+      <div style="font-size:15px; font-weight:800;">📞 Liên Hệ Trực Tiếp Cơ Sở</div>
+      <button class="btn btn-soft btn-sm" onclick="closeModal('call-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="text-align:center;">
+      <div id="call-place-name" style="font-size:16px; font-weight:800; color:var(--text);"></div>
+      <div id="call-place-sub" style="font-size:12px; color:var(--muted); margin-top:2px;"></div>
+      <div class="big-phone-box">
+        <div style="font-size:11.5px; font-weight:700; color:var(--jade-dark); margin-bottom:2px;">SỐ ĐIỆN THOẠI / HOTLINE</div>
+        <div id="call-phone-display" class="big-phone-num"></div>
+      </div>
+      <p style="font-size:11.8px; color:var(--muted);">Trên điện thoại trình duyệt sẽ mở trình quay số tự động. Trên máy tính bạn có thể sao chép số hoặc nhắn Zalo ngay bên dưới:</p>
+    </div>
+    <div class="modal-foot" style="justify-content:center;">
+      <button id="call-copy-btn" class="btn btn-soft-jade btn-sm">📋 Sao chép số</button>
+      <a id="call-tel-link" href="#" class="btn btn-jade btn-sm">📞 Gọi ngay (tel:)</a>
+      <a id="call-zalo-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-zalo btn-sm">💬 Nhắn Zalo</a>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL XÁC NHẬN MESSENGER (CHỈ HIỆN KHI CÓ FB HỢP LỆ) ==================== -->
+<div id="fb-msg-modal" class="modal-bg">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-head">
+      <div style="font-size:15px; font-weight:800;">💬 Kết Nối Facebook Messenger</div>
+      <button class="btn btn-soft btn-sm" onclick="closeModal('fb-msg-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="fbm-shop" style="font-size:15.5px; font-weight:800; color:var(--fb);"></div>
+      <div id="fbm-slug" style="font-size:12px; color:var(--muted); font-family:monospace; margin-bottom:10px;"></div>
+      <label class="form-label">Nội dung tin nhắn chốt đơn / đặt bàn đã soạn sẵn:</label>
+      <textarea id="fbm-text" class="form-control" rows="4" style="font-size:12.5px; background:#f8fbff;"></textarea>
+      <div style="font-size:11.5px; color:var(--muted); margin-top:7px;">
+        💡 Đã mở tab <b>m.me</b> tự động. Nếu trình duyệt chặn popup hoặc trang cá nhân hạn chế tin nhắn chờ, hãy bấm <b>Sao chép tin nhắn</b> rồi mở <b>Trang Facebook gốc</b> bên dưới:
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button id="fbm-copy-btn" class="btn btn-soft-fb btn-sm">📋 Sao chép tin nhắn</button>
+      <a id="fbm-page-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">🌐 Trang Facebook</a>
+      <a id="fbm-mme-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-fb btn-sm">💬 Mở lại Messenger</a>
+    </div>
+  </div>
+</div>
 
 <!-- ==================== MODAL THÊM / SỬA ADMIN ==================== -->
 <div id="admin-modal" class="modal-bg">
@@ -862,148 +1034,258 @@
 
 <script>
 /* =========================================================================
-   1. HẰNG SỐ & DỮ LIỆU GỐC (47 DANH THẮNG • 22 ĐẶC SẢN • 12 NHÀ HÀNG • 28 PHƯỜNG/XÃ)
+   0. CẤU HÌNH NHÚNG SẴN CHO GITHUB PAGES & FIREBASE REALTIME DATABASE
    ========================================================================= */
-const STORAGE_KEY = 'nb_hub_v7_complete';
-
-const REGIONS = {
-  hoalu:    { name: 'Vùng Cố Đô Hoa Lư (Tỉnh lỵ)', short: 'Cố Đô Hoa Lư', color: '#0b6e63' },
-  tamchuc:  { name: 'Vùng Tam Chúc – Phủ Lý', short: 'Tam Chúc – Phủ Lý', color: '#65a30d' },
-  thanhnam: { name: 'Vùng Thành Nam – Biển Đông', short: 'Thành Nam – Biển Đông', color: '#d97706' }
+const DEFAULT_FIREBASE_CONFIG = {
+  databaseURL: "",
+  authToken: "",
+  autoSync: false
 };
 
+const STORAGE_KEY = 'nb_hub_v10_firebase_github';
+const FIREBASE_ROOT_NODE = 'ninhbinh_mien_di_san';
+
+/* =========================================================================
+   1. DỮ LIỆU GỐC (129 PHƯỜNG/XÃ • 47 DANH THẮNG • 22 ĐẶC SẢN • 12 NHÀ HÀNG)
+      * SĐT & Facebook chưa xác thực của nhà hàng/đặc sản được để TRỐNG ("")
+   ========================================================================= */
+const REGIONS = {
+  hoalu:    { name: 'Vùng Di Sản Cố Đô Hoa Lư – Tràng An', short: 'Cố Đô Hoa Lư – Tràng An', color: '#0b6e63' },
+  tamchuc:  { name: 'Vùng Tâm Linh Tam Chúc – Văn Hiến Sơn Nam', short: 'Tam Chúc – Sơn Nam', color: '#65a30d' },
+  thanhnam: { name: 'Vùng Văn Hóa Trần – Phủ Dầy & Biển Đông', short: 'Trần – Phủ Dầy – Biển', color: '#d97706' }
+};
+
+// ĐẦY ĐỦ 129 ĐƠN VỊ HÀNH CHÍNH CẤP XÃ (32 PHƯỜNG, 97 XÃ) CỦA NINH BÌNH – MIỀN DI SẢN
 const DEFAULT_WARDS = [
-  // Vùng Cố Đô Hoa Lư (Tỉnh lỵ)
-  { id:'w_hoalu', name:'Phường Hoa Lư', region:'hoalu', lat:20.2506, lng:105.9745 },
-  { id:'w_tayhoalu', name:'Phường Tây Hoa Lư', region:'hoalu', lat:20.2780, lng:105.9120 },
-  { id:'w_namhoalu', name:'Phường Nam Hoa Lư', region:'hoalu', lat:20.2156, lng:105.9344 },
-  { id:'w_giavan', name:'Xã Gia Vân', region:'hoalu', lat:20.3820, lng:105.8820 },
-  { id:'w_giavien', name:'Xã Gia Viễn', region:'hoalu', lat:20.3450, lng:105.8750 },
-  { id:'w_giathinh', name:'Xã Gia Thịnh', region:'hoalu', lat:20.3220, lng:105.8620 },
-  { id:'w_cucphuong', name:'Xã Cúc Phương', region:'hoalu', lat:20.3167, lng:105.6083 },
-  { id:'w_phulong', name:'Xã Phú Long', region:'hoalu', lat:20.2150, lng:105.7850 },
-  { id:'w_nhoquan', name:'Xã Nho Quan', region:'hoalu', lat:20.3260, lng:105.7520 },
-  { id:'w_tamdiep', name:'Phường Tam Điệp', region:'hoalu', lat:20.1620, lng:105.9150 },
-  { id:'w_yenmac', name:'Xã Yên Mạc', region:'hoalu', lat:20.1240, lng:106.0280 },
-  { id:'w_phatdiem', name:'Xã Phát Diệm', region:'hoalu', lat:20.0912, lng:106.0825 },
-  { id:'w_laithanh', name:'Xã Lai Thành', region:'hoalu', lat:20.0980, lng:106.0740 },
-  { id:'w_kimdong', name:'Xã Kim Đông', region:'hoalu', lat:19.9950, lng:106.1050 },
-  // Vùng Tam Chúc – Phủ Lý
-  { id:'w_tamchuc', name:'Phường Tam Chúc', region:'tamchuc', lat:20.5567, lng:105.8053 },
-  { id:'w_phuly', name:'Phường Phủ Lý', region:'tamchuc', lat:20.5411, lng:105.9139 },
-  { id:'w_thanhliem', name:'Xã Thanh Liêm', region:'tamchuc', lat:20.4680, lng:105.9320 },
-  { id:'w_duytien', name:'Phường Duy Tiên', region:'tamchuc', lat:20.6180, lng:105.9820 },
-  { id:'w_namly', name:'Xã Nam Lý', region:'tamchuc', lat:20.5580, lng:106.0850 },
-  { id:'w_tran_thuong', name:'Xã Nhân Đạo', region:'tamchuc', lat:20.5850, lng:106.1150 },
-  // Vùng Thành Nam – Biển Đông
-  { id:'w_namdinh', name:'Phường Nam Định', region:'thanhnam', lat:20.4339, lng:106.1683 },
-  { id:'w_locvuong', name:'Phường Lộc Vượng', region:'thanhnam', lat:20.4533, lng:106.1618 },
-  { id:'w_vuban', name:'Xã Vụ Bản', region:'thanhnam', lat:20.3712, lng:106.0685 },
-  { id:'w_cole', name:'Xã Cổ Lễ', region:'thanhnam', lat:20.3480, lng:106.2280 },
-  { id:'w_xuantruong', name:'Xã Xuân Trường', region:'thanhnam', lat:20.3120, lng:106.3450 },
-  { id:'w_haihau', name:'Xã Hải Hậu', region:'thanhnam', lat:20.1950, lng:106.2880 },
-  { id:'w_thinhlong', name:'Xã Thịnh Long', region:'thanhnam', lat:20.1450, lng:106.2750 },
-  { id:'w_giaothuy', name:'Xã Giao Thủy', region:'thanhnam', lat:20.2450, lng:106.5150 }
+  // I. VÙNG DI SẢN CỐ ĐÔ HOA LƯ – TRÀNG AN (39 ĐVHC: 8 Phường, 31 Xã)
+  { id:'w001', name:'Phường Hoa Lư', region:'hoalu', lat:20.2539, lng:105.9750 },
+  { id:'w002', name:'Phường Tây Hoa Lư', region:'hoalu', lat:20.2815, lng:105.9082 },
+  { id:'w003', name:'Phường Nam Hoa Lư', region:'hoalu', lat:20.2145, lng:105.9320 },
+  { id:'w004', name:'Phường Đông Hoa Lư', region:'hoalu', lat:20.2320, lng:106.0180 },
+  { id:'w005', name:'Phường Tam Điệp', region:'hoalu', lat:20.1512, lng:105.9225 },
+  { id:'w006', name:'Phường Yên Sơn', region:'hoalu', lat:20.1780, lng:105.8950 },
+  { id:'w007', name:'Phường Trung Sơn', region:'hoalu', lat:20.1380, lng:105.9480 },
+  { id:'w008', name:'Phường Yên Thắng', region:'hoalu', lat:20.1450, lng:105.9820 },
+  { id:'w009', name:'Xã Gia Viễn', region:'hoalu', lat:20.3320, lng:105.9180 },
+  { id:'w010', name:'Xã Đại Hoàng', region:'hoalu', lat:20.3120, lng:105.8920 },
+  { id:'w011', name:'Xã Gia Hưng', region:'hoalu', lat:20.3710, lng:105.8750 },
+  { id:'w012', name:'Xã Gia Phong', region:'hoalu', lat:20.3240, lng:105.8580 },
+  { id:'w013', name:'Xã Gia Vân', region:'hoalu', lat:20.3540, lng:105.8980 },
+  { id:'w014', name:'Xã Gia Trấn', region:'hoalu', lat:20.3180, lng:105.9450 },
+  { id:'w015', name:'Xã Nho Quan', region:'hoalu', lat:20.3210, lng:105.7520 },
+  { id:'w016', name:'Xã Gia Lâm', region:'hoalu', lat:20.3780, lng:105.7920 },
+  { id:'w017', name:'Xã Gia Tường', region:'hoalu', lat:20.3480, lng:105.8050 },
+  { id:'w018', name:'Xã Phú Sơn', region:'hoalu', lat:20.2980, lng:105.7350 },
+  { id:'w019', name:'Xã Cúc Phương', region:'hoalu', lat:20.2910, lng:105.6850 },
+  { id:'w020', name:'Xã Phú Long', region:'hoalu', lat:20.2280, lng:105.7680 },
+  { id:'w021', name:'Xã Thanh Sơn', region:'hoalu', lat:20.2750, lng:105.7950 },
+  { id:'w022', name:'Xã Quỳnh Lưu', region:'hoalu', lat:20.2520, lng:105.8250 },
+  { id:'w023', name:'Xã Yên Mô', region:'hoalu', lat:20.1320, lng:106.0120 },
+  { id:'w024', name:'Xã Yên Từ', region:'hoalu', lat:20.1580, lng:106.0380 },
+  { id:'w025', name:'Xã Yên Mạc', region:'hoalu', lat:20.1180, lng:106.0480 },
+  { id:'w026', name:'Xã Đồng Thái', region:'hoalu', lat:20.0980, lng:105.9950 },
+  { id:'w027', name:'Xã Yên Khánh', region:'hoalu', lat:20.1850, lng:106.0750 },
+  { id:'w028', name:'Xã Khánh Nhạc', region:'hoalu', lat:20.2120, lng:106.0520 },
+  { id:'w029', name:'Xã Khánh Thiện', region:'hoalu', lat:20.2180, lng:106.1050 },
+  { id:'w030', name:'Xã Khánh Hội', region:'hoalu', lat:20.1720, lng:106.0980 },
+  { id:'w031', name:'Xã Khánh Trung', region:'hoalu', lat:20.1650, lng:106.1320 },
+  { id:'w032', name:'Xã Phát Diệm', region:'hoalu', lat:20.0910, lng:106.0920 },
+  { id:'w033', name:'Xã Quang Thiện', region:'hoalu', lat:20.1180, lng:106.1150 },
+  { id:'w034', name:'Xã Chất Bình', region:'hoalu', lat:20.1350, lng:106.1380 },
+  { id:'w035', name:'Xã Kim Sơn', region:'hoalu', lat:20.0780, lng:106.1220 },
+  { id:'w036', name:'Xã Định Hóa', region:'hoalu', lat:20.0580, lng:106.1080 },
+  { id:'w037', name:'Xã Bình Minh', region:'hoalu', lat:20.0250, lng:106.0950 },
+  { id:'w038', name:'Xã Kim Đông', region:'hoalu', lat:19.9920, lng:106.0820 },
+  { id:'w039', name:'Xã Lai Thành', region:'hoalu', lat:20.0720, lng:106.0480 },
+
+  // II. VÙNG TÂM LINH TAM CHÚC – VĂN HIẾN SƠN NAM (33 ĐVHC: 16 Phường, 17 Xã)
+  { id:'w040', name:'Phường Hà Nam', region:'tamchuc', lat:20.5620, lng:105.9150 },
+  { id:'w041', name:'Phường Phủ Lý', region:'tamchuc', lat:20.5410, lng:105.9120 },
+  { id:'w042', name:'Phường Phù Vân', region:'tamchuc', lat:20.5580, lng:105.8920 },
+  { id:'w043', name:'Phường Châu Sơn', region:'tamchuc', lat:20.5240, lng:105.8980 },
+  { id:'w044', name:'Phường Liêm Tuyền', region:'tamchuc', lat:20.5280, lng:105.9420 },
+  { id:'w045', name:'Phường Duy Tiên', region:'tamchuc', lat:20.6250, lng:105.9620 },
+  { id:'w046', name:'Phường Duy Tân', region:'tamchuc', lat:20.6380, lng:105.9320 },
+  { id:'w047', name:'Phường Đồng Văn', region:'tamchuc', lat:20.6480, lng:105.9020 },
+  { id:'w048', name:'Phường Duy Hà', region:'tamchuc', lat:20.6180, lng:105.9950 },
+  { id:'w049', name:'Phường Tiên Sơn', region:'tamchuc', lat:20.5920, lng:105.9780 },
+  { id:'w050', name:'Phường Lê Hồ', region:'tamchuc', lat:20.6150, lng:105.8680 },
+  { id:'w051', name:'Phường Nguyễn Úy', region:'tamchuc', lat:20.5980, lng:105.8520 },
+  { id:'w052', name:'Phường Lý Thường Kiệt', region:'tamchuc', lat:20.5480, lng:105.8250 },
+  { id:'w053', name:'Phường Kim Thanh', region:'tamchuc', lat:20.5680, lng:105.8450 },
+  { id:'w054', name:'Phường Tam Chúc', region:'tamchuc', lat:20.5810, lng:105.7980 },
+  { id:'w055', name:'Phường Kim Bảng', region:'tamchuc', lat:20.5750, lng:105.8750 },
+  { id:'w056', name:'Xã Liêm Hà', region:'tamchuc', lat:20.4920, lng:105.9250 },
+  { id:'w057', name:'Xã Tân Thanh', region:'tamchuc', lat:20.4680, lng:105.9080 },
+  { id:'w058', name:'Xã Thanh Bình', region:'tamchuc', lat:20.4450, lng:105.9380 },
+  { id:'w059', name:'Xã Thanh Lâm', region:'tamchuc', lat:20.4320, lng:105.8820 },
+  { id:'w060', name:'Xã Thanh Liêm', region:'tamchuc', lat:20.4580, lng:105.8620 },
+  { id:'w061', name:'Xã Bình Lục', region:'tamchuc', lat:20.5120, lng:106.0350 },
+  { id:'w062', name:'Xã Bình Mỹ', region:'tamchuc', lat:20.4980, lng:106.0120 },
+  { id:'w063', name:'Xã Bình An', region:'tamchuc', lat:20.5350, lng:106.0180 },
+  { id:'w064', name:'Xã Bình Giang', region:'tamchuc', lat:20.5480, lng:106.0580 },
+  { id:'w065', name:'Xã Bình Sơn', region:'tamchuc', lat:20.4680, lng:105.9850 },
+  { id:'w066', name:'Xã Lý Nhân', region:'tamchuc', lat:20.5650, lng:106.0920 },
+  { id:'w067', name:'Xã Nam Xang', region:'tamchuc', lat:20.6180, lng:106.0680 },
+  { id:'w068', name:'Xã Bắc Lý', region:'tamchuc', lat:20.5920, lng:106.1050 },
+  { id:'w069', name:'Xã Vĩnh Trụ', region:'tamchuc', lat:20.5580, lng:106.1220 },
+  { id:'w070', name:'Xã Trần Thương', region:'tamchuc', lat:20.5420, lng:106.1580 },
+  { id:'w071', name:'Xã Nhân Hà', region:'tamchuc', lat:20.5180, lng:106.1420 },
+  { id:'w072', name:'Xã Nam Lý', region:'tamchuc', lat:20.5250, lng:106.1020 },
+
+  // III. VÙNG VĂN HÓA TRẦN – PHỦ DẦY & BIỂN ĐÔNG (57 ĐVHC: 8 Phường, 49 Xã)
+  { id:'w073', name:'Phường Nam Định', region:'thanhnam', lat:20.4280, lng:106.1680 },
+  { id:'w074', name:'Phường Thiên Trường', region:'thanhnam', lat:20.4520, lng:106.1780 },
+  { id:'w075', name:'Phường Đông A', region:'thanhnam', lat:20.4450, lng:106.1980 },
+  { id:'w076', name:'Phường Vị Khê', region:'thanhnam', lat:20.4020, lng:106.1820 },
+  { id:'w077', name:'Phường Thành Nam', region:'thanhnam', lat:20.4150, lng:106.1520 },
+  { id:'w078', name:'Phường Trường Thi', region:'thanhnam', lat:20.4220, lng:106.1350 },
+  { id:'w079', name:'Phường Hồng Quang', region:'thanhnam', lat:20.3880, lng:106.1580 },
+  { id:'w080', name:'Phường Mỹ Lộc', region:'thanhnam', lat:20.4620, lng:106.1250 },
+  { id:'w081', name:'Xã Minh Tân', region:'thanhnam', lat:20.4180, lng:106.0650 },
+  { id:'w082', name:'Xã Hiển Khánh', region:'thanhnam', lat:20.3950, lng:106.0950 },
+  { id:'w083', name:'Xã Vụ Bản', region:'thanhnam', lat:20.3680, lng:106.0820 },
+  { id:'w084', name:'Xã Liên Minh', region:'thanhnam', lat:20.3480, lng:106.1120 },
+  { id:'w085', name:'Xã Ý Yên', region:'thanhnam', lat:20.3320, lng:106.0280 },
+  { id:'w086', name:'Xã Yên Đồng', region:'thanhnam', lat:20.2750, lng:106.0480 },
+  { id:'w087', name:'Xã Yên Cường', region:'thanhnam', lat:20.2980, lng:106.0120 },
+  { id:'w088', name:'Xã Vạn Thắng', region:'thanhnam', lat:20.3150, lng:105.9850 },
+  { id:'w089', name:'Xã Vũ Dương', region:'thanhnam', lat:20.3580, lng:105.9950 },
+  { id:'w090', name:'Xã Tân Minh', region:'thanhnam', lat:20.3880, lng:106.0150 },
+  { id:'w091', name:'Xã Phong Doanh', region:'thanhnam', lat:20.4120, lng:105.9880 },
+  { id:'w092', name:'Xã Nam Trực', region:'thanhnam', lat:20.3580, lng:106.1850 },
+  { id:'w093', name:'Xã Nam Minh', region:'thanhnam', lat:20.3280, lng:106.1650 },
+  { id:'w094', name:'Xã Nam Đồng', region:'thanhnam', lat:20.3120, lng:106.2050 },
+  { id:'w095', name:'Xã Nam Ninh', region:'thanhnam', lat:20.3480, lng:106.2280 },
+  { id:'w096', name:'Xã Nam Hồng', region:'thanhnam', lat:20.3780, lng:106.2120 },
+  { id:'w097', name:'Xã Cổ Lễ', region:'thanhnam', lat:20.2950, lng:106.2650 },
+  { id:'w098', name:'Xã Ninh Giang', region:'thanhnam', lat:20.2780, lng:106.2380 },
+  { id:'w099', name:'Xã Cát Thành', region:'thanhnam', lat:20.2520, lng:106.2720 },
+  { id:'w100', name:'Xã Trực Ninh', region:'thanhnam', lat:20.2280, lng:106.2450 },
+  { id:'w101', name:'Xã Quang Hưng', region:'thanhnam', lat:20.2050, lng:106.2180 },
+  { id:'w102', name:'Xã Minh Thái', region:'thanhnam', lat:20.1920, lng:106.2580 },
+  { id:'w103', name:'Xã Ninh Cường', region:'thanhnam', lat:20.1780, lng:106.2250 },
+  { id:'w104', name:'Xã Xuân Trường', region:'thanhnam', lat:20.2980, lng:106.3480 },
+  { id:'w105', name:'Xã Xuân Hưng', region:'thanhnam', lat:20.2720, lng:106.3220 },
+  { id:'w106', name:'Xã Xuân Giang', region:'thanhnam', lat:20.3180, lng:106.3180 },
+  { id:'w107', name:'Xã Xuân Hồng', region:'thanhnam', lat:20.3350, lng:106.3520 },
+  { id:'w108', name:'Xã Giao Thủy', region:'thanhnam', lat:20.2450, lng:106.4520 },
+  { id:'w109', name:'Xã Giao Minh', region:'thanhnam', lat:20.2680, lng:106.4180 },
+  { id:'w110', name:'Xã Giao Hòa', region:'thanhnam', lat:20.2820, lng:106.4580 },
+  { id:'w111', name:'Xã Giao Hưng', region:'thanhnam', lat:20.2550, lng:106.4980 },
+  { id:'w112', name:'Xã Giao Phúc', region:'thanhnam', lat:20.2220, lng:106.4250 },
+  { id:'w113', name:'Xã Giao Bình', region:'thanhnam', lat:20.2050, lng:106.4580 },
+  { id:'w114', name:'Xã Giao Ninh', region:'thanhnam', lat:20.1920, lng:106.4120 },
+  { id:'w115', name:'Xã Hải Hậu', region:'thanhnam', lat:20.1750, lng:106.2980 },
+  { id:'w116', name:'Xã Hải Anh', region:'thanhnam', lat:20.2120, lng:106.3120 },
+  { id:'w117', name:'Xã Hải Tiến', region:'thanhnam', lat:20.1520, lng:106.3380 },
+  { id:'w118', name:'Xã Hải Hưng', region:'thanhnam', lat:20.1950, lng:106.3480 },
+  { id:'w119', name:'Xã Hải An', region:'thanhnam', lat:20.1480, lng:106.2720 },
+  { id:'w120', name:'Xã Hải Quang', region:'thanhnam', lat:20.1250, lng:106.3050 },
+  { id:'w121', name:'Xã Hải Xuân', region:'thanhnam', lat:20.1050, lng:106.2650 },
+  { id:'w122', name:'Xã Hải Thịnh', region:'thanhnam', lat:20.0680, lng:106.2350 },
+  { id:'w123', name:'Xã Đồng Thịnh', region:'thanhnam', lat:20.2420, lng:106.1680 },
+  { id:'w124', name:'Xã Nghĩa Hưng', region:'thanhnam', lat:20.1950, lng:106.1750 },
+  { id:'w125', name:'Xã Nghĩa Sơn', region:'thanhnam', lat:20.1580, lng:106.1850 },
+  { id:'w126', name:'Xã Hồng Phong', region:'thanhnam', lat:20.1280, lng:106.1780 },
+  { id:'w127', name:'Xã Quý Nhất', region:'thanhnam', lat:20.0950, lng:106.1820 },
+  { id:'w128', name:'Xã Nghĩa Lâm', region:'thanhnam', lat:20.0550, lng:106.1650 },
+  { id:'w129', name:'Xã Rạng Đông', region:'thanhnam', lat:20.0080, lng:106.1520 }
 ];
 
+// 47 DANH LAM THẮNG CẢNH TIÊU BIỂU
 const DEFAULT_LANDMARKS = [
-  // === 1. VÙNG CỐ ĐÔ HOA LƯ (19 ĐIỂM) ===
-  { id:'lm01', name:'Quần thể danh thắng Tràng An', region:'hoalu', ward:'Phường Tây Hoa Lư', theme:'Di sản / Thiên nhiên', lat:20.2506, lng:105.9375, ticket:'250.000đ (gồm đò)', hours:'07:00 - 16:30', visible:true, desc:'Di sản Văn hóa và Thiên nhiên Thế giới (di sản kép đầu tiên Đông Nam Á), nổi tiếng với hành trình ngồi đò xuyên hang động ngập nước, thung lũng đá vôi và các đền phủ cổ kính (Đền Trình, Đền Trần, Phủ Khống).' },
-  { id:'lm02', name:'Tam Cốc – Bích Động', region:'hoalu', ward:'Phường Nam Hoa Lư', theme:'Di sản / Thiên nhiên', lat:20.2156, lng:105.9344, ticket:'250.000đ (vé + đò)', hours:'07:00 - 17:00', visible:true, desc:'Được mệnh danh "Nam thiên đệ nhị động". Đi thuyền trên sông Ngô Đồng xuyên qua Hang Cả, Hang Hai, Hang Ba, rực rỡ nhất mùa lúa chín tháng 5–6, kết hợp thăm chùa cổ Bích Động tựa lưng vào núi.' },
-  { id:'lm03', name:'Hang Múa (Đỉnh Ngọa Long)', region:'hoalu', ward:'Phường Nam Hoa Lư', theme:'Di sản / Thiên nhiên', lat:20.2314, lng:105.9372, ticket:'100.000đ', hours:'06:00 - 19:00', visible:true, desc:'Nổi tiếng với gần 500 bậc đá dẫn lên đỉnh núi Ngọa Long, nơi có tượng rồng đá uy nghi và tầm nhìn bao quát toàn cảnh cánh đồng Tam Cốc và dòng sông Ngô Đồng.' },
-  { id:'lm04', name:'Động Am Tiên – Tuyệt Tình Cốc', region:'hoalu', ward:'Phường Tây Hoa Lư', theme:'Di sản / Thiên nhiên', lat:20.2767, lng:105.9078, ticket:'50.000đ', hours:'07:30 - 17:30', visible:true, desc:'Thung lũng ngập nước xanh biếc bao bọc bởi vách núi đá vôi dựng đứng, gắn liền với dấu tích nơi Thái hậu Dương Vân Nga tu hành cuối đời.' },
-  { id:'lm05', name:'Khu bảo tồn đất ngập nước Vân Long', region:'hoalu', ward:'Xã Gia Vân', theme:'Di sản / Thiên nhiên', lat:20.3982, lng:105.8756, ticket:'100.000đ (vé + đò)', hours:'07:30 - 17:00', visible:true, desc:'Được ví như "vịnh không sóng" với mặt nước phẳng lặng như gương soi bóng núi đá vôi, nơi sinh sống của quần thể voọc mông trắng quý hiếm.' },
-  { id:'lm06', name:'Vườn Quốc gia Cúc Phương', region:'hoalu', ward:'Xã Cúc Phương', theme:'Di sản / Thiên nhiên', lat:20.3167, lng:105.6083, ticket:'60.000đ', hours:'06:00 - 18:00', visible:true, desc:'Vườn quốc gia đầu tiên của Việt Nam, nổi bật với rừng nguyên sinh, cây chò ngàn năm, động Người Xưa, trung tâm cứu hộ linh trưởng và mùa bướm rừng tháng 4–5.' },
-  { id:'lm07', name:'Khu du lịch sinh thái Thung Nham', region:'hoalu', ward:'Phường Nam Hoa Lư', theme:'Di sản / Thiên nhiên', lat:20.2055, lng:105.9022, ticket:'150.000đ', hours:'07:00 - 18:00', visible:true, desc:'Điểm du lịch sinh thái kết hợp khám phá hang động (Động Vái Giời, Hang Bụt), miệt vườn và vườn chim tự nhiên lớn nhất miền Bắc.' },
-  { id:'lm08', name:'Suối khoáng nóng Kênh Gà', region:'hoalu', ward:'Xã Gia Thịnh', theme:'Biển / Sinh thái', lat:20.3225, lng:105.8680, ticket:'150.000đ (tắm khoáng)', hours:'07:00 - 20:00', visible:true, desc:'Điểm nghỉ dưỡng suối khoáng nóng thiên nhiên yên bình bên dòng sông Hoàng Long, thích hợp thư giãn và phục hồi sức khỏe cuối tuần.' },
-  { id:'lm09', name:'Hồ Đồng Chương', region:'hoalu', ward:'Xã Phú Long', theme:'Di sản / Thiên nhiên', lat:20.2150, lng:105.7850, ticket:'50.000đ', hours:'07:00 - 18:00', visible:true, desc:'Hồ nước ngọt sinh thái yên bình uốn lượn giữa những đồi thông xanh mướt vùng Nho Quan cũ, lý tưởng để cắm trại, chèo thuyền và nghỉ dưỡng cuối tuần.' },
-  { id:'lm10', name:'Cố đô Hoa Lư (Đền Vua Đinh – Vua Lê)', region:'hoalu', ward:'Phường Tây Hoa Lư', theme:'Tâm linh / Di tích', lat:20.2858, lng:105.9082, ticket:'20.000đ', hours:'07:00 - 17:00', visible:true, desc:'Kinh đô đầu tiên của nhà nước phong kiến tập quyền Việt Nam thế kỷ X, nổi bật với Đền Vua Đinh Tiên Hoàng và Đền Vua Lê Đại Hành lưu giữ nhiều hiện vật chạm khắc gỗ đá tinh xảo.' },
-  { id:'lm11', name:'Chùa Bái Đính', region:'hoalu', ward:'Phường Tây Hoa Lư', theme:'Tâm linh / Di tích', lat:20.2738, lng:105.8647, ticket:'Miễn phí (xe điện 60k)', hours:'06:00 - 21:00', visible:true, desc:'Quần thể chùa lớn bậc nhất Đông Nam Á với nhiều kỷ lục (hành lang La Hán dài nhất, tượng Phật bằng đồng lớn nhất...), gồm khu chùa cổ trên sườn núi và khu chùa mới đồ sộ.' },
-  { id:'lm12', name:'Đền Thái Vi', region:'hoalu', ward:'Phường Nam Hoa Lư', theme:'Tâm linh / Di tích', lat:20.2215, lng:105.9265, ticket:'Miễn phí', hours:'07:00 - 17:30', visible:true, desc:'Nằm sâu trong khu vực Tam Cốc thanh tịnh, thờ các vị vua nhà Trần (Trần Thái Tông, Trần Thánh Tông...) với kiến trúc cột đá nguyên khối chạm khắc cực kỳ cầu kỳ.' },
-  { id:'lm13', name:'Núi Non Nước (Dục Thúy Sơn)', region:'hoalu', ward:'Phường Hoa Lư', theme:'Tâm linh / Di tích', lat:20.2588, lng:105.9832, ticket:'20.000đ', hours:'06:30 - 18:00', visible:true, desc:'Ngọn núi đá nằm ngay ngã ba sông Đáy và sông Vân giữa trung tâm Tỉnh lỵ, lưu giữ hàng chục bài thơ khắc trên vách đá của các danh nhân qua nhiều triều đại.' },
-  { id:'lm14', name:'Đền Thánh Nguyễn', region:'hoalu', ward:'Xã Gia Viễn', theme:'Tâm linh / Di tích', lat:20.3655, lng:105.8420, ticket:'Miễn phí', hours:'07:00 - 17:30', visible:true, desc:'Di tích kiến trúc nghệ thuật quốc gia thờ Thiền sư Nguyễn Minh Không (Lý Quốc Sư) – vị thánh tổ nghề đúc đồng Việt Nam.' },
-  { id:'lm15', name:'Phố cổ Hoa Lư – Hồ Kỳ Lân', region:'hoalu', ward:'Phường Hoa Lư', theme:'Tâm linh / Di tích', lat:20.2542, lng:105.9675, ticket:'Miễn phí', hours:'07:00 - 23:00', visible:true, desc:'Không gian tái hiện kiến trúc và văn hóa truyền thống thời Đại Việt, nổi bật với hai tòa tháp Tứ Ân lung linh về đêm cùng khu ẩm thực và làng nghề thủ công.' },
-  { id:'lm16', name:'Nhà thờ đá Phát Diệm', region:'hoalu', ward:'Xã Phát Diệm', theme:'Công giáo', lat:20.0912, lng:106.0825, ticket:'Miễn phí', hours:'06:30 - 18:00', visible:true, desc:'Quần thể kiến trúc Công giáo độc đáo bậc nhất Việt Nam, xây dựng hoàn toàn bằng đá và gỗ lim theo phong cách đình chùa truyền thống phương Đông kết hợp tinh thần Gothic.' },
-  { id:'lm17', name:'Khu dự trữ sinh quyển Bãi ngang – Cồn Nổi', region:'hoalu', ward:'Xã Kim Đông', theme:'Biển / Sinh thái', lat:19.9920, lng:106.1080, ticket:'Miễn phí', hours:'06:00 - 18:00', visible:true, desc:'Vùng đất bồi ven biển Kim Sơn cũ thuộc Khu dự trữ sinh quyển thế giới, hệ sinh thái rừng ngập mặn phong phú, phù hợp trải nghiệm du lịch sinh thái biển.' },
-  { id:'lm18', name:'Nhà thờ Lãng Vân', region:'hoalu', ward:'Xã Gia Vân', theme:'Công giáo', lat:20.3885, lng:105.8965, ticket:'Miễn phí', hours:'06:00 - 18:30', visible:true, desc:'Công trình kiến trúc Công giáo quy mô lớn, uy nghi và tinh xảo bậc nhất vùng Gia Vân, nổi bật với tháp chuông cao vút giữa không gian làng quê yên bình.' },
-  { id:'lm19', name:'Đan viện Châu Sơn', region:'hoalu', ward:'Xã Phú Long', theme:'Công giáo', lat:20.2380, lng:105.7580, ticket:'Miễn phí', hours:'08:00 - 16:30', visible:true, desc:'Thánh đường kiến trúc Gothic gạch đỏ không trát cổ kính ẩn mình giữa rừng xanh, nổi tiếng với không gian tĩnh lặng và những bức tường dày mang đậm dấu ấn thời gian.' },
+  { id:'lm01', name:'Quần thể danh thắng Tràng An', region:'hoalu', ward:'Phường Tây Hoa Lư', theme:'Di sản / Thiên nhiên', lat:20.2506, lng:105.9375, ticket:'250.000đ (gồm đò)', hours:'07:00 - 16:30', phone:'', visible:true, desc:'Di sản Văn hóa và Thiên nhiên Thế giới (di sản kép đầu tiên Đông Nam Á), nổi tiếng với hành trình ngồi đò xuyên hang động ngập nước, thung lũng đá vôi và các đền phủ cổ kính (Đền Trình, Đền Trần, Phủ Khống).' },
+  { id:'lm02', name:'Tam Cốc – Bích Động', region:'hoalu', ward:'Phường Nam Hoa Lư', theme:'Di sản / Thiên nhiên', lat:20.2156, lng:105.9344, ticket:'250.000đ (vé + đò)', hours:'07:00 - 17:00', phone:'', visible:true, desc:'Được mệnh danh "Nam thiên đệ nhị động". Đi thuyền trên sông Ngô Đồng xuyên qua Hang Cả, Hang Hai, Hang Ba, rực rỡ nhất mùa lúa chín tháng 5–6, kết hợp thăm chùa cổ Bích Động tựa lưng vào núi.' },
+  { id:'lm03', name:'Hang Múa (Đỉnh Ngọa Long)', region:'hoalu', ward:'Phường Nam Hoa Lư', theme:'Di sản / Thiên nhiên', lat:20.2314, lng:105.9372, ticket:'100.000đ', hours:'06:00 - 19:00', phone:'', visible:true, desc:'Nổi tiếng với gần 500 bậc đá dẫn lên đỉnh núi Ngọa Long, nơi có tượng rồng đá uy nghi và tầm nhìn bao quát toàn cảnh cánh đồng Tam Cốc và dòng sông Ngô Đồng.' },
+  { id:'lm04', name:'Động Am Tiên – Tuyệt Tình Cốc', region:'hoalu', ward:'Phường Tây Hoa Lư', theme:'Di sản / Thiên nhiên', lat:20.2767, lng:105.9078, ticket:'50.000đ', hours:'07:30 - 17:30', phone:'', visible:true, desc:'Thung lũng ngập nước xanh biếc bao bọc bởi vách núi đá vôi dựng đứng, gắn liền với dấu tích nơi Thái hậu Dương Vân Nga tu hành cuối đời.' },
+  { id:'lm05', name:'Khu bảo tồn đất ngập nước Vân Long', region:'hoalu', ward:'Xã Gia Vân', theme:'Di sản / Thiên nhiên', lat:20.3982, lng:105.8756, ticket:'100.000đ (vé + đò)', hours:'07:30 - 17:00', phone:'', visible:true, desc:'Được ví như "vịnh không sóng" với mặt nước phẳng lặng như gương soi bóng núi đá vôi, nơi sinh sống của quần thể voọc mông trắng quý hiếm.' },
+  { id:'lm06', name:'Vườn Quốc gia Cúc Phương', region:'hoalu', ward:'Xã Cúc Phương', theme:'Di sản / Thiên nhiên', lat:20.3167, lng:105.6083, ticket:'60.000đ', hours:'06:00 - 18:00', phone:'', visible:true, desc:'Vườn quốc gia đầu tiên của Việt Nam, nổi bật với rừng nguyên sinh, cây chò ngàn năm, động Người Xưa, trung tâm cứu hộ linh trưởng và mùa bướm rừng tháng 4–5.' },
+  { id:'lm07', name:'Khu du lịch sinh thái Thung Nham', region:'hoalu', ward:'Phường Nam Hoa Lư', theme:'Di sản / Thiên nhiên', lat:20.2055, lng:105.9022, ticket:'150.000đ', hours:'07:00 - 18:00', phone:'', visible:true, desc:'Điểm du lịch sinh thái kết hợp khám phá hang động (Động Vái Giời, Hang Bụt), miệt vườn và vườn chim tự nhiên lớn nhất miền Bắc.' },
+  { id:'lm08', name:'Suối khoáng nóng Kênh Gà', region:'hoalu', ward:'Xã Gia Thịnh', theme:'Biển / Sinh thái', lat:20.3225, lng:105.8680, ticket:'150.000đ (tắm khoáng)', hours:'07:00 - 20:00', phone:'', visible:true, desc:'Điểm nghỉ dưỡng suối khoáng nóng thiên nhiên yên bình bên dòng sông Hoàng Long, thích hợp thư giãn và phục hồi sức khỏe cuối tuần.' },
+  { id:'lm09', name:'Hồ Đồng Chương', region:'hoalu', ward:'Xã Phú Long', theme:'Di sản / Thiên nhiên', lat:20.2150, lng:105.7850, ticket:'50.000đ', hours:'07:00 - 18:00', phone:'', visible:true, desc:'Hồ nước ngọt sinh thái yên bình uốn lượn giữa những đồi thông xanh mướt vùng Nho Quan cũ, lý tưởng để cắm trại, chèo thuyền và nghỉ dưỡng cuối tuần.' },
+  { id:'lm10', name:'Cố đô Hoa Lư (Đền Vua Đinh – Vua Lê)', region:'hoalu', ward:'Phường Tây Hoa Lư', theme:'Tâm linh / Di tích', lat:20.2858, lng:105.9082, ticket:'20.000đ', hours:'07:00 - 17:00', phone:'', visible:true, desc:'Kinh đô đầu tiên của nhà nước phong kiến tập quyền Việt Nam thế kỷ X, nổi bật với Đền Vua Đinh Tiên Hoàng và Đền Vua Lê Đại Hành lưu giữ nhiều hiện vật chạm khắc gỗ đá tinh xảo.' },
+  { id:'lm11', name:'Chùa Bái Đính', region:'hoalu', ward:'Phường Tây Hoa Lư', theme:'Tâm linh / Di tích', lat:20.2738, lng:105.8647, ticket:'Miễn phí (xe điện 60k)', hours:'06:00 - 21:00', phone:'', visible:true, desc:'Quần thể chùa lớn bậc nhất Đông Nam Á với nhiều kỷ lục (hành lang La Hán dài nhất, tượng Phật bằng đồng lớn nhất...), gồm khu chùa cổ trên sườn núi và khu chùa mới đồ sộ.' },
+  { id:'lm12', name:'Đền Thái Vi', region:'hoalu', ward:'Phường Nam Hoa Lư', theme:'Tâm linh / Di tích', lat:20.2215, lng:105.9265, ticket:'Miễn phí', hours:'07:00 - 17:30', phone:'', visible:true, desc:'Nằm sâu trong khu vực Tam Cốc thanh tịnh, thờ các vị vua nhà Trần (Trần Thái Tông, Trần Thánh Tông...) với kiến trúc cột đá nguyên khối chạm khắc cực kỳ cầu kỳ.' },
+  { id:'lm13', name:'Núi Non Nước (Dục Thúy Sơn)', region:'hoalu', ward:'Phường Hoa Lư', theme:'Tâm linh / Di tích', lat:20.2588, lng:105.9832, ticket:'20.000đ', hours:'06:30 - 18:00', phone:'', visible:true, desc:'Ngọn núi đá nằm ngay ngã ba sông Đáy và sông Vân giữa trung tâm Hoa Lư, lưu giữ hàng chục bài thơ khắc trên vách đá của các danh nhân qua nhiều triều đại.' },
+  { id:'lm14', name:'Đền Thánh Nguyễn', region:'hoalu', ward:'Xã Gia Viễn', theme:'Tâm linh / Di tích', lat:20.3655, lng:105.8420, ticket:'Miễn phí', hours:'07:00 - 17:30', phone:'', visible:true, desc:'Di tích kiến trúc nghệ thuật quốc gia thờ Thiền sư Nguyễn Minh Không (Lý Quốc Sư) – vị thánh tổ nghề đúc đồng Việt Nam.' },
+  { id:'lm15', name:'Phố cổ Hoa Lư – Hồ Kỳ Lân', region:'hoalu', ward:'Phường Hoa Lư', theme:'Tâm linh / Di tích', lat:20.2542, lng:105.9675, ticket:'Miễn phí', hours:'07:00 - 23:00', phone:'', visible:true, desc:'Không gian tái hiện kiến trúc và văn hóa truyền thống thời Đại Việt, nổi bật với hai tòa tháp Tứ Ân lung linh về đêm cùng khu ẩm thực và làng nghề thủ công.' },
+  { id:'lm16', name:'Nhà thờ đá Phát Diệm', region:'hoalu', ward:'Xã Phát Diệm', theme:'Công giáo', lat:20.0912, lng:106.0825, ticket:'Miễn phí', hours:'06:30 - 18:00', phone:'', visible:true, desc:'Quần thể kiến trúc Công giáo độc đáo bậc nhất Việt Nam, xây dựng hoàn toàn bằng đá và gỗ lim theo phong cách đình chùa truyền thống phương Đông kết hợp tinh thần Gothic.' },
+  { id:'lm17', name:'Khu dự trữ sinh quyển Bãi ngang – Cồn Nổi', region:'hoalu', ward:'Xã Kim Đông', theme:'Biển / Sinh thái', lat:19.9920, lng:106.1080, ticket:'Miễn phí', hours:'06:00 - 18:00', phone:'', visible:true, desc:'Vùng đất bồi ven biển Kim Sơn thuộc Khu dự trữ sinh quyển thế giới, hệ sinh thái rừng ngập mặn phong phú, phù hợp trải nghiệm du lịch sinh thái biển.' },
+  { id:'lm18', name:'Nhà thờ Lãng Vân', region:'hoalu', ward:'Xã Gia Vân', theme:'Công giáo', lat:20.3885, lng:105.8965, ticket:'Miễn phí', hours:'06:00 - 18:30', phone:'', visible:true, desc:'Công trình kiến trúc Công giáo quy mô lớn, uy nghi và tinh xảo bậc nhất vùng Gia Vân, nổi bật với tháp chuông cao vút giữa không gian làng quê yên bình.' },
+  { id:'lm19', name:'Đan viện Châu Sơn', region:'hoalu', ward:'Xã Phú Long', theme:'Công giáo', lat:20.2380, lng:105.7580, ticket:'Miễn phí', hours:'08:00 - 16:30', phone:'', visible:true, desc:'Thánh đường kiến trúc Gothic gạch đỏ không trát cổ kính ẩn mình giữa rừng xanh, nổi tiếng với không gian tĩnh lặng và những bức tường dày mang đậm dấu ấn thời gian.' },
 
-  // === 2. VÙNG THÀNH NAM – BIỂN ĐÔNG (17 ĐIỂM) ===
-  { id:'lm20', name:'Đền Trần Nam Định', region:'thanhnam', ward:'Phường Lộc Vượng', theme:'Tâm linh / Di tích', lat:20.4533, lng:106.1618, ticket:'Miễn phí', hours:'06:30 - 18:00', visible:true, desc:'Quần thể di tích lịch sử quốc gia đặc biệt thờ 14 vị vua nhà Trần và các quan lại có công phù tá, nổi tiếng với Lễ hội Khai Ấn đầu xuân.' },
-  { id:'lm21', name:'Chùa Tháp Phổ Minh', region:'thanhnam', ward:'Phường Lộc Vượng', theme:'Tâm linh / Di tích', lat:20.4562, lng:106.1645, ticket:'Miễn phí', hours:'06:30 - 18:00', visible:true, desc:'Ngôi cổ tự gắn liền với triều đại nhà Trần, nổi bật với tòa tháp Phổ Minh 14 tầng có niên đại hơn 700 năm.' },
-  { id:'lm22', name:'Quần thể di tích Phủ Dầy', region:'thanhnam', ward:'Xã Vụ Bản', theme:'Tâm linh / Di tích', lat:20.3712, lng:106.0685, ticket:'Miễn phí', hours:'06:00 - 18:30', visible:true, desc:'Trung tâm tín ngưỡng thờ Mẫu Tam phủ của người Việt (Di sản UNESCO), gắn với truyền thuyết Thánh Mẫu Liễu Hạnh (Phủ Tiên Hương, Phủ Vân Cát, Lăng Mẫu).' },
-  { id:'lm23', name:'Chùa Cổ Lễ', region:'thanhnam', ward:'Xã Cổ Lễ', theme:'Tâm linh / Di tích', lat:20.3480, lng:106.2280, ticket:'Miễn phí', hours:'06:30 - 18:00', visible:true, desc:'Công trình có kiến trúc giao thoa độc đáo giữa truyền thống Việt Nam và phong cách Gothic phương Tây, nổi bật với tháp Cửu Phẩm Liên Hoa cao 32m.' },
-  { id:'lm24', name:'Chùa Keo Hành Thiện (Thần Quang Tự)', region:'thanhnam', ward:'Xã Xuân Trường', theme:'Tâm linh / Di tích', lat:20.3185, lng:106.3520, ticket:'Miễn phí', hours:'07:00 - 17:30', visible:true, desc:'Di tích quốc gia đặc biệt mang đậm dấu ấn kiến trúc gỗ cổ thời Hậu Lê với nghệ thuật chạm khắc tinh xảo.' },
-  { id:'lm25', name:'Cầu ngói Chùa Lương', region:'thanhnam', ward:'Xã Hải Hậu', theme:'Tâm linh / Di tích', lat:20.2055, lng:106.2865, ticket:'Miễn phí', hours:'06:00 - 19:00', visible:true, desc:'Cây cầu ngói cổ nổi tiếng với kiến trúc "thượng gia hạ kiều", gắn liền với quần thể Chùa Lương (Chùa Phúc Lâm) có từ cuối thế kỷ XV.' },
-  { id:'lm26', name:'Cột cờ & Khu phố cổ Thành Nam', region:'thanhnam', ward:'Phường Nam Định', theme:'Tâm linh / Di tích', lat:20.4275, lng:106.1740, ticket:'Miễn phí', hours:'07:00 - 21:00', visible:true, desc:'Cột cờ là một trong bốn kỳ đài cổ còn lại từ thời Nguyễn; khu phố cổ lưu giữ dấu ấn hơn 800 năm lịch sử đất Thành Nam.' },
-  { id:'lm27', name:'Bảo tàng Dệt & Bảo tàng Đồng Quê', region:'thanhnam', ward:'Phường Nam Định', theme:'Tâm linh / Di tích', lat:20.4210, lng:106.1820, ticket:'30.000đ', hours:'07:30 - 17:00', visible:true, desc:'Lưu giữ hiện vật quý về lịch sử ngành dệt Thành Nam và không gian sinh hoạt truyền thống của cư dân đồng bằng Bắc Bộ.' },
-  { id:'lm28', name:'Vương Cung Thánh Đường Phú Nhai', region:'thanhnam', ward:'Xã Xuân Trường', theme:'Công giáo', lat:20.3025, lng:106.3380, ticket:'Miễn phí', hours:'06:00 - 18:30', visible:true, desc:'Một trong những thánh đường có quy mô lớn nhất Việt Nam với lối kiến trúc Gothic nguy nga và hai tháp chuông cao 44m.' },
-  { id:'lm29', name:'Nhà thờ Giáo xứ Hưng Nghĩa', region:'thanhnam', ward:'Xã Hải Hậu', theme:'Công giáo', lat:20.2280, lng:106.2720, ticket:'Miễn phí', hours:'06:00 - 18:30', visible:true, desc:'Gây ấn tượng mạnh với kiến trúc Gothic kiểu Pháp – Tây Ban Nha cổ kính, nhiều chóp nhọn tinh xảo như một tòa lâu đài châu Âu.' },
-  { id:'lm30', name:'Nhà thờ đổ Hải Lý', region:'thanhnam', ward:'Xã Hải Hậu', theme:'Công giáo', lat:20.1620, lng:106.3250, ticket:'Miễn phí', hours:'24/7', visible:true, desc:'Phế tích tháp chuông nhà thờ cũ nằm ngay sát bờ biển Xương Điền, điểm ngắm bình minh và hoàng hôn độc đáo bậc nhất miền Bắc.' },
-  { id:'lm31', name:'Nhà thờ Xương Điền & Đông Cường', region:'thanhnam', ward:'Xã Hải Hậu', theme:'Công giáo', lat:20.1750, lng:106.3120, ticket:'Miễn phí', hours:'06:00 - 18:00', visible:true, desc:'Các công trình nhà thờ gỗ độc đáo mang phong cách kết hợp Đông – Tây đậm nét văn hóa vùng biển Hải Hậu.' },
-  { id:'lm32', name:'Vườn Quốc gia Xuân Thủy (Ramsar)', region:'thanhnam', ward:'Xã Giao Thủy', theme:'Biển / Sinh thái', lat:20.2450, lng:106.5350, ticket:'40.000đ', hours:'07:00 - 17:30', visible:true, desc:'Khu Ramsar đầu tiên của Việt Nam với hệ sinh thái rừng ngập mặn rộng lớn (Cồn Lu, Cồn Ngạn), nơi trú ngụ của nhiều loài chim di cư quý hiếm.' },
-  { id:'lm33', name:'Biển Thịnh Long', region:'thanhnam', ward:'Xã Thịnh Long', theme:'Biển / Sinh thái', lat:20.1450, lng:106.2750, ticket:'Miễn phí', hours:'24/7', visible:true, desc:'Bãi biển dài, cát mịn, sóng êm, thích hợp nghỉ dưỡng cuối tuần và thưởng thức hải sản tươi sống đánh bắt trong ngày.' },
-  { id:'lm34', name:'Ruộng muối Bạch Long – Hải Hậu', region:'thanhnam', ward:'Xã Giao Thủy', theme:'Biển / Sinh thái', lat:20.2150, lng:106.4250, ticket:'Miễn phí', hours:'06:00 - 18:00', visible:true, desc:'Cảnh quan làng nghề làm muối truyền thống ven biển đẹp như tranh vẽ vào những ngày nắng gắt.' },
-  { id:'lm35', name:'Khu du lịch sinh thái Núi Ngăm', region:'thanhnam', ward:'Xã Vụ Bản', theme:'Di sản / Thiên nhiên', lat:20.3820, lng:106.0580, ticket:'50.000đ', hours:'07:00 - 18:00', visible:true, desc:'Không gian núi non, sông nước yên bình nằm ngay gần quần thể Phủ Dầy, thích hợp dã ngoại gia đình.' },
-  { id:'lm36', name:'Hồ Vị Xuyên', region:'thanhnam', ward:'Phường Nam Định', theme:'Di sản / Thiên nhiên', lat:20.4315, lng:106.1665, ticket:'Miễn phí', hours:'24/7', visible:true, desc:'Hồ nước ngọt yên bình rợp bóng cây xanh nằm ngay khu vực trung tâm Thành Nam, gắn liền với tượng đài Hưng Đạo Vương.' },
+  { id:'lm20', name:'Đền Trần Nam Định', region:'thanhnam', ward:'Phường Thiên Trường', theme:'Tâm linh / Di tích', lat:20.4533, lng:106.1618, ticket:'Miễn phí', hours:'06:30 - 18:00', phone:'', visible:true, desc:'Quần thể di tích lịch sử quốc gia đặc biệt thờ 14 vị vua nhà Trần và các quan lại có công phù tá, nổi tiếng với Lễ hội Khai Ấn đầu xuân.' },
+  { id:'lm21', name:'Chùa Tháp Phổ Minh', region:'thanhnam', ward:'Phường Thiên Trường', theme:'Tâm linh / Di tích', lat:20.4562, lng:106.1645, ticket:'Miễn phí', hours:'06:30 - 18:00', phone:'', visible:true, desc:'Ngôi cổ tự gắn liền với triều đại nhà Trần, nổi bật với tòa tháp Phổ Minh 14 tầng có niên đại hơn 700 năm.' },
+  { id:'lm22', name:'Quần thể di tích Phủ Dầy', region:'thanhnam', ward:'Xã Vụ Bản', theme:'Tâm linh / Di tích', lat:20.3712, lng:106.0685, ticket:'Miễn phí', hours:'06:00 - 18:30', phone:'', visible:true, desc:'Trung tâm tín ngưỡng thờ Mẫu Tam phủ của người Việt (Di sản UNESCO), gắn với truyền thuyết Thánh Mẫu Liễu Hạnh (Phủ Tiên Hương, Phủ Vân Cát, Lăng Mẫu).' },
+  { id:'lm23', name:'Chùa Cổ Lễ', region:'thanhnam', ward:'Xã Cổ Lễ', theme:'Tâm linh / Di tích', lat:20.3480, lng:106.2280, ticket:'Miễn phí', hours:'06:30 - 18:00', phone:'', visible:true, desc:'Công trình có kiến trúc giao thoa độc đáo giữa truyền thống Việt Nam và phong cách Gothic phương Tây, nổi bật với tháp Cửu Phẩm Liên Hoa cao 32m.' },
+  { id:'lm24', name:'Chùa Keo Hành Thiện (Thần Quang Tự)', region:'thanhnam', ward:'Xã Xuân Hồng', theme:'Tâm linh / Di tích', lat:20.3185, lng:106.3520, ticket:'Miễn phí', hours:'07:00 - 17:30', phone:'', visible:true, desc:'Di tích quốc gia đặc biệt mang đậm dấu ấn kiến trúc gỗ cổ thời Hậu Lê với nghệ thuật chạm khắc tinh xảo.' },
+  { id:'lm25', name:'Cầu ngói Chùa Lương', region:'thanhnam', ward:'Xã Hải Anh', theme:'Tâm linh / Di tích', lat:20.2055, lng:106.2865, ticket:'Miễn phí', hours:'06:00 - 19:00', phone:'', visible:true, desc:'Cây cầu ngói cổ nổi tiếng với kiến trúc "thượng gia hạ kiều", gắn liền với quần thể Chùa Lương (Chùa Phúc Lâm) có từ cuối thế kỷ XV.' },
+  { id:'lm26', name:'Cột cờ & Khu phố cổ Thành Nam', region:'thanhnam', ward:'Phường Nam Định', theme:'Tâm linh / Di tích', lat:20.4275, lng:106.1740, ticket:'Miễn phí', hours:'07:00 - 21:00', phone:'', visible:true, desc:'Cột cờ là một trong bốn kỳ đài cổ còn lại từ thời Nguyễn; khu phố cổ lưu giữ dấu ấn hơn 800 năm lịch sử đất Thành Nam.' },
+  { id:'lm27', name:'Bảo tàng Dệt & Bảo tàng Đồng Quê', region:'thanhnam', ward:'Phường Thành Nam', theme:'Tâm linh / Di tích', lat:20.4210, lng:106.1820, ticket:'30.000đ', hours:'07:30 - 17:00', phone:'', visible:true, desc:'Lưu giữ hiện vật quý về lịch sử ngành dệt Thành Nam và không gian sinh hoạt truyền thống của cư dân đồng bằng Bắc Bộ.' },
+  { id:'lm28', name:'Vương Cung Thánh Đường Phú Nhai', region:'thanhnam', ward:'Xã Xuân Trường', theme:'Công giáo', lat:20.3025, lng:106.3380, ticket:'Miễn phí', hours:'06:00 - 18:30', phone:'', visible:true, desc:'Một trong những thánh đường có quy mô lớn nhất Việt Nam với lối kiến trúc Gothic nguy nga và hai tháp chuông cao 44m.' },
+  { id:'lm29', name:'Nhà thờ Giáo xứ Hưng Nghĩa', region:'thanhnam', ward:'Xã Hải Hưng', theme:'Công giáo', lat:20.2280, lng:106.2720, ticket:'Miễn phí', hours:'06:00 - 18:30', phone:'', visible:true, desc:'Gây ấn tượng mạnh với kiến trúc Gothic kiểu Pháp – Tây Ban Nha cổ kính, nhiều chóp nhọn tinh xảo như một tòa lâu đài châu Âu.' },
+  { id:'lm30', name:'Nhà thờ đổ Hải Lý', region:'thanhnam', ward:'Xã Hải Tiến', theme:'Công giáo', lat:20.1620, lng:106.3250, ticket:'Miễn phí', hours:'24/7', phone:'', visible:true, desc:'Phế tích tháp chuông nhà thờ cũ nằm ngay sát bờ biển Xương Điền, điểm ngắm bình minh và hoàng hôn độc đáo bậc nhất miền Bắc.' },
+  { id:'lm31', name:'Nhà thờ Xương Điền & Đông Cường', region:'thanhnam', ward:'Xã Hải Tiến', theme:'Công giáo', lat:20.1750, lng:106.3120, ticket:'Miễn phí', hours:'06:00 - 18:00', phone:'', visible:true, desc:'Các công trình nhà thờ gỗ độc đáo mang phong cách kết hợp Đông – Tây đậm nét văn hóa vùng biển Hải Hậu.' },
+  { id:'lm32', name:'Vườn Quốc gia Xuân Thủy (Ramsar)', region:'thanhnam', ward:'Xã Giao Thủy', theme:'Biển / Sinh thái', lat:20.2450, lng:106.5350, ticket:'40.000đ', hours:'07:00 - 17:30', phone:'', visible:true, desc:'Khu Ramsar đầu tiên của Việt Nam với hệ sinh thái rừng ngập mặn rộng lớn (Cồn Lu, Cồn Ngạn), nơi trú ngụ của nhiều loài chim di cư quý hiếm.' },
+  { id:'lm33', name:'Biển Thịnh Long', region:'thanhnam', ward:'Xã Hải Thịnh', theme:'Biển / Sinh thái', lat:20.1450, lng:106.2750, ticket:'Miễn phí', hours:'24/7', phone:'', visible:true, desc:'Bãi biển dài, cát mịn, sóng êm, thích hợp nghỉ dưỡng cuối tuần và thưởng thức hải sản tươi sống đánh bắt trong ngày.' },
+  { id:'lm34', name:'Ruộng muối Bạch Long – Hải Hậu', region:'thanhnam', ward:'Xã Giao Bình', theme:'Biển / Sinh thái', lat:20.2150, lng:106.4250, ticket:'Miễn phí', hours:'06:00 - 18:00', phone:'', visible:true, desc:'Cảnh quan làng nghề làm muối truyền thống ven biển đẹp như tranh vẽ vào những ngày nắng gắt.' },
+  { id:'lm35', name:'Khu du lịch sinh thái Núi Ngăm', region:'thanhnam', ward:'Xã Minh Tân', theme:'Di sản / Thiên nhiên', lat:20.3820, lng:106.0580, ticket:'50.000đ', hours:'07:00 - 18:00', phone:'', visible:true, desc:'Không gian núi non, sông nước yên bình nằm ngay gần quần thể Phủ Dầy, thích hợp dã ngoại gia đình.' },
+  { id:'lm36', name:'Hồ Vị Xuyên', region:'thanhnam', ward:'Phường Nam Định', theme:'Di sản / Thiên nhiên', lat:20.4315, lng:106.1665, ticket:'Miễn phí', hours:'24/7', phone:'', visible:true, desc:'Hồ nước ngọt yên bình rợp bóng cây xanh nằm ngay khu vực trung tâm Thành Nam, gắn liền với tượng đài Hưng Đạo Vương.' },
 
-  // === 3. VÙNG TAM CHÚC – PHỦ LÝ (11 ĐIỂM) ===
-  { id:'lm37', name:'Khu du lịch tâm linh Tam Chúc', region:'tamchuc', ward:'Phường Tam Chúc', theme:'Tâm linh / Di tích', lat:20.5567, lng:105.8053, ticket:'Thuyền/xe điện 90k-270k', hours:'06:00 - 20:00', visible:true, desc:'Quần thể chùa quy mô lớn hàng đầu Việt Nam, nổi bật với hồ Tam Chúc, vườn cột kinh, Điện Tam Thế, Điện Quán Thế Âm và Chùa Ngọc trên đỉnh núi Thất Tinh.' },
-  { id:'lm38', name:'Chùa Địa Tạng Phi Lai Tự (Chùa Đùng)', region:'tamchuc', ward:'Xã Thanh Liêm', theme:'Tâm linh / Di tích', lat:20.4685, lng:105.9325, ticket:'Miễn phí', hours:'06:30 - 18:00', visible:true, desc:'Ngôi chùa nổi tiếng với không gian thanh tịnh dưới chân núi, kiến trúc hài hòa với sân sỏi trắng và cây xanh.' },
-  { id:'lm39', name:'Chùa Long Đọi Sơn', region:'tamchuc', ward:'Phường Duy Tiên', theme:'Tâm linh / Di tích', lat:20.6180, lng:105.9820, ticket:'Miễn phí', hours:'06:30 - 17:30', visible:true, desc:'Di tích quốc gia đặc biệt tọa lạc trên đỉnh núi Đọi, lưu giữ nhiều giá trị lịch sử Phật giáo vùng Sơn Nam và bia đá cổ.' },
-  { id:'lm40', name:'Chùa Bà Đanh & Chùa Phật Quang', region:'tamchuc', ward:'Phường Tam Chúc', theme:'Tâm linh / Di tích', lat:20.5320, lng:105.8650, ticket:'Miễn phí', hours:'06:30 - 18:00', visible:true, desc:'Những ngôi cổ tự mang vẻ đẹp trầm mặc, kiến trúc tinh tế bên dòng sông Đáy thơ mộng.' },
-  { id:'lm41', name:'Đền Trần Thương', region:'tamchuc', ward:'Xã Nhân Đạo', theme:'Tâm linh / Di tích', lat:20.5850, lng:106.1150, ticket:'Miễn phí', hours:'06:30 - 18:00', visible:true, desc:'Nằm bên bờ sông Hồng, thờ Hưng Đạo Đại Vương Trần Quốc Tuấn tại nơi từng là kho lương của quân đội nhà Trần; nổi tiếng với lễ phát lương tháng Giêng.' },
-  { id:'lm42', name:'Đền Lảnh Giang', region:'tamchuc', ward:'Phường Duy Tiên', theme:'Tâm linh / Di tích', lat:20.6350, lng:106.0380, ticket:'Miễn phí', hours:'06:30 - 18:00', visible:true, desc:'Ngôi đền cổ kính ven sông Hồng thờ Tam vị danh thần thời Hùng Vương thứ 18.' },
-  { id:'lm43', name:'Đền Trúc – Ngũ Động Thi Sơn', region:'tamchuc', ward:'Phường Tam Chúc', theme:'Di sản / Thiên nhiên', lat:20.5420, lng:105.8550, ticket:'30.000đ', hours:'07:00 - 17:30', visible:true, desc:'Quần thể gồm ngôi đền bằng gỗ lim ẩn mình giữa rừng trúc xanh (thờ Lý Thường Kiệt) kết hợp hệ thống 5 hang động đá vôi tự nhiên.' },
-  { id:'lm44', name:'Tiểu Vương Cung Thánh Đường Sở Kiện', region:'tamchuc', ward:'Xã Thanh Liêm', theme:'Công giáo', lat:20.4950, lng:105.9250, ticket:'Miễn phí', hours:'06:00 - 18:30', visible:true, desc:'Nhà thờ Kẻ Sở — một trong những thánh đường cổ kính và uy nghiêm bậc nhất miền Bắc với kiến trúc Gothic đặc sắc.' },
-  { id:'lm45', name:'Kẽm Trống', region:'tamchuc', ward:'Xã Thanh Liêm', theme:'Di sản / Thiên nhiên', lat:20.4520, lng:105.9020, ticket:'Miễn phí', hours:'24/7', visible:true, desc:'Danh thắng thiên nhiên nổi tiếng với hai dãy núi đá vôi dựng đứng soi bóng xuống dòng sông Đáy, từng đi vào thơ ca của Hồ Xuân Hương.' },
-  { id:'lm46', name:'Nhà Bá Kiến & Làng Vũ Đại', region:'tamchuc', ward:'Xã Nam Lý', theme:'Tâm linh / Di tích', lat:20.5580, lng:106.0850, ticket:'Miễn phí', hours:'07:00 - 18:00', visible:true, desc:'Quê hương nhà văn Nam Cao, lưu giữ ngôi nhà ba gian cổ (nguyên mẫu trong tác phẩm Chí Phèo) và nổi tiếng với nghề kho cá niêu đất truyền thống.' },
-  { id:'lm47', name:'Làng trống Đọi Tam & Làng lụa Nha Xá', region:'tamchuc', ward:'Phường Duy Tiên', theme:'Tâm linh / Di tích', lat:20.6250, lng:106.0050, ticket:'Miễn phí', hours:'07:30 - 17:30', visible:true, desc:'Các làng nghề thủ công truyền thống lâu đời, thường được kết hợp tham quan cùng tuyến Chùa Long Đọi Sơn và Đền Lảnh Giang.' }
+  { id:'lm37', name:'Khu du lịch tâm linh Tam Chúc', region:'tamchuc', ward:'Phường Tam Chúc', theme:'Tâm linh / Di tích', lat:20.5567, lng:105.8053, ticket:'Thuyền/xe điện 90k-270k', hours:'06:00 - 20:00', phone:'', visible:true, desc:'Quần thể chùa quy mô lớn hàng đầu Việt Nam, nổi bật với hồ Tam Chúc, vườn cột kinh, Điện Tam Thế, Điện Quán Thế Âm và Chùa Ngọc trên đỉnh núi Thất Tinh.' },
+  { id:'lm38', name:'Chùa Địa Tạng Phi Lai Tự (Chùa Đùng)', region:'tamchuc', ward:'Xã Thanh Bình', theme:'Tâm linh / Di tích', lat:20.4685, lng:105.9325, ticket:'Miễn phí', hours:'06:30 - 18:00', phone:'', visible:true, desc:'Ngôi chùa nổi tiếng với không gian thanh tịnh dưới chân núi, kiến trúc hài hòa với sân sỏi trắng và cây xanh.' },
+  { id:'lm39', name:'Chùa Long Đọi Sơn', region:'tamchuc', ward:'Phường Tiên Sơn', theme:'Tâm linh / Di tích', lat:20.6180, lng:105.9820, ticket:'Miễn phí', hours:'06:30 - 17:30', phone:'', visible:true, desc:'Di tích quốc gia đặc biệt tọa lạc trên đỉnh núi Đọi, lưu giữ nhiều giá trị lịch sử Phật giáo vùng Sơn Nam và bia đá cổ.' },
+  { id:'lm40', name:'Chùa Bà Đanh & Chùa Phật Quang', region:'tamchuc', ward:'Phường Lý Thường Kiệt', theme:'Tâm linh / Di tích', lat:20.5320, lng:105.8650, ticket:'Miễn phí', hours:'06:30 - 18:00', phone:'', visible:true, desc:'Những ngôi cổ tự mang vẻ đẹp trầm mặc, kiến trúc tinh tế bên dòng sông Đáy thơ mộng.' },
+  { id:'lm41', name:'Đền Trần Thương', region:'tamchuc', ward:'Xã Trần Thương', theme:'Tâm linh / Di tích', lat:20.5850, lng:106.1150, ticket:'Miễn phí', hours:'06:30 - 18:00', phone:'', visible:true, desc:'Nằm bên bờ sông Hồng, thờ Hưng Đạo Đại Vương Trần Quốc Tuấn tại nơi từng là kho lương của quân đội nhà Trần; nổi tiếng với lễ phát lương tháng Giêng.' },
+  { id:'lm42', name:'Đền Lảnh Giang', region:'tamchuc', ward:'Phường Duy Hà', theme:'Tâm linh / Di tích', lat:20.6350, lng:106.0380, ticket:'Miễn phí', hours:'06:30 - 18:00', phone:'', visible:true, desc:'Ngôi đền cổ kính ven sông Hồng thờ Tam vị danh thần thời Hùng Vương thứ 18.' },
+  { id:'lm43', name:'Đền Trúc – Ngũ Động Thi Sơn', region:'tamchuc', ward:'Phường Lý Thường Kiệt', theme:'Di sản / Thiên nhiên', lat:20.5420, lng:105.8550, ticket:'30.000đ', hours:'07:00 - 17:30', phone:'', visible:true, desc:'Quần thể gồm ngôi đền bằng gỗ lim ẩn mình giữa rừng trúc xanh (thờ Lý Thường Kiệt) kết hợp hệ thống 5 hang động đá vôi tự nhiên.' },
+  { id:'lm44', name:'Tiểu Vương Cung Thánh Đường Sở Kiện', region:'tamchuc', ward:'Xã Liêm Hà', theme:'Công giáo', lat:20.4950, lng:105.9250, ticket:'Miễn phí', hours:'06:00 - 18:30', phone:'', visible:true, desc:'Nhà thờ Kẻ Sở — một trong những thánh đường cổ kính và uy nghiêm bậc nhất miền Bắc với kiến trúc Gothic đặc sắc.' },
+  { id:'lm45', name:'Kẽm Trống', region:'tamchuc', ward:'Xã Tân Thanh', theme:'Di sản / Thiên nhiên', lat:20.4520, lng:105.9020, ticket:'Miễn phí', hours:'24/7', phone:'', visible:true, desc:'Danh thắng thiên nhiên nổi tiếng với hai dãy núi đá vôi dựng đứng soi bóng xuống dòng sông Đáy, từng đi vào thơ ca của Hồ Xuân Hương.' },
+  { id:'lm46', name:'Nhà Bá Kiến & Làng Vũ Đại', region:'tamchuc', ward:'Xã Nam Lý', theme:'Tâm linh / Di tích', lat:20.5580, lng:106.0850, ticket:'Miễn phí', hours:'07:00 - 18:00', phone:'', visible:true, desc:'Quê hương nhà văn Nam Cao, lưu giữ ngôi nhà ba gian cổ (nguyên mẫu trong tác phẩm Chí Phèo) và nổi tiếng với nghề kho cá niêu đất truyền thống.' },
+  { id:'lm47', name:'Làng trống Đọi Tam & Làng lụa Nha Xá', region:'tamchuc', ward:'Phường Tiên Sơn', theme:'Tâm linh / Di tích', lat:20.6250, lng:106.0050, ticket:'Miễn phí', hours:'07:30 - 17:30', phone:'', visible:true, desc:'Các làng nghề thủ công truyền thống lâu đời, thường được kết hợp tham quan cùng tuyến Chùa Long Đọi Sơn và Đền Lảnh Giang.' }
 ];
 
+// 22 ĐẶC SẢN THƯƠNG HIỆU (ĐỂ TRỐNG LIÊN HỆ CHƯA XÁC THỰC ĐỂ ADMIN NHẬP CHÍNH XÁC)
 const DEFAULT_SPECIALTIES = [
-  // 16 Đặc sản Ninh Bình cũ (Vùng Cố Đô Hoa Lư)
-  { id:'sp01', sku:'NB-DE01', name:'Thịt Dê Núi Trường Yên', shop:'Đặc Sản Dê Núi Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', price:265000, unit:'Set 500g', emoji:'🍖', grad:'linear-gradient(135deg,#991b1b,#ea580c)', fb:'denuitruongyenhoalu', phone:'0912 918 535', lat:20.2780, lng:105.9180, visible:true, desc:'Dê thả núi đá vôi Tràng An ăn lá thuốc tự nhiên, thịt săn ngọt, đóng gói hút chân không kèm tương bần.' },
-  { id:'sp02', sku:'NB-CC02', name:'Cơm Cháy Ninh Bình Chà Bông', shop:'Cơm Cháy Đại Long Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', price:135000, unit:'Combo 2 gói 500g', emoji:'🍘', grad:'linear-gradient(135deg,#b45309,#f59e0b)', fb:'comchaydailonghoalu', phone:'0977 974 535', lat:20.2520, lng:105.9680, visible:true, desc:'Gạo nếp cái hoa vàng chiên giòn rụm không hôi dầu, phủ ruốc heo chà bông đậm vị kèm sốt dê.' },
-  { id:'sp03', sku:'NB-NM03', name:'Nem Chua Yên Mạc Tiến Vua', shop:'Nem Chua Gia Truyền Bà Hợi', region:'hoalu', ward:'Xã Yên Mạc', price:75000, unit:'Quả 200g', emoji:'🥬', grad:'linear-gradient(135deg,#065f46,#10b981)', fb:'nemchuayenmacbahoi', phone:'0965 118 935', lat:20.1240, lng:106.0280, visible:true, desc:'Thịt mông lợn tươi thái sợi, bì lợn, thính gạo rang gói lá ổi lên men tự nhiên, chua thanh giòn sật.' },
-  { id:'sp04', sku:'NB-RK04', name:'Rượu Nếp Kim Sơn Ủ Chum', shop:'Lò Rượu Lai Thành Kim Sơn', region:'hoalu', ward:'Xã Lai Thành', price:95000, unit:'Chai 1 Lít', emoji:'🍶', grad:'linear-gradient(135deg,#5b21b6,#9333ea)', fb:'ruounepkimsonlaithanh', phone:'0984 085 235', lat:20.0980, lng:106.0740, visible:true, desc:'Nấu từ gạo nếp chiêm và men thuốc bắc 36 vị, ủ chum sành hạ thổ lâu năm êm dịu thơm nồng.' },
-  { id:'sp05', sku:'NB-MT05', name:'Mắm Tép Gia Viễn Chưng Thịt', shop:'Mắm Tép Gia Vân – Vân Long', region:'hoalu', ward:'Xã Gia Vân', price:165000, unit:'Hũ 500g', emoji:'🏺', grad:'linear-gradient(135deg,#9a3412,#ea580c)', fb:'mamtepgiavienvanlong', phone:'0968 875 635', lat:20.3820, lng:105.8820, visible:true, desc:'Tép riu tươi đầm chiêm trũng Vân Long ủ muối biển và thính nếp đủ tháng cho màu đỏ au tự nhiên.' },
-  { id:'sp06', sku:'NB-GN06', name:'Gỏi Cá Nhệch Kim Sơn', shop:'Đặc Sản Cá Nhệch Phát Diệm', region:'hoalu', ward:'Xã Phát Diệm', price:290000, unit:'Set 3-4 người', emoji:'🐟', grad:'linear-gradient(135deg,#0369a1,#0ea5e9)', fb:'goicanhechphatdiem', phone:'0945 102 035', lat:20.0860, lng:106.0920, visible:true, desc:'Cá nhệch nước lợ trộn thính nếp thơm bùi, ăn kèm bát chẻo xương cá béo ngậy và hơn 10 loại lá thơm.' },
-  { id:'sp07', sku:'NB-ON07', name:'Ốc Núi Tam Điệp Ăn Lá Thuốc', shop:'Ốc Núi Đá Tam Điệp', region:'hoalu', ward:'Phường Tam Điệp', price:180000, unit:'1 Kg ốc sống', emoji:'🐌', grad:'linear-gradient(135deg,#0f766e,#14b8a6)', fb:'ocnuitamdiepnb', phone:'0915 915 035', lat:20.1620, lng:105.9150, visible:true, desc:'Ốc sống trong hang đá vôi ăn thảo dược tự nhiên, thịt giòn sần sật, ngọt mát thoảng hương thuốc bắc.' },
-  { id:'sp08', sku:'NB-CR08', name:'Cá Rô Tổng Trường Kho Niêu', shop:'Ẩm Thực Hang Động Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', price:195000, unit:'Niêu 600g', emoji:'🐠', grad:'linear-gradient(135deg,#92400e,#d97706)', fb:'carotongtruonghoalu', phone:'0936 908 035', lat:20.2890, lng:105.9020, visible:true, desc:'Giống cá rô đặc hữu vùng hang ngập nước Trường Yên, thịt chắc béo kho niêu đất với tương bần riềng sả.' },
-  { id:'sp09', sku:'NB-BM09', name:'Bún Mọc Kim Sơn', shop:'Bún Mọc Tố Như Phát Diệm', region:'hoalu', ward:'Xã Phát Diệm', price:120000, unit:'Set 4 suất', emoji:'🍜', grad:'linear-gradient(135deg,#1d4ed8,#3b82f6)', fb:'bunmockimson', phone:'0917 091 035', lat:20.0940, lng:106.0850, visible:true, desc:'Mọc thịt lợn tươi giã tay giòn ngọt, nước dùng ninh xương thanh mát chuẩn vị phố huyện Kim Sơn.' },
-  { id:'sp10', sku:'NB-ML10', name:'Miến Lươn Ninh Bình', shop:'Miến Lươn Bà Phấn Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', price:145000, unit:'Set 4 tô', emoji:'🍲', grad:'linear-gradient(135deg,#b91c1c,#f97316)', fb:'mienluonbaphanhoalu', phone:'0918 979 035', lat:20.2580, lng:105.9780, visible:true, desc:'Lươn đồng cốm xào giòn thơm lừng kết hợp miến dong dai ngon và nước dùng ninh xương lươn ngọt thanh.' },
-  { id:'sp11', sku:'NB-XK11', name:'Xôi Trứng Kiến Nho Quan', shop:'Đặc Sản Mường Nho Quan', region:'hoalu', ward:'Xã Nho Quan', price:160000, unit:'Hộp 500g', emoji:'🍚', grad:'linear-gradient(135deg,#4d7c0f,#84cc16)', fb:'xoitrungkiennhoquan', phone:'0963 755 035', lat:20.3260, lng:105.7520, visible:true, desc:'Trứng kiến nâu rừng núi đá vôi xào hành khô béo bùi hòa quyện xôi nếp nương dẻo thơm.' },
-  { id:'sp12', sku:'NB-MO12', name:'Mật Ong Rừng Cúc Phương', shop:'HTX Mật Ong Cúc Phương', region:'hoalu', ward:'Xã Cúc Phương', price:280000, unit:'Chai 750ml', emoji:'🍯', grad:'linear-gradient(135deg,#a16207,#eab308)', fb:'matongrungcucphuong', phone:'0962 712 035', lat:20.3120, lng:105.6250, visible:true, desc:'Mật hoa rừng nguyên chất vùng đệm VQG Cúc Phương, sánh đặc màu vàng hổ phách, thơm ngát tự nhiên.' },
-  { id:'sp13', sku:'NB-DD13', name:'Dứa Đồng Giao Mật Ngọt', shop:'Nông Sản Đồng Giao Tam Điệp', region:'hoalu', ward:'Phường Tam Điệp', price:85000, unit:'Combo 3 quả', emoji:'🍍', grad:'linear-gradient(135deg,#ca8a04,#facc15)', fb:'duadonggiaotamdiep', phone:'0989 932 035', lat:20.1510, lng:105.9320, visible:true, desc:'Dứa chín cây Đồng Giao mắt nhỏ, cùi vàng ươm ngọt lịm ít xơ; có cả bản dứa sấy dẻo không đường.' },
-  { id:'sp14', sku:'NB-BT14', name:'Bánh Trôi Ninh Bình Đường Mật', shop:'Bánh Quê Phố Cổ Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', price:50000, unit:'Hộp 10 viên', emoji:'🍡', grad:'linear-gradient(135deg,#be185d,#ec4899)', fb:'banhtroininhbinh', phone:'0932 254 035', lat:20.2545, lng:105.9685, visible:true, desc:'Bánh trôi nhân đường mật mía, lạc rang, thơm mùi lá cúc tần và hoa bưởi thanh tao.' },
-  { id:'sp15', sku:'NB-KL15', name:'Khoai Lang Hoàng Long', shop:'Nông Sản Bãi Bồi Hoàng Long', region:'hoalu', ward:'Xã Gia Viễn', price:60000, unit:'Túi 3 Kg', emoji:'🍠', grad:'linear-gradient(135deg,#9f1239,#e11d48)', fb:'khoailanghoanglongnb', phone:'0974 825 035', lat:20.3380, lng:105.8450, visible:true, desc:'Trồng trên đất phù sa bãi bồi sông Hoàng Long, củ thuôn đều vỏ đỏ ruột vàng óng, bở tơi thơm ngọt.' },
-  { id:'sp16', sku:'NB-MC16', name:'Mắm Cáy Bãi Ngang Kim Sơn', shop:'Làng Nghề Mắm Cáy Kim Đông', region:'hoalu', ward:'Xã Kim Đông', price:90000, unit:'Chai 500ml', emoji:'🦀', grad:'linear-gradient(135deg,#0b6e63,#0d9488)', fb:'mamcaybaingangkimson', phone:'0982 125 035', lat:20.0250, lng:106.1100, visible:true, desc:'Con cáy tươi bãi ngang ven biển Kim Sơn giã nhuyễn ủ muối biển, gừng và rượu nếp phơi nắng đủ ngày.' },
-
-  // 3 Đặc sản Hà Nam cũ (Vùng Tam Chúc – Phủ Lý)
-  { id:'sp17', sku:'NB-VD17', name:'Cá Kho Làng Vũ Đại Niêu Đất', shop:'Cá Kho Trần Luận – Nam Lý', region:'tamchuc', ward:'Xã Nam Lý', price:550000, unit:'Niêu 1.5 Kg', emoji:'🍲', grad:'linear-gradient(135deg,#78350f,#b45309)', fb:'cakholangvudaitranluan', phone:'0988 999 525', lat:20.5580, lng:106.0850, visible:true, desc:'Cá trắm đen kho niêu đất cùng riềng, gừng, nước cốt chanh, tương cua trên củi nhãn 14 tiếng.' },
-  { id:'sp18', sku:'NB-BC18', name:'Bánh Cuốn Chả Nướng Phủ Lý', shop:'Bánh Cuốn Biên Hòa Phủ Lý', region:'tamchuc', ward:'Phường Phủ Lý', price:110000, unit:'Set 3 suất', emoji:'🥟', grad:'linear-gradient(135deg,#15803d,#22c55e)', fb:'banhcuonchaphuly', phone:'0913 542 590', lat:20.5425, lng:105.9155, visible:true, desc:'Bánh cuốn tráng mỏng từ gạo Tám ăn cùng chả thịt ba chỉ nướng than hoa nóng hổi và nước chấm đu đủ.' },
-  { id:'sp19', sku:'NB-CN19', name:'Chuối Ngự Đại Hoàng Tiến Vua', shop:'Vườn Chuối Ngự Đại Hoàng', region:'tamchuc', ward:'Xã Nam Lý', price:85000, unit:'Nải tuyển chọn', emoji:'🍌', grad:'linear-gradient(135deg,#a16207,#f59e0b)', fb:'chuoingudaihoangchuan', phone:'0973 551 090', lat:20.5510, lng:106.0740, visible:true, desc:'Giống chuối ngự quả nhỏ xinh, vỏ mỏng vàng ươm, thịt dẻo ngọt thanh và hương thơm đặc trưng.' },
-
-  // 3 Đặc sản Nam Định cũ (Vùng Thành Nam – Biển Đông)
-  { id:'sp20', sku:'NB-SC20', name:'Kẹo Sìu Châu Thành Nam', shop:'Kẹo Sìu Châu Kim Thành Hoa', region:'thanhnam', ward:'Phường Nam Định', price:95000, unit:'Hộp quà 500g', emoji:'🍬', grad:'linear-gradient(135deg,#9a3412,#f97316)', fb:'keosiuchaunamdinh', phone:'0912 436 018', lat:20.4360, lng:106.1720, visible:true, desc:'Lạc nhân tuyển chọn, vừng trắng, mạch nha và đường kính — giòn tan thơm bùi, uống cùng trà nóng cực hợp.' },
-  { id:'sp21', sku:'NB-NN21', name:'Nem Nắm Giao Thủy Lá Sung', shop:'Nem Nắm Phượng Tùng', region:'thanhnam', ward:'Xã Giao Thủy', price:65000, unit:'Quả 250g', emoji:'🥗', grad:'linear-gradient(135deg,#047857,#10b981)', fb:'nemnamgiaothuychuan', phone:'0985 258 018', lat:20.2580, lng:106.4520, visible:true, desc:'Thịt lợn chần chín tới trộn bì thái chỉ, tỏi ta, nước mắm Sa Châu và thính gạo Tám, cuốn lá sung.' },
-  { id:'sp22', sku:'NB-GT22', name:'Gạo Tám Xoan Hải Hậu', shop:'HTX Gạo Tám Xoan Hải Hậu', region:'thanhnam', ward:'Xã Hải Hậu', price:145000, unit:'Túi 5 Kg', emoji:'🌾', grad:'linear-gradient(135deg,#4338ca,#6366f1)', fb:'gaotamxoanhaihau', phone:'0986 195 018', lat:20.1950, lng:106.2880, visible:true, desc:'Hạt gạo nhỏ dài trắng trong, nấu cơm dẻo ngọt đậm đà và tỏa hương thơm ngát đặc sản vùng biển Hải Hậu.' }
+  { id:'sp01', sku:'NB-DE01', name:'Thịt Dê Núi Trường Yên', shop:'Đặc Sản Dê Núi Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', price:265000, unit:'Set 500g', emoji:'🍖', grad:'linear-gradient(135deg,#991b1b,#ea580c)', fb:'', phone:'', lat:20.2780, lng:105.9180, visible:true, desc:'Dê thả núi đá vôi Tràng An ăn lá thuốc tự nhiên, thịt săn ngọt, đóng gói hút chân không kèm tương bần.' },
+  { id:'sp02', sku:'NB-CC02', name:'Cơm Cháy Ninh Bình Chà Bông', shop:'Cơm Cháy Đại Long Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', price:135000, unit:'Combo 2 gói 500g', emoji:'🍘', grad:'linear-gradient(135deg,#b45309,#f59e0b)', fb:'', phone:'', lat:20.2520, lng:105.9680, visible:true, desc:'Gạo nếp cái hoa vàng chiên giòn rụm không hôi dầu, phủ ruốc heo chà bông đậm vị kèm sốt dê.' },
+  { id:'sp03', sku:'NB-NM03', name:'Nem Chua Yên Mạc Tiến Vua', shop:'Nem Chua Gia Truyền Yên Mạc', region:'hoalu', ward:'Xã Yên Mạc', price:75000, unit:'Quả 200g', emoji:'🥬', grad:'linear-gradient(135deg,#065f46,#10b981)', fb:'', phone:'', lat:20.1240, lng:106.0280, visible:true, desc:'Thịt mông lợn tươi thái sợi, bì lợn, thính gạo rang gói lá ổi lên men tự nhiên, chua thanh giòn sật.' },
+  { id:'sp04', sku:'NB-RK04', name:'Rượu Nếp Kim Sơn Ủ Chum', shop:'Lò Rượu Lai Thành Kim Sơn', region:'hoalu', ward:'Xã Lai Thành', price:95000, unit:'Chai 1 Lít', emoji:'🍶', grad:'linear-gradient(135deg,#5b21b6,#9333ea)', fb:'', phone:'', lat:20.0980, lng:106.0740, visible:true, desc:'Nấu từ gạo nếp chiêm và men thuốc bắc 36 vị, ủ chum sành hạ thổ lâu năm êm dịu thơm nồng.' },
+  { id:'sp05', sku:'NB-MT05', name:'Mắm Tép Gia Viễn Chưng Thịt', shop:'Mắm Tép Gia Vân – Vân Long', region:'hoalu', ward:'Xã Gia Vân', price:165000, unit:'Hũ 500g', emoji:'🏺', grad:'linear-gradient(135deg,#9a3412,#ea580c)', fb:'', phone:'', lat:20.3820, lng:105.8820, visible:true, desc:'Tép riu tươi đầm chiêm trũng Vân Long ủ muối biển và thính nếp đủ tháng cho màu đỏ au tự nhiên.' },
+  { id:'sp06', sku:'NB-GN06', name:'Gỏi Cá Nhệch Kim Sơn', shop:'Đặc Sản Cá Nhệch Phát Diệm', region:'hoalu', ward:'Xã Phát Diệm', price:290000, unit:'Set 3-4 người', emoji:'🐟', grad:'linear-gradient(135deg,#0369a1,#0ea5e9)', fb:'', phone:'', lat:20.0860, lng:106.0920, visible:true, desc:'Cá nhệch nước lợ trộn thính nếp thơm bùi, ăn kèm bát chẻo xương cá béo ngậy và hơn 10 loại lá thơm.' },
+  { id:'sp07', sku:'NB-ON07', name:'Ốc Núi Tam Điệp Ăn Lá Thuốc', shop:'Ốc Núi Đá Tam Điệp', region:'hoalu', ward:'Phường Tam Điệp', price:180000, unit:'1 Kg ốc sống', emoji:'🐌', grad:'linear-gradient(135deg,#0f766e,#14b8a6)', fb:'', phone:'', lat:20.1620, lng:105.9150, visible:true, desc:'Ốc sống trong hang đá vôi ăn thảo dược tự nhiên, thịt giòn sần sật, ngọt mát thoảng hương thuốc bắc.' },
+  { id:'sp08', sku:'NB-CR08', name:'Cá Rô Tổng Trường Kho Niêu', shop:'Ẩm Thực Hang Động Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', price:195000, unit:'Niêu 600g', emoji:'🐠', grad:'linear-gradient(135deg,#92400e,#d97706)', fb:'', phone:'', lat:20.2890, lng:105.9020, visible:true, desc:'Giống cá rô đặc hữu vùng hang ngập nước Trường Yên, thịt chắc béo kho niêu đất với tương bần riềng sả.' },
+  { id:'sp09', sku:'NB-BM09', name:'Bún Mọc Kim Sơn', shop:'Bún Mọc Phố Phát Diệm', region:'hoalu', ward:'Xã Phát Diệm', price:120000, unit:'Set 4 suất', emoji:'🍜', grad:'linear-gradient(135deg,#1d4ed8,#3b82f6)', fb:'', phone:'', lat:20.0940, lng:106.0850, visible:true, desc:'Mọc thịt lợn tươi giã tay giòn ngọt, nước dùng ninh xương thanh mát chuẩn vị phố huyện Kim Sơn.' },
+  { id:'sp10', sku:'NB-ML10', name:'Miến Lươn Ninh Bình', shop:'Miến Lươn Cố Đô Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', price:145000, unit:'Set 4 tô', emoji:'🍲', grad:'linear-gradient(135deg,#b91c1c,#f97316)', fb:'', phone:'', lat:20.2580, lng:105.9780, visible:true, desc:'Lươn đồng cốm xào giòn thơm lừng kết hợp miến dong dai ngon và nước dùng ninh xương lươn ngọt thanh.' },
+  { id:'sp11', sku:'NB-XK11', name:'Xôi Trứng Kiến Nho Quan', shop:'Đặc Sản Mường Nho Quan', region:'hoalu', ward:'Xã Nho Quan', price:160000, unit:'Hộp 500g', emoji:'🍚', grad:'linear-gradient(135deg,#4d7c0f,#84cc16)', fb:'', phone:'', lat:20.3260, lng:105.7520, visible:true, desc:'Trứng kiến nâu rừng núi đá vôi xào hành khô béo bùi hòa quyện xôi nếp nương dẻo thơm.' },
+  { id:'sp12', sku:'NB-MO12', name:'Mật Ong Rừng Cúc Phương', shop:'HTX Mật Ong Cúc Phương', region:'hoalu', ward:'Xã Cúc Phương', price:280000, unit:'Chai 750ml', emoji:'🍯', grad:'linear-gradient(135deg,#a16207,#eab308)', fb:'', phone:'', lat:20.3120, lng:105.6250, visible:true, desc:'Mật hoa rừng nguyên chất vùng đệm VQG Cúc Phương, sánh đặc màu vàng hổ phách, thơm ngát tự nhiên.' },
+  { id:'sp13', sku:'NB-DD13', name:'Dứa Đồng Giao Mật Ngọt', shop:'Nông Sản Đồng Giao Tam Điệp', region:'hoalu', ward:'Phường Tam Điệp', price:85000, unit:'Combo 3 quả', emoji:'🍍', grad:'linear-gradient(135deg,#ca8a04,#facc15)', fb:'', phone:'', lat:20.1510, lng:105.9320, visible:true, desc:'Dứa chín cây Đồng Giao mắt nhỏ, cùi vàng ươm ngọt lịm ít xơ; có cả bản dứa sấy dẻo không đường.' },
+  { id:'sp14', sku:'NB-BT14', name:'Bánh Trôi Ninh Bình Đường Mật', shop:'Bánh Quê Phố Cổ Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', price:50000, unit:'Hộp 10 viên', emoji:'🍡', grad:'linear-gradient(135deg,#be185d,#ec4899)', fb:'', phone:'', lat:20.2545, lng:105.9685, visible:true, desc:'Bánh trôi nhân đường mật mía, lạc rang, thơm mùi lá cúc tần và hoa bưởi thanh tao.' },
+  { id:'sp15', sku:'NB-KL15', name:'Khoai Lang Hoàng Long', shop:'Nông Sản Bãi Bồi Hoàng Long', region:'hoalu', ward:'Xã Gia Viễn', price:60000, unit:'Túi 3 Kg', emoji:'🍠', grad:'linear-gradient(135deg,#9f1239,#e11d48)', fb:'', phone:'', lat:20.3380, lng:105.8450, visible:true, desc:'Trồng trên đất phù sa bãi bồi sông Hoàng Long, củ thuôn đều vỏ đỏ ruột vàng óng, bở tơi thơm ngọt.' },
+  { id:'sp16', sku:'NB-MC16', name:'Mắm Cáy Bãi Ngang Kim Sơn', shop:'Làng Nghề Mắm Cáy Kim Đông', region:'hoalu', ward:'Xã Kim Đông', price:90000, unit:'Chai 500ml', emoji:'🦀', grad:'linear-gradient(135deg,#0b6e63,#0d9488)', fb:'', phone:'', lat:20.0250, lng:106.1100, visible:true, desc:'Con cáy tươi bãi ngang ven biển Kim Sơn giã nhuyễn ủ muối biển, gừng và rượu nếp phơi nắng đủ ngày.' },
+  { id:'sp17', sku:'NB-VD17', name:'Cá Kho Làng Vũ Đại Niêu Đất', shop:'Cơ Sở Cá Kho Làng Vũ Đại', region:'tamchuc', ward:'Xã Nam Lý', price:550000, unit:'Niêu 1.5 Kg', emoji:'🍲', grad:'linear-gradient(135deg,#78350f,#b45309)', fb:'', phone:'', lat:20.5580, lng:106.0850, visible:true, desc:'Cá trắm đen kho niêu đất cùng riềng, gừng, nước cốt chanh, tương cua trên củi nhãn 14 tiếng.' },
+  { id:'sp18', sku:'NB-BC18', name:'Bánh Cuốn Chả Nướng Phủ Lý', shop:'Bánh Cuốn Chả Phủ Lý', region:'tamchuc', ward:'Phường Phủ Lý', price:110000, unit:'Set 3 suất', emoji:'🥟', grad:'linear-gradient(135deg,#15803d,#22c55e)', fb:'', phone:'', lat:20.5425, lng:105.9155, visible:true, desc:'Bánh cuốn tráng mỏng từ gạo Tám ăn cùng chả thịt ba chỉ nướng than hoa nóng hổi và nước chấm đu đủ.' },
+  { id:'sp19', sku:'NB-CN19', name:'Chuối Ngự Đại Hoàng Tiến Vua', shop:'Vườn Chuối Ngự Đại Hoàng', region:'tamchuc', ward:'Xã Nam Lý', price:85000, unit:'Nải tuyển chọn', emoji:'🍌', grad:'linear-gradient(135deg,#a16207,#f59e0b)', fb:'', phone:'', lat:20.5510, lng:106.0740, visible:true, desc:'Giống chuối ngự quả nhỏ xinh, vỏ mỏng vàng ươm, thịt dẻo ngọt thanh và hương thơm đặc trưng.' },
+  { id:'sp20', sku:'NB-SC20', name:'Kẹo Sìu Châu Thành Nam', shop:'Kẹo Sìu Châu Thành Nam', region:'thanhnam', ward:'Phường Nam Định', price:95000, unit:'Hộp quà 500g', emoji:'🍬', grad:'linear-gradient(135deg,#9a3412,#f97316)', fb:'', phone:'', lat:20.4360, lng:106.1720, visible:true, desc:'Lạc nhân tuyển chọn, vừng trắng, mạch nha và đường kính — giòn tan thơm bùi, uống cùng trà nóng cực hợp.' },
+  { id:'sp21', sku:'NB-NN21', name:'Nem Nắm Giao Thủy Lá Sung', shop:'Đặc Sản Nem Nắm Giao Thủy', region:'thanhnam', ward:'Xã Giao Thủy', price:65000, unit:'Quả 250g', emoji:'🥗', grad:'linear-gradient(135deg,#047857,#10b981)', fb:'', phone:'', lat:20.2580, lng:106.4520, visible:true, desc:'Thịt lợn chần chín tới trộn bì thái chỉ, tỏi ta, nước mắm Sa Châu và thính gạo Tám, cuốn lá sung.' },
+  { id:'sp22', sku:'NB-GT22', name:'Gạo Tám Xoan Hải Hậu', shop:'HTX Gạo Tám Xoan Hải Hậu', region:'thanhnam', ward:'Xã Hải Hậu', price:145000, unit:'Túi 5 Kg', emoji:'🌾', grad:'linear-gradient(135deg,#4338ca,#6366f1)', fb:'', phone:'', lat:20.1950, lng:106.2880, visible:true, desc:'Hạt gạo nhỏ dài trắng trong, nấu cơm dẻo ngọt đậm đà và tỏa hương thơm ngát đặc sản vùng biển Hải Hậu.' }
 ];
 
+// 12 NHÀ HÀNG TIÊU BIỂU — RÀ SOÁT SẠCH: ĐỂ TRỐNG ("") TOÀN BỘ SĐT VÀ FACEBOOK CHƯA XÁC THỰC
 const DEFAULT_RESTAURANTS = [
-  { id:'rs01', name:'Nhà hàng Thịt Dê Chính Thư', region:'hoalu', ward:'Phường Nam Hoa Lư', priceRange:'180k - 300k/người', signature:'Dê tái chanh, Dê ủ trấu, Dê nướng tảng, Cơm cháy sốt dê', fb:'nhahangdenuichinhthu', phone:'0912 238 535', lat:20.2385, lng:105.9320, visible:true, desc:'Quán dê gia truyền lâu đời nổi tiếng bậc nhất Hoa Lư, gần Hang Múa & Tràng An.' },
-  { id:'rs02', name:'Nhà hàng Đức Dê — Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', priceRange:'150k - 250k/người', signature:'Dê hấp tía tô, Dê xào lăn, Tiết canh dê, Cơm cháy chà bông', fb:'nhahangducdeninhbinh', phone:'0982 241 035', lat:20.2410, lng:105.9780, visible:true, desc:'Thịt dê tươi mỗi ngày, chế biến chuẩn vị được người dân địa phương và du khách yêu thích.' },
-  { id:'rs03', name:'Nhà hàng Tam Gia Trang', region:'hoalu', ward:'Phường Tây Hoa Lư', priceRange:'180k - 320k/người', signature:'Dê núi 7 món, Cá rô Tổng Trường, Gà đồi nướng mật ong', fb:'nhahangtamgiatrang', phone:'0914 268 035', lat:20.2680, lng:105.9220, visible:true, desc:'Không gian sân vườn rộng lớn đậm chất cổ trang ngay trục đường Tràng An – Cố đô Hoa Lư.' },
-  { id:'rs04', name:'Nhà hàng Vũ Bảo — Gỏi Cá Nhệch', region:'hoalu', ward:'Xã Phát Diệm', priceRange:'200k - 350k/người', signature:'Gỏi cá nhệch Kim Sơn trứ danh, Cua đồng rang muối, Lẩu cua đồng', fb:'nhahangvubaokimson', phone:'0989 095 035', lat:20.0950, lng:106.0810, visible:true, desc:'Thương hiệu ẩm thực hàng đầu về Gỏi cá nhệch Kim Sơn và đặc sản đồng quê.' },
-  { id:'rs05', name:'Phố Ẩm Thực Phố Cổ Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', priceRange:'50k - 180k/người', signature:'Bánh trôi, Miến lươn, Bánh đa cá rô, Xiên nướng & đặc sản đêm', fb:'phocohoaluninhbinh', phone:'0919 254 035', lat:20.2548, lng:105.9670, visible:true, desc:'Khu ẩm thực sầm uất ven hồ Kỳ Lân, lung linh về đêm bên hai tòa tháp Tứ Ân.' },
-  { id:'rs06', name:'Nhà hàng Bến Thuyền Tràng An', region:'hoalu', ward:'Phường Tây Hoa Lư', priceRange:'160k - 270k/người', signature:'Dê quay nguyên con, Cơm cháy đáy nồi, Ốc núi hấp gừng', fb:'nhahangbenthuyentrangan', phone:'0914 254 535', lat:20.2545, lng:105.9410, visible:true, desc:'Vị trí siêu gần bến thuyền Tràng An, view hồ và núi đá vôi mát mẻ.' },
-  { id:'rs07', name:'Nhà hàng Sinh Thái Vân Long', region:'hoalu', ward:'Xã Gia Vân', priceRange:'150k - 250k/người', signature:'Mắm tép chưng thịt, Cá rô đầm Vân Long, Dê núi hấp gừng', fb:'nhahangvanlonggiavan', phone:'0968 395 035', lat:20.3940, lng:105.8790, visible:true, desc:'Điểm dừng ăn trưa lý tưởng ngay sát bến đò Khu bảo tồn Vân Long và Nhà thờ Lãng Vân.' },
-  { id:'rs08', name:'Nhà hàng Thủy Đình — Tam Chúc', region:'tamchuc', ward:'Phường Tam Chúc', priceRange:'150k - 280k/người', signature:'Cơm chay Tam Chúc, Cá kho Vũ Đại, Gà đồi Ba Sao', fb:'nhahangthuydinhtamchuc', phone:'0966 553 090', lat:20.5530, lng:105.8120, visible:true, desc:'View thẳng hồ Tam Chúc, phục vụ cả thực đơn chay thanh tịnh và đặc sản mặn.' },
-  { id:'rs09', name:'Bánh Cuốn Chả Phủ Lý Phú Mạnh', region:'tamchuc', ward:'Phường Phủ Lý', priceRange:'45k - 85k/người', signature:'Bánh cuốn nóng/nguội, Chả nướng than hoa, Bún cá rô đồng', fb:'banhcuonchaphumanh', phone:'0915 541 890', lat:20.5418, lng:105.9180, visible:true, desc:'Điểm ăn sáng và trưa trứ danh ngay trung tâm Phường Phủ Lý.' },
-  { id:'rs10', name:'Phở Bò Gia Truyền Cụ Tặng', region:'thanhnam', ward:'Phường Nam Định', priceRange:'45k - 75k/người', signature:'Phở bò tái chín nạm gầu, Phở sốt vang, Quẩy nóng', fb:'phobogiatruyencutang', phone:'0912 429 518', lat:20.4295, lng:106.1745, visible:true, desc:'Nước dùng ninh xương bò ngọt tự nhiên, bánh phở sợi nhỏ mềm mịn chuẩn gốc Thành Nam.' },
-  { id:'rs11', name:'Nhà hàng Hải Sản Biển Thịnh Long', region:'thanhnam', ward:'Xã Thịnh Long', priceRange:'220k - 380k/người', signature:'Bề bề rang muối, Ghẹ xanh hấp bia, Cá song hấp xì dầu', fb:'haisanbienxanhthinhlong', phone:'0983 145 018', lat:20.1455, lng:106.2780, visible:true, desc:'Hải sản tươi sống đánh bắt trong ngày từ tàu cá ven biển Thịnh Long – Hải Hậu.' },
-  { id:'rs12', name:'Nhà hàng Cơm Quê Phủ Dầy', region:'thanhnam', ward:'Xã Vụ Bản', priceRange:'130k - 220k/người', signature:'Gà ri hấp lá chanh, Nem nắm Giao Thủy, Canh cua cà pháo', fb:'comquephudayvuban', phone:'0978 371 018', lat:20.3735, lng:106.0710, visible:true, desc:'Không gian nhà gỗ Bắc Bộ ấm cúng phục vụ du khách hành hương Phủ Dầy và Núi Ngăm.' }
+  { id:'rs01', name:'Nhà hàng Thịt Dê Chính Thư', region:'hoalu', ward:'Phường Nam Hoa Lư', priceRange:'180k - 300k/người', signature:'Dê tái chanh, Dê ủ trấu, Dê nướng tảng, Cơm cháy sốt dê', fb:'', phone:'', lat:20.2385, lng:105.9320, visible:true, desc:'Quán dê gia truyền lâu đời nổi tiếng bậc nhất Hoa Lư, gần Hang Múa & Tràng An.' },
+  { id:'rs02', name:'Nhà hàng Đức Dê — Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', priceRange:'150k - 250k/người', signature:'Dê hấp tía tô, Dê xào lăn, Tiết canh dê, Cơm cháy chà bông', fb:'', phone:'', lat:20.2410, lng:105.9780, visible:true, desc:'Thịt dê tươi mỗi ngày, chế biến chuẩn vị được người dân địa phương và du khách yêu thích.' },
+  { id:'rs03', name:'Nhà hàng Thăng Long — Tràng An', region:'hoalu', ward:'Phường Tây Hoa Lư', priceRange:'180k - 320k/người', signature:'Dê núi 7 món, Cá rô Tổng Trường, Cơm cháy ruốc dê', fb:'', phone:'', lat:20.2580, lng:105.9310, visible:true, desc:'Không gian rộng rãi phục vụ khách đoàn và gia đình ngay trục đường vào Quần thể danh thắng Tràng An.' },
+  { id:'rs04', name:'Nhà hàng Hoàng Giang — Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', priceRange:'170k - 300k/người', signature:'Dê nướng xiên, Lẩu dê thuốc bắc, Gà đồi nướng mật ong', fb:'', phone:'', lat:20.2740, lng:105.9150, visible:true, desc:'Nhà hàng sân vườn ven núi đá vôi gần Cố đô Hoa Lư và Chùa Bái Đính.' },
+  { id:'rs05', name:'Nhà hàng Ba Cửa — Tam Cốc', region:'hoalu', ward:'Phường Nam Hoa Lư', priceRange:'160k - 280k/người', signature:'Dê áp chảo, Nem dê, Ốc núi hấp sả, Cơm cháy sốt dê', fb:'', phone:'', lat:20.2245, lng:105.9355, visible:true, desc:'Vị trí thuận tiện trên tuyến đường từ Hang Múa vào bến thuyền Tam Cốc – Bích Động.' },
+  { id:'rs06', name:'Nhà hàng Vũ Bảo — Gỏi Cá Nhệch', region:'hoalu', ward:'Xã Phát Diệm', priceRange:'200k - 350k/người', signature:'Gỏi cá nhệch Kim Sơn trứ danh, Cua đồng rang muối, Lẩu cua đồng', fb:'', phone:'', lat:20.0950, lng:106.0810, visible:true, desc:'Thương hiệu ẩm thực hàng đầu về Gỏi cá nhệch Kim Sơn và đặc sản đồng quê.' },
+  { id:'rs07', name:'Phố Ẩm Thực Phố Cổ Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', priceRange:'50k - 180k/người', signature:'Bánh trôi, Miến lươn, Bánh đa cá rô, Xiên nướng & đặc sản đêm', fb:'', phone:'', lat:20.2548, lng:105.9670, visible:true, desc:'Khu ẩm thực sầm uất ven hồ Kỳ Lân, lung linh về đêm bên hai tòa tháp Tứ Ân.' },
+  { id:'rs08', name:'Nhà hàng Sinh Thái Vân Long', region:'hoalu', ward:'Xã Gia Vân', priceRange:'150k - 250k/người', signature:'Mắm tép chưng thịt, Cá rô đầm Vân Long, Dê núi hấp gừng', fb:'', phone:'', lat:20.3940, lng:105.8790, visible:true, desc:'Điểm dừng ăn trưa lý tưởng ngay sát bến đò Khu bảo tồn Vân Long và Nhà thờ Lãng Vân.' },
+  { id:'rs09', name:'Nhà hàng Thủy Đình — Tam Chúc', region:'tamchuc', ward:'Phường Tam Chúc', priceRange:'150k - 280k/người', signature:'Cơm chay Tam Chúc, Cá kho Vũ Đại, Gà đồi Ba Sao', fb:'', phone:'', lat:20.5530, lng:105.8120, visible:true, desc:'View thẳng hồ Tam Chúc, phục vụ cả thực đơn chay thanh tịnh và đặc sản mặn.' },
+  { id:'rs10', name:'Bánh Cuốn Chả Phủ Lý Phú Mạnh', region:'tamchuc', ward:'Phường Phủ Lý', priceRange:'45k - 85k/người', signature:'Bánh cuốn nóng/nguội, Chả nướng than hoa, Bún cá rô đồng', fb:'', phone:'', lat:20.5418, lng:105.9180, visible:true, desc:'Điểm ăn sáng và trưa trứ danh ngay trung tâm Phường Phủ Lý.' },
+  { id:'rs11', name:'Phở Bò Gia Truyền Cụ Tặng', region:'thanhnam', ward:'Phường Nam Định', priceRange:'45k - 75k/người', signature:'Phở bò tái chín nạm gầu, Phở sốt vang, Quẩy nóng', fb:'', phone:'', lat:20.4295, lng:106.1745, visible:true, desc:'Nước dùng ninh xương bò ngọt tự nhiên, bánh phở sợi nhỏ mềm mịn chuẩn gốc Thành Nam.' },
+  { id:'rs12', name:'Nhà hàng Hải Sản Biển Thịnh Long', region:'thanhnam', ward:'Xã Hải Thịnh', priceRange:'220k - 380k/người', signature:'Bề bề rang muối, Ghẹ xanh hấp bia, Cá song hấp xì dầu', fb:'', phone:'', lat:20.1455, lng:106.2780, visible:true, desc:'Hải sản tươi sống đánh bắt trong ngày từ tàu cá ven biển Thịnh Long – Hải Hậu.' }
 ];
 
 const TOUR_ROUTES = [
@@ -1011,15 +1293,120 @@ const TOUR_ROUTES = [
   { id:'rt2', name:'Cung đường Sinh thái Gia Vân – Cúc Phương', sub:'Đầm Vân Long → Nhà thờ Lãng Vân → Kênh Gà → Đan viện Châu Sơn → Cúc Phương', ids:['lm05','lm18','lm08','lm19','lm06'] },
   { id:'rt3', name:'Cung đường Tâm linh Liên vùng (2 ngày)', sub:'Tam Chúc → Địa Tạng Phi Lai → Bái Đính → Phủ Dầy → Đền Trần', ids:['lm37','lm38','lm11','lm22','lm20'] },
   { id:'rt4', name:'Cung đường Kiến trúc Công giáo Độc đáo', sub:'Sở Kiện → Lãng Vân → Phát Diệm → Phú Nhai → Hưng Nghĩa → Nhà thờ đổ Hải Lý', ids:['lm44','lm18','lm16','lm28','lm29','lm30'] },
-  { id:'rt5', name:'Cung đường Làng nghề & Văn hóa Bắc NB', sub:'Chùa Long Đọi Sơn → Đọi Tam / Nha Xá → Đền Trần Thương → Làng Vũ Đại', ids:['lm39','lm47','lm41','lm46'] },
+  { id:'rt5', name:'Cung đường Làng nghề & Văn hóa Sơn Nam', sub:'Chùa Long Đọi Sơn → Đọi Tam / Nha Xá → Đền Trần Thương → Làng Vũ Đại', ids:['lm39','lm47','lm41','lm46'] },
   { id:'rt6', name:'Cung đường Biển & Sinh thái Đông Nam', sub:'Cồn Nổi Kim Sơn → Biển Thịnh Long → Cầu ngói Chùa Lương → VQG Xuân Thủy', ids:['lm17','lm33','lm25','lm32'] }
 ];
 
 /* =========================================================================
-   2. STATE & LOCALSTORAGE
+   2. KIỂM TRA & CHUẨN HÓA SỐ ĐIỆN THOẠI + FACEBOOK MESSENGER (XỬ LÝ RỖNG)
+   ========================================================================= */
+function sanitizePhone(raw) {
+  let digits = String(raw || '').replace(/[^\d+]/g, '');
+  if (digits.startsWith('+84')) digits = '0' + digits.slice(3);
+  else if (digits.startsWith('84') && digits.length >= 11) digits = '0' + digits.slice(2);
+  return digits.replace(/\D/g, '');
+}
+function isValidPhoneInput(raw) {
+  const trimmed = String(raw || '').trim();
+  if (!trimmed) return true; // Cho phép để trống
+  const clean = sanitizePhone(trimmed);
+  return /^0\d{9,10}$/.test(clean);
+}
+function hasValidPhone(raw) {
+  const clean = sanitizePhone(raw);
+  return /^0\d{9,10}$/.test(clean);
+}
+function formatPhoneDisplay(raw) {
+  const clean = sanitizePhone(raw);
+  if (!hasValidPhone(clean)) return '';
+  return `${clean.slice(0,4)}.${clean.slice(4,7)}.${clean.slice(7)}`;
+}
+
+function parseFacebookSlug(fbRaw) {
+  let raw = String(fbRaw || '').trim();
+  if (!raw) return { slug: '', pageUrl: '' };
+  raw = raw.replace(/\s+/g, '').replace(/^@+/, '');
+  const idMatch = raw.match(/profile\.php\?id=(\d+)/i);
+  if (idMatch) {
+    return { slug: idMatch[1], pageUrl: `https://www.facebook.com/profile.php?id=${idMatch[1]}` };
+  }
+  raw = raw.replace(/^https?:\/\/(www\.|m\.|mbasic\.|web\.)?(facebook\.com|fb\.com|m\.me)\//i, '');
+  const slug = raw.split(/[?#/&]/)[0] || '';
+  if (!slug) return { slug: '', pageUrl: '' };
+  const isNumericId = /^\d{8,}$/.test(slug);
+  return {
+    slug,
+    pageUrl: isNumericId ? `https://www.facebook.com/profile.php?id=${slug}` : `https://www.facebook.com/${slug}`
+  };
+}
+function isValidFbInput(raw) {
+  const trimmed = String(raw || '').trim();
+  if (!trimmed) return true; // Cho phép để trống
+  const { slug } = parseFacebookSlug(trimmed);
+  return /^[a-zA-Z0-9._-]{3,80}$/.test(slug);
+}
+function hasValidFb(raw) {
+  const trimmed = String(raw || '').trim();
+  if (!trimmed) return false;
+  const { slug } = parseFacebookSlug(trimmed);
+  return /^[a-zA-Z0-9._-]{3,80}$/.test(slug);
+}
+function buildMessengerUrl(fbRaw, messageText = '') {
+  const { slug } = parseFacebookSlug(fbRaw);
+  if (!slug) return '';
+  const base = `https://m.me/${encodeURIComponent(slug)}`;
+  return messageText ? `${base}?text=${encodeURIComponent(messageText)}` : base;
+}
+
+function openMessengerModal(fbRaw, shopName, messageText) {
+  if (!hasValidFb(fbRaw)) {
+    copyText(messageText, 'Cơ sở chưa liên kết Facebook — Đã sao chép nội dung đặt bàn / hỏi mua!');
+    return;
+  }
+  const { slug, pageUrl } = parseFacebookSlug(fbRaw);
+  const mmeUrl = buildMessengerUrl(fbRaw, messageText);
+  document.getElementById('fbm-shop').textContent = `🏪 ${shopName || slug}`;
+  document.getElementById('fbm-slug').textContent = `🔗 https://m.me/${slug}`;
+  document.getElementById('fbm-text').value = messageText || '';
+  document.getElementById('fbm-page-link').href = pageUrl;
+  document.getElementById('fbm-mme-link').href = mmeUrl;
+  document.getElementById('fbm-copy-btn').onclick = () => copyText(document.getElementById('fbm-text').value, 'Đã sao chép nội dung tin nhắn!');
+  document.getElementById('fb-msg-modal').classList.add('open');
+}
+
+function handleCallClick(event, rawPhone, placeName, subInfo = '') {
+  if (event) event.stopPropagation();
+  if (!hasValidPhone(rawPhone)) {
+    toast('Cơ sở này chưa cập nhật số điện thoại.', 'info');
+    return;
+  }
+  const clean = sanitizePhone(rawPhone);
+  const disp = formatPhoneDisplay(rawPhone);
+  document.getElementById('call-place-name').textContent = placeName || 'Cơ sở Ninh Bình – Miền Di Sản';
+  document.getElementById('call-place-sub').textContent = subInfo || 'Bấm gọi trực tiếp hoặc sao chép số điện thoại';
+  document.getElementById('call-phone-display').textContent = disp;
+  document.getElementById('call-tel-link').href = `tel:${clean}`;
+  document.getElementById('call-zalo-link').href = `https://zalo.me/${clean}`;
+  document.getElementById('call-copy-btn').onclick = () => copyText(clean, `Đã sao chép số: ${disp}`);
+  document.getElementById('call-modal').classList.add('open');
+}
+
+function editItemFromShortcut(adminTabName, id) {
+  switchTab('admin');
+  if (!ui.adminLoggedIn) {
+    toast('Nhập mã PIN Admin (mặc định: 2026) để cập nhật SĐT / Facebook cho cơ sở này.', 'info');
+    return;
+  }
+  setAdminTab(adminTabName);
+  openAdminForm(id);
+}
+
+/* =========================================================================
+   3. STATE & LOCALSTORAGE (KHÓA: nb_hub_v10_firebase_github)
    ========================================================================= */
 let db = {
   pin: '2026',
+  firebase: { ...DEFAULT_FIREBASE_CONFIG },
   landmarks: [],
   specialties: [],
   restaurants: [],
@@ -1040,8 +1427,9 @@ let ui = {
   zoom: 1, panX: 0, panY: 0,
   marketType: 'all',
   adminLoggedIn: false,
-  adminTab: 'landmarks',
-  editingId: null
+  adminTab: 'restaurants',
+  editingId: null,
+  codeFindIdx: 0
 };
 
 function loadDB() {
@@ -1051,6 +1439,7 @@ function loadDB() {
       const parsed = JSON.parse(raw);
       db = {
         pin: parsed.pin || '2026',
+        firebase: parsed.firebase || { ...DEFAULT_FIREBASE_CONFIG },
         landmarks: parsed.landmarks || JSON.parse(JSON.stringify(DEFAULT_LANDMARKS)),
         specialties: parsed.specialties || JSON.parse(JSON.stringify(DEFAULT_SPECIALTIES)),
         restaurants: parsed.restaurants || JSON.parse(JSON.stringify(DEFAULT_RESTAURANTS)),
@@ -1068,6 +1457,7 @@ function loadDB() {
 function resetDBObject() {
   db = {
     pin: '2026',
+    firebase: { ...DEFAULT_FIREBASE_CONFIG },
     landmarks: JSON.parse(JSON.stringify(DEFAULT_LANDMARKS)),
     specialties: JSON.parse(JSON.stringify(DEFAULT_SPECIALTIES)),
     restaurants: JSON.parse(JSON.stringify(DEFAULT_RESTAURANTS)),
@@ -1081,12 +1471,244 @@ function saveDB() {
 }
 
 /* =========================================================================
-   3. HELPERS (HAVERSINE, FORMAT, COPY, TOAST, MODAL)
+   4. ĐỒNG BỘ FIREBASE REALTIME DATABASE REST API (KHÔNG CDN — THUẦN FETCH)
+   ========================================================================= */
+function parseFirebaseDatabaseURL(rawInput) {
+  let txt = String(rawInput || '').trim();
+  if (!txt) return '';
+  if (txt.startsWith('http://') || txt.startsWith('https://')) {
+    return txt.replace(/\/+$/, '');
+  }
+  const m = txt.match(/["']?databaseURL["']?\s*:\s*["'](https:\/\/[^"'\s]+)["']/i);
+  if (m && m[1]) return m[1].replace(/\/+$/, '');
+  const p = txt.match(/["']?projectId["']?\s*:\s*["']([a-zA-Z0-9-]+)["']/i);
+  if (p && p[1]) return `https://${p[1]}-default-rtdb.firebaseio.com`;
+  return '';
+}
+
+function buildFirebaseEndpoint() {
+  const base = (db.firebase?.databaseURL || '').replace(/\/+$/, '');
+  if (!base) return '';
+  const tok = (db.firebase?.authToken || '').trim();
+  return `${base}/${FIREBASE_ROOT_NODE}.json${tok ? `?auth=${encodeURIComponent(tok)}` : ''}`;
+}
+
+function updateFirebaseStatusUI(connected, label = '') {
+  const hdrPill = document.getElementById('cloud-status-pill');
+  const tabBadge = document.getElementById('fb-rtdb-badge');
+  if (connected) {
+    hdrPill.className = 'tag tag-jade';
+    hdrPill.textContent = '☁️ Firebase Live';
+    if (tabBadge) {
+      tabBadge.className = 'tag tag-jade';
+      tabBadge.textContent = label || '🟢 Đã kết nối Firebase RTDB';
+    }
+  } else {
+    hdrPill.className = 'tag tag-slate';
+    hdrPill.textContent = '💾 Local';
+    if (tabBadge) {
+      tabBadge.className = 'tag tag-slate';
+      tabBadge.textContent = label || '⚪ Chưa cấu hình Firebase';
+    }
+  }
+}
+
+async function testAndSaveFirebase() {
+  const raw = document.getElementById('fb-rtdb-input').value;
+  const tok = document.getElementById('fb-rtdb-token').value.trim();
+  const url = parseFirebaseDatabaseURL(raw);
+  if (!url) {
+    toast('Vui lòng nhập Firebase Realtime Database URL (https://...-rtdb.firebaseio.com) hoặc dán Firebase Config JSON!', 'error');
+    return;
+  }
+  db.firebase.databaseURL = url;
+  db.firebase.authToken = tok;
+  saveDB();
+
+  const endpoint = buildFirebaseEndpoint();
+  try {
+    const res = await fetch(endpoint, { method: 'GET' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    updateFirebaseStatusUI(true, `🟢 Kết nối thành công (${url.replace(/^https:\/\//,'')})`);
+    toast('Kết nối Firebase Realtime Database thành công!');
+  } catch (err) {
+    updateFirebaseStatusUI(false, '🔴 Lỗi kết nối hoặc chưa mở Rules');
+    toast(`Không thể kết nối Firebase (${err.message}). Kiểm tra URL và Security Rules!`, 'error');
+  }
+}
+
+function toggleAutoSync(checked) {
+  db.firebase.autoSync = Boolean(checked);
+  saveDB();
+  toast(db.firebase.autoSync ? 'Đã bật tự động đồng bộ lên Firebase!' : 'Đã tắt tự động đồng bộ Firebase.', 'info');
+}
+
+async function pushFirebaseREST(silent = false) {
+  const endpoint = buildFirebaseEndpoint();
+  if (!endpoint) {
+    if (!silent) toast('Vui lòng nhập và kiểm tra Firebase URL trước!', 'error');
+    return;
+  }
+  try {
+    const payload = {
+      updatedAt: new Date().toISOString(),
+      pin: db.pin,
+      landmarks: db.landmarks,
+      specialties: db.specialties,
+      restaurants: db.restaurants,
+      wards: db.wards
+    };
+    const res = await fetch(endpoint, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    updateFirebaseStatusUI(true);
+    if (!silent) toast('⬆️ Đã đẩy toàn bộ dữ liệu lên Firebase thành công!');
+  } catch (err) {
+    if (!silent) toast(`Lỗi đẩy dữ liệu Firebase (${err.message}). Kiểm tra Rules .write: true!`, 'error');
+  }
+}
+
+async function pullFirebaseREST(silent = false) {
+  const endpoint = buildFirebaseEndpoint();
+  if (!endpoint) {
+    if (!silent) toast('Vui lòng nhập và kiểm tra Firebase URL trước!', 'error');
+    return;
+  }
+  try {
+    const res = await fetch(endpoint, { method: 'GET' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data || typeof data !== 'object') {
+      if (!silent) toast('Trên Firebase chưa có dữ liệu. Hãy bấm "Đẩy toàn bộ dữ liệu lên Firebase" trước!', 'info');
+      return;
+    }
+    if (Array.isArray(data.landmarks)) db.landmarks = data.landmarks;
+    if (Array.isArray(data.specialties)) db.specialties = data.specialties;
+    if (Array.isArray(data.restaurants)) db.restaurants = data.restaurants;
+    if (Array.isArray(data.wards)) db.wards = data.wards;
+    if (data.pin) db.pin = data.pin;
+    saveDB();
+    updateCounts();
+    updateFirebaseStatusUI(true);
+    if (ui.tab === 'map') { renderMap(); renderLandmarkQuickGrid(); }
+    if (ui.tab === 'market') renderMarket();
+    if (ui.adminLoggedIn) renderAdminTable();
+    if (!silent) toast('⬇️ Đã tải dữ liệu mới nhất từ Firebase về trang web!');
+  } catch (err) {
+    if (!silent) toast(`Không thể tải dữ liệu từ Firebase (${err.message}).`, 'error');
+  }
+}
+
+/* =========================================================================
+   5. TRÌNH CHỈNH SỬA CODE TRỰC TIẾP & ĐÓNG GÓI GITHUB PAGES
+   ========================================================================= */
+function buildBundledHTMLSource() {
+  let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  html = html
+    .replace(/class="modal-bg open"/g, 'class="modal-bg"')
+    .replace(/class="overlay open"/g, 'class="overlay"')
+    .replace(/class="drawer open"/g, 'class="drawer"');
+
+  const safeJson = obj => JSON.stringify(obj, null, 2).replace(/<\/script>/gi, '<\\/script>');
+  html = html
+    .replace(/const DEFAULT_FIREBASE_CONFIG = \{[\s\S]*?\};/, `const DEFAULT_FIREBASE_CONFIG = ${safeJson(db.firebase)};`)
+    .replace(/const DEFAULT_WARDS = \[[\s\S]*?\];/, `const DEFAULT_WARDS = ${safeJson(db.wards)};`)
+    .replace(/const DEFAULT_LANDMARKS = \[[\s\S]*?\];/, `const DEFAULT_LANDMARKS = ${safeJson(db.landmarks)};`)
+    .replace(/const DEFAULT_SPECIALTIES = \[[\s\S]*?\];/, `const DEFAULT_SPECIALTIES = ${safeJson(db.specialties)};`)
+    .replace(/const DEFAULT_RESTAURANTS = \[[\s\S]*?\];/, `const DEFAULT_RESTAURANTS = ${safeJson(db.restaurants)};`);
+
+  // Xóa nội dung đang hiển thị trong textarea editor để tránh lồng code đệ quy
+  html = html.replace(/(<textarea id="live-code-editor"[^>]*>)[\s\S]*?(<\/textarea>)/, '$1$2');
+  return html;
+}
+
+function refreshCodeEditorFromState() {
+  const ed = document.getElementById('live-code-editor');
+  if (!ed) return;
+  ed.value = buildBundledHTMLSource();
+  ui.codeFindIdx = 0;
+}
+
+function findInCodeEditor() {
+  const ed = document.getElementById('live-code-editor');
+  const q = (document.getElementById('code-find-inp').value || '').trim();
+  if (!q || !ed.value) return;
+  const low = ed.value.toLowerCase();
+  let pos = low.indexOf(q.toLowerCase(), ui.codeFindIdx);
+  if (pos === -1) pos = low.indexOf(q.toLowerCase(), 0);
+  if (pos === -1) {
+    toast(`Không tìm thấy "${q}" trong code.`, 'info');
+    return;
+  }
+  ed.focus();
+  ed.setSelectionRange(pos, pos + q.length);
+  ui.codeFindIdx = pos + q.length;
+}
+
+function applyAndPreviewCode() {
+  const code = document.getElementById('live-code-editor').value;
+  if (!code || !code.includes('<html')) {
+    toast('Mã nguồn HTML không hợp lệ!', 'error');
+    return;
+  }
+  document.open();
+  document.write(code);
+  document.close();
+}
+
+function restoreOriginalCode() {
+  openConfirm('Khôi phục code gốc?', 'Đặt lại mã nguồn về trạng thái chuẩn kèm dữ liệu hiện tại?', () => {
+    refreshCodeEditorFromState();
+    toast('Đã khôi phục mã nguồn chuẩn!', 'info');
+  });
+}
+
+function downloadGitHubIndex() {
+  const ed = document.getElementById('live-code-editor');
+  const code = (ed && ed.value.trim().startsWith('<!DOCTYPE html>')) ? ed.value : buildBundledHTMLSource();
+  const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  a.click();
+  toast('⬇️ Đã xuất tệp index.html chuẩn GitHub Pages (đã nhúng sẵn cấu hình Firebase & dữ liệu)!');
+}
+
+function downloadGitHubReadme() {
+  const md = `# Ninh Bình – Miền Di Sản | FB-Connect Hub
+
+> **Đất Cố Đô Ngàn Năm – Tinh Hoa Miền Di Sản** • Ứng dụng web đơn tệp kết nối du lịch, đặc sản địa phương và nhà hàng ẩm thực Ninh Bình với Facebook Messenger, tích hợp **129 Phường, Xã** sau hợp nhất.
+
+## ✨ Tính năng nổi bật
+- **Địa giới hành chính 129 Phường, Xã (32 Phường, 97 Xã)** chia 3 phân khu:
+  1. *Vùng Di Sản Cố Đô Hoa Lư – Tràng An* (39 ĐVHC)
+  2. *Vùng Tâm Linh Tam Chúc – Văn Hiến Sơn Nam* (33 ĐVHC)
+  3. *Vùng Văn Hóa Trần – Phủ Dầy & Biển Đông* (57 ĐVHC)
+- **Bản đồ SVG tương tác (Zoom +, −, Reset & kéo thả Pan):** 47 danh lam thắng cảnh, 22 đặc sản thương hiệu, 12 nhà hàng tiêu biểu, định vị GPS Haversine, 6 cung đường liên vùng + tự chọn tuyến Google Maps đa điểm.
+- **Kết nối thẳng Facebook Messenger & Xưởng Poster:** Link \`https://m.me/<slug>?text=...\` chuẩn xác, xử lý thông minh khi cơ sở chưa cập nhật SĐT/Facebook, vẽ Poster PNG 900×900 bằng Canvas và tạo Mã QR thuần JS ngoại tuyến 100%.
+- **Đồng bộ Firebase Realtime Database & Quản trị Admin (PIN: 2026):** Đồng bộ dữ liệu qua REST API thuần \`fetch()\` không phụ thuộc CDN.
+
+## 🚀 Hướng dẫn triển khai lên GitHub Pages
+1. Tạo repository mới trên GitHub (ví dụ: \`ninh-binh-mien-di-san\`).
+2. Đưa 2 tệp \`index.html\` và \`README.md\` lên nhánh \`main\`.
+3. Vào **Settings → Pages → Source: Deploy from a branch → Branch: main / (root) → Save**.
+`;
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'README.md';
+  a.click();
+  toast('📄 Đã tải tệp README.md!');
+}
+
+/* =========================================================================
+   6. HELPERS (HAVERSINE, FORMAT, COPY, TOAST, MODAL)
    ========================================================================= */
 const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const fmtVND = v => new Intl.NumberFormat('vi-VN').format(Number(v) || 0) + 'đ';
-const cleanFb = u => String(u || '').trim().replace(/^https?:\/\/(www\.|m\.)?(facebook\.com|fb\.com|m\.me)\//i,'').replace(/^@/,'').split(/[?/]/)[0] || 'ninhbinhmoihub';
-const mMe = (fb, txt) => `https://m.me/${encodeURIComponent(cleanFb(fb))}?text=${encodeURIComponent(txt)}`;
 const gMaps = (lat, lng) => `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
 const gMapsMulti = pts => {
   if (!pts || pts.length < 2) return '#';
@@ -1126,11 +1748,11 @@ function openConfirm(title, msg, cb) {
 document.getElementById('cf-ok').onclick = () => { if (cfCb) cfCb(); closeModal('confirm-modal'); };
 
 /* =========================================================================
-   4. ĐIỀU HƯỚNG TAB & CẬP NHẬT CHỈ SỐ
+   7. ĐIỀU HƯỚNG TAB & CẬP NHẬT CHỈ SỐ
    ========================================================================= */
 function switchTab(t) {
   ui.tab = t;
-  ['map','market','fb','admin'].forEach(k => {
+  ['map','market','fb','cloud','admin'].forEach(k => {
     document.getElementById(`tab-${k}`).classList.toggle('active', k === t);
     document.getElementById(`nd-${k}`).classList.toggle('active', k === t);
     document.getElementById(`nm-${k}`).classList.toggle('active', k === t);
@@ -1138,6 +1760,12 @@ function switchTab(t) {
   if (t === 'map') { renderMap(); renderLandmarkQuickGrid(); renderRoutesGrid(); }
   if (t === 'market') { populateWardFilter(); renderMarket(); }
   if (t === 'fb') { populateFBSelect(); renderFBHub(); }
+  if (t === 'cloud') {
+    document.getElementById('fb-rtdb-input').value = db.firebase?.databaseURL || '';
+    document.getElementById('fb-rtdb-token').value = db.firebase?.authToken || '';
+    document.getElementById('fb-autosync-toggle').checked = Boolean(db.firebase?.autoSync);
+    refreshCodeEditorFromState();
+  }
   if (t === 'admin') { renderAdminView(); }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1163,7 +1791,7 @@ function updateCounts() {
 }
 
 /* =========================================================================
-   5. BẢN ĐỒ SVG TƯƠNG TÁC (ZOOM, PAN, 3 LỚP GHIM, GỢI Ý GẦN NHẤT, CUNG ĐƯỜNG)
+   8. BẢN ĐỒ SVG TƯƠNG TÁC (ZOOM, PAN, 3 LỚP GHIM, GỢI Ý GẦN NHẤT, CUNG ĐƯỜNG)
    ========================================================================= */
 function gpsToSvg(lat, lng) {
   const minLng = 105.52, maxLng = 106.62, minLat = 19.96, maxLat = 20.68;
@@ -1171,7 +1799,6 @@ function gpsToSvg(lat, lng) {
   const y = 595 - ((lat - minLat) / (maxLat - minLat)) * 545;
   return { x: Math.max(25, Math.min(895, x)), y: Math.max(25, Math.min(615, y)) };
 }
-
 function applyTransform() {
   document.getElementById('svg-viewport').setAttribute('transform', `translate(${ui.panX.toFixed(1)},${ui.panY.toFixed(1)}) scale(${ui.zoom.toFixed(2)})`);
 }
@@ -1192,7 +1819,6 @@ function focusSvgPoint(lat, lng) {
   applyTransform();
 }
 
-// Kéo thả & Cuộn chuột Zoom cho bản đồ SVG
 (function initPanZoom() {
   const wrap = document.getElementById('map-svg-wrap');
   let dragging = false, sx = 0, sy = 0;
@@ -1243,16 +1869,12 @@ function resetMapView() {
   resetZoom();
   clearRoute();
 }
-
 function toggleCustomRouteMode() {
   ui.customRouteMode = !ui.customRouteMode;
   const btn = document.getElementById('btn-custom-route-mode');
   btn.className = ui.customRouteMode ? 'btn btn-danger btn-sm' : 'btn btn-soft-gold btn-sm';
-  if (ui.customRouteMode) {
-    toast('Chế độ tự chọn tuyến: Bấm lần lượt các Danh thắng trên bản đồ hoặc bảng tra cứu!', 'info');
-  }
+  if (ui.customRouteMode) toast('Chế độ tự chọn tuyến: Bấm lần lượt các Danh thắng trên bản đồ hoặc bảng tra cứu!', 'info');
 }
-
 function drawRoute(ids, title) {
   ui.activeRouteIds = ids;
   ui.activeRouteTitle = title;
@@ -1273,7 +1895,6 @@ function renderMap() {
   const pLayer = document.getElementById('svg-pins');
   const banner = document.getElementById('route-banner');
 
-  // 1. Vẽ tuyến đường
   const rPts = ui.activeRouteIds.map(id => db.landmarks.find(l => l.id === id)).filter(Boolean);
   if (rPts.length >= 2) {
     banner.classList.remove('hidden');
@@ -1291,7 +1912,6 @@ function renderMap() {
     rLayer.innerHTML = '';
   }
 
-  // 2. Vẽ các ghim
   const pins = [];
   if (ui.layers.specialties) db.specialties.filter(x => x.visible !== false).forEach(s => pins.push({ type:'specialty', id:s.id, lat:s.lat, lng:s.lng, region:s.region, color:'#0b6e63', icon:s.emoji||'🎁', title:s.name }));
   if (ui.layers.restaurants) db.restaurants.filter(x => x.visible !== false).forEach(r => pins.push({ type:'restaurant', id:r.id, lat:r.lat, lng:r.lng, region:r.region, color:'#7c3aed', icon:'🍽️', title:r.name }));
@@ -1312,7 +1932,6 @@ function renderMap() {
       </g>`;
   }).join('');
 
-  // 3. Ghim GPS người dùng
   const uL = document.getElementById('svg-user');
   if (ui.userGPS) {
     const up = gpsToSvg(ui.userGPS.lat, ui.userGPS.lng);
@@ -1342,7 +1961,6 @@ function onPinClick(type, id, zoomTo = false) {
   }
   renderMap();
 }
-
 function getItemByTypeId(type, id) {
   if (type === 'landmark') return db.landmarks.find(x => x.id === id);
   if (type === 'specialty') return db.specialties.find(x => x.id === id);
@@ -1354,12 +1972,12 @@ function renderMapDetail() {
   const { type, id } = ui.selected;
   const item = getItemByTypeId(type, id) || db.landmarks[0];
   if (!item) { box.innerHTML = '<p>Chưa có dữ liệu.</p>'; return; }
-
   const distTxt = ui.userGPS ? ` • Cách bạn <b>${calcKm(ui.userGPS.lat, ui.userGPS.lng, item.lat, item.lng).toFixed(1)} km</b>` : '';
 
   if (type === 'landmark') {
     const nearSp = db.specialties.filter(x => x.visible !== false).map(s => ({ s, km: calcKm(item.lat, item.lng, s.lat, s.lng) })).sort((a,b) => a.km - b.km).slice(0, 3);
     const nearRs = db.restaurants.filter(x => x.visible !== false).map(r => ({ r, km: calcKm(item.lat, item.lng, r.lat, r.lng) })).sort((a,b) => a.km - b.km).slice(0, 3);
+    const okP = hasValidPhone(item.phone), cleanP = sanitizePhone(item.phone), dispP = formatPhoneDisplay(item.phone);
     box.innerHTML = `
       <div style="display:flex; gap:10px; align-items:flex-start;">
         <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏛️</div>
@@ -1373,33 +1991,74 @@ function renderMapDetail() {
       </div>
       <p style="font-size:12.5px; color:var(--muted);">${esc(item.desc)}</p>
       <div class="info-box">
-        <div>🗺️ <b>Vùng:</b> ${REGIONS[item.region]?.name || ''}${distTxt}</div>
+        <div>🗺️ <b>Phân khu:</b> ${REGIONS[item.region]?.name || ''}${distTxt}</div>
         <div>🎟️ <b>Vé tham khảo:</b> ${esc(item.ticket)} • 🕒 ${esc(item.hours)}</div>
+        <div>📞 <b>BQL / Hỗ trợ:</b> ${okP ? `<a href="tel:${cleanP}" onclick="handleCallClick(event,'${esc(cleanP)}','${esc(item.name)}','${esc(item.ward)}')" style="color:var(--fb); font-weight:800;">${esc(dispP)}</a>` : '<span class="tag tag-slate">Chưa cập nhật SĐT</span>'}</div>
         <div>🛰️ <b>GPS:</b> <span class="gps-badge">${item.lat.toFixed(4)}, ${item.lng.toFixed(4)}</span></div>
       </div>
-      <a href="${gMaps(item.lat, item.lng)}" target="_blank" rel="noopener noreferrer" class="btn btn-gold btn-sm">🗺️ Mở chỉ đường Google Maps</a>
+      <div class="row-2">
+        <a href="${gMaps(item.lat, item.lng)}" target="_blank" rel="noopener noreferrer" class="btn btn-gold btn-sm">🗺️ Chỉ đường Maps</a>
+        ${okP
+          ? `<a href="tel:${cleanP}" onclick="handleCallClick(event,'${esc(cleanP)}','${esc(item.name)}','${esc(item.ward)}')" class="btn btn-soft-jade btn-sm">📞 Gọi ${esc(dispP)}</a>`
+          : `<button class="btn btn-soft btn-sm" onclick="editItemFromShortcut('landmarks','${item.id}')">✏️ Admin cập nhật SĐT</button>`}
+      </div>
 
       <div class="nearby-card">
         <div style="font-size:12px; font-weight:800;">🎁 Top 3 Đặc sản gần nhất</div>
-        ${nearSp.map(({s, km}) => `
-          <div class="nearby-row" onclick="onPinClick('specialty','${s.id}',true)">
-            <span style="font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.emoji||'🎁'} ${esc(s.name)}</span>
-            <span class="tag tag-jade">${km.toFixed(1)} km</span>
-          </div>`).join('')}
+        ${nearSp.map(({s, km}) => {
+          const spOkFb = hasValidFb(s.fb), spOkP = hasValidPhone(s.phone);
+          const spMsg = `Chào ${s.shop}! Mình đang tham quan ${item.name}, muốn đặt ${s.name} (${fmtVND(s.price)} / ${s.unit}).`;
+          const spUrl = buildMessengerUrl(s.fb, spMsg);
+          const spClean = sanitizePhone(s.phone);
+          return `
+          <div class="nearby-row">
+            <div style="min-width:0; flex:1; cursor:pointer;" onclick="onPinClick('specialty','${s.id}',true)">
+              <div style="font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.emoji||'🎁'} ${esc(s.name)}</div>
+              <div style="font-size:10.5px; color:var(--muted);">${km.toFixed(1)} km • ${spOkP ? esc(formatPhoneDisplay(s.phone)) : 'Chưa cập nhật SĐT'}</div>
+            </div>
+            <div style="display:flex; gap:4px; flex-shrink:0;">
+              <button class="btn btn-soft-fb btn-xs" onclick="addToCart('${s.id}')" title="Thêm giỏ">+🛒</button>
+              ${spOkP ? `<a href="tel:${spClean}" onclick="handleCallClick(event,'${esc(spClean)}','${esc(s.shop)}','${esc(s.name)}')" class="btn btn-soft-jade btn-xs">📞</a>` : ''}
+              ${spOkFb
+                ? `<a href="${spUrl}" target="_blank" rel="noopener noreferrer" onclick="openMessengerModal('${esc(s.fb)}','${esc(s.shop)}','${esc(spMsg)}')" class="btn btn-fb btn-xs">💬</a>`
+                : `<button class="btn btn-soft btn-xs" onclick="copyText(${JSON.stringify(spMsg)},'Đã sao chép nội dung hỏi mua!')" title="Sao chép nội dung hỏi mua">📋</button>`}
+            </div>
+          </div>`;
+        }).join('')}
       </div>
+
       <div class="nearby-card">
         <div style="font-size:12px; font-weight:800;">🍽️ Top 3 Nhà hàng gần nhất</div>
-        ${nearRs.map(({r, km}) => `
-          <div class="nearby-row" onclick="onPinClick('restaurant','${r.id}',true)">
-            <span style="font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🍽️ ${esc(r.name)}</span>
-            <span class="tag tag-food">${km.toFixed(1)} km</span>
-          </div>`).join('')}
+        ${nearRs.map(({r, km}) => {
+          const rsOkFb = hasValidFb(r.fb), rsOkP = hasValidPhone(r.phone);
+          const rsMsg = `Chào ${r.name}! Mình đang ở gần ${item.name}, muốn đặt bàn qua Ninh Bình – Miền Di Sản.`;
+          const rsUrl = buildMessengerUrl(r.fb, rsMsg);
+          const rsClean = sanitizePhone(r.phone);
+          return `
+          <div class="nearby-row">
+            <div style="min-width:0; flex:1; cursor:pointer;" onclick="onPinClick('restaurant','${r.id}',true)">
+              <div style="font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🍽️ ${esc(r.name)}</div>
+              <div style="font-size:10.5px; color:var(--muted);">${km.toFixed(1)} km • ${rsOkP ? esc(formatPhoneDisplay(r.phone)) : 'Chưa cập nhật SĐT'}</div>
+            </div>
+            <div style="display:flex; gap:4px; flex-shrink:0;">
+              <a href="${gMaps(r.lat, r.lng)}" target="_blank" rel="noopener noreferrer" class="btn btn-soft-gold btn-xs" title="Chỉ đường">🗺️</a>
+              ${rsOkP ? `<a href="tel:${rsClean}" onclick="handleCallClick(event,'${esc(rsClean)}','${esc(r.name)}','${esc(r.ward)}')" class="btn btn-soft-jade btn-xs">📞</a>` : ''}
+              ${rsOkFb
+                ? `<a href="${rsUrl}" target="_blank" rel="noopener noreferrer" onclick="openMessengerModal('${esc(r.fb)}','${esc(r.name)}','${esc(rsMsg)}')" class="btn btn-food btn-xs">💬</a>`
+                : `<button class="btn btn-soft btn-xs" onclick="copyText(${JSON.stringify(rsMsg)},'Đã sao chép nội dung đặt bàn!')" title="Sao chép nội dung đặt bàn">📋</button>`}
+            </div>
+          </div>`;
+        }).join('')}
       </div>`;
     return;
   }
 
   if (type === 'specialty') {
-    const msg = `Chào ${item.shop}! Mình muốn chốt đơn ${item.name} (${fmtVND(item.price)} / ${item.unit}) từ Bản đồ Ninh Bình`;
+    const okFb = hasValidFb(item.fb), okP = hasValidPhone(item.phone);
+    const msg = `Chào ${item.shop}! Mình muốn chốt đơn ${item.name} (${fmtVND(item.price)} / ${item.unit}) từ Ninh Bình – Miền Di Sản Hub.`;
+    const mUrl = buildMessengerUrl(item.fb, msg);
+    const { slug } = parseFacebookSlug(item.fb);
+    const cleanP = sanitizePhone(item.phone), dispP = formatPhoneDisplay(item.phone);
     box.innerHTML = `
       <div style="display:flex; gap:10px; align-items:flex-start;">
         <div style="width:44px;height:44px;border-radius:12px;background:${item.grad};color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${item.emoji||'🎁'}</div>
@@ -1411,19 +2070,29 @@ function renderMapDetail() {
       <p style="font-size:12.5px; color:var(--muted);">${esc(item.desc)}</p>
       <div class="info-box">
         <div>💰 <b>Giá bán:</b> <span style="font-size:16px; font-weight:800; color:var(--fb);">${fmtVND(item.price)}</span> / ${esc(item.unit)}</div>
-        <div>📞 <b>Hotline:</b> <a href="tel:${item.phone.replace(/\s+/g,'')}" style="color:var(--fb); font-weight:800;">${esc(item.phone)}</a>${distTxt}</div>
+        <div>📞 <b>Hotline:</b> ${okP ? `<a href="tel:${cleanP}" onclick="handleCallClick(event,'${esc(cleanP)}','${esc(item.shop)}','${esc(item.name)}')" style="color:var(--fb); font-weight:800;">${esc(dispP)}</a>` : '<span class="tag tag-slate">Chưa cập nhật SĐT</span>'}${distTxt}</div>
+        <div>💬 <b>Facebook:</b> ${okFb ? `<code>https://m.me/${esc(slug)}</code>` : '<span class="tag tag-slate">Chưa liên kết Facebook</span>'}</div>
         <div>🛰️ <b>GPS:</b> <span class="gps-badge">${item.lat.toFixed(4)}, ${item.lng.toFixed(4)}</span></div>
       </div>
-      <a href="${mMe(item.fb, msg)}" target="_blank" rel="noopener noreferrer" class="btn btn-fb btn-sm">💬 Chốt đơn thẳng Facebook Messenger</a>
-      <div class="row-2">
-        <button class="btn btn-soft-fb btn-sm" onclick="addToCart('${item.id}')">🛒 + Giỏ gom đơn</button>
-        <a href="${gMaps(item.lat, item.lng)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">🗺️ Chỉ đường</a>
+      ${okFb
+        ? `<a href="${mUrl}" target="_blank" rel="noopener noreferrer" onclick="openMessengerModal('${esc(item.fb)}','${esc(item.shop)}','${esc(msg)}')" class="btn btn-fb btn-sm">💬 Chốt đơn qua Messenger</a>`
+        : `<button class="btn btn-soft-fb btn-sm" onclick="copyText(${JSON.stringify(msg)},'Đã sao chép nội dung hỏi mua!')">📋 Sao chép nội dung hỏi mua</button>`}
+      <div class="row-3">
+        <button class="btn btn-soft-fb btn-xs" onclick="addToCart('${item.id}')">🛒 + Giỏ</button>
+        ${okP
+          ? `<a href="tel:${cleanP}" onclick="handleCallClick(event,'${esc(cleanP)}','${esc(item.shop)}','${esc(item.name)}')" class="btn btn-soft-jade btn-xs">📞 ${esc(dispP)}</a>`
+          : `<button class="btn btn-soft btn-xs" onclick="editItemFromShortcut('specialties','${item.id}')">✏️ + SĐT/FB</button>`}
+        <a href="${gMaps(item.lat, item.lng)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-xs">🗺️ Đường</a>
       </div>`;
     return;
   }
 
   // Restaurant
-  const rMsg = `Chào ${item.name}! Mình muốn đặt bàn (4 khách) qua Bản đồ Ninh Bình. Nhà hàng xác nhận giúp mình nhé!`;
+  const rOkFb = hasValidFb(item.fb), rOkP = hasValidPhone(item.phone);
+  const rMsg = `Chào ${item.name}! Mình muốn đặt bàn qua Ninh Bình – Miền Di Sản Hub. Nhà hàng xác nhận giúp mình nhé!`;
+  const rUrl = buildMessengerUrl(item.fb, rMsg);
+  const { slug: rSlug } = parseFacebookSlug(item.fb);
+  const rCleanP = sanitizePhone(item.phone), rDispP = formatPhoneDisplay(item.phone);
   box.innerHTML = `
     <div style="display:flex; gap:10px; align-items:flex-start;">
       <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#5b21b6,#9333ea);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🍽️</div>
@@ -1436,12 +2105,17 @@ function renderMapDetail() {
     <div class="info-box">
       <div>🔥 <b>Món đặc trưng:</b> ${esc(item.signature)}</div>
       <div>💰 <b>Khoảng giá:</b> <b>${esc(item.priceRange)}</b>${distTxt}</div>
-      <div>📞 <b>Đặt bàn:</b> <a href="tel:${item.phone.replace(/\s+/g,'')}" style="color:var(--fb); font-weight:800;">${esc(item.phone)}</a></div>
+      <div>📞 <b>Đặt bàn:</b> ${rOkP ? `<a href="tel:${rCleanP}" onclick="handleCallClick(event,'${esc(rCleanP)}','${esc(item.name)}','${esc(item.ward)}')" style="color:var(--fb); font-weight:800;">${esc(rDispP)}</a>` : '<span class="tag tag-slate">Chưa cập nhật SĐT</span>'}</div>
+      <div>💬 <b>Facebook:</b> ${rOkFb ? `<code>https://m.me/${esc(rSlug)}</code>` : '<span class="tag tag-slate">Chưa liên kết Facebook</span>'}</div>
       <div>🛰️ <b>GPS:</b> <span class="gps-badge">${item.lat.toFixed(4)}, ${item.lng.toFixed(4)}</span></div>
     </div>
-    <a href="${mMe(item.fb, rMsg)}" target="_blank" rel="noopener noreferrer" class="btn btn-food btn-sm">💬 Đặt bàn qua Facebook Messenger</a>
+    ${rOkFb
+      ? `<a href="${rUrl}" target="_blank" rel="noopener noreferrer" onclick="openMessengerModal('${esc(item.fb)}','${esc(item.name)}','${esc(rMsg)}')" class="btn btn-food btn-sm">💬 Đặt bàn qua Messenger</a>`
+      : `<button class="btn btn-soft-food btn-sm" onclick="copyText(${JSON.stringify(rMsg)},'Đã sao chép nội dung đặt bàn!')">📋 Sao chép nội dung đặt bàn</button>`}
     <div class="row-2">
-      <a href="tel:${item.phone.replace(/\s+/g,'')}" class="btn btn-soft-jade btn-sm">📞 Gọi điện</a>
+      ${rOkP
+        ? `<a href="tel:${rCleanP}" onclick="handleCallClick(event,'${esc(rCleanP)}','${esc(item.name)}','${esc(item.ward)}')" class="btn btn-soft-jade btn-sm">📞 Gọi ${esc(rDispP)}</a>`
+        : `<button class="btn btn-soft btn-sm" onclick="editItemFromShortcut('restaurants','${item.id}')">✏️ Admin cập nhật SĐT/FB</button>`}
       <a href="${gMaps(item.lat, item.lng)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">🗺️ Chỉ đường</a>
     </div>`;
 }
@@ -1498,8 +2172,8 @@ function locateGPS() {
       toast('Đã định vị GPS thành công!');
     },
     () => {
-      ui.userGPS = { lat: 20.3820, lng: 105.8820 };
-      st.innerHTML = `ℹ️ Đang dùng tọa độ mô phỏng tại <b>Xã Gia Vân (20.3820, 105.8820)</b> để tính khoảng cách km.`;
+      ui.userGPS = { lat: 20.3540, lng: 105.8980 };
+      st.innerHTML = `ℹ️ Đang dùng tọa độ tham chiếu tại <b>Xã Gia Vân (20.3540, 105.8980)</b> để tính khoảng cách km.`;
       renderMap();
       toast('Đang tính khoảng cách từ Xã Gia Vân.', 'info');
     },
@@ -1508,13 +2182,15 @@ function locateGPS() {
 }
 
 /* =========================================================================
-   6. TAB 2: CHỢ ĐẶC SẢN & NHÀ HÀNG + GIỎ HÀNG GOM ĐƠN
+   9. TAB 2: CHỢ ĐẶC SẢN & NHÀ HÀNG + GIỎ HÀNG GOM ĐƠN
    ========================================================================= */
 function populateWardFilter() {
   const sel = document.getElementById('mk-ward');
+  const reg = document.getElementById('mk-region')?.value || 'all';
   const prev = sel.value;
-  sel.innerHTML = `<option value="all">📍 Tất cả Phường / Xã mới</option>` +
-    db.wards.map(w => `<option value="${esc(w.name)}">📍 ${esc(w.name)} (${REGIONS[w.region]?.short})</option>`).join('');
+  const list = reg === 'all' ? db.wards : db.wards.filter(w => w.region === reg);
+  sel.innerHTML = `<option value="all">📍 Tất cả ${list.length} Phường / Xã</option>` +
+    list.map(w => `<option value="${esc(w.name)}">📍 ${esc(w.name)} (${REGIONS[w.region]?.short})</option>`).join('');
   if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
 }
 function setMarketType(t) {
@@ -1533,7 +2209,11 @@ function renderMarket() {
       if (reg !== 'all' && s.region !== reg) return;
       if (ward !== 'all' && s.ward !== ward) return;
       if (q && !`${s.name} ${s.shop} ${s.ward} ${s.desc}`.toLowerCase().includes(q)) return;
-      const msg = `Chào ${s.shop}! Mình muốn chốt đơn ${s.name} (${fmtVND(s.price)} / ${s.unit}) từ Ninh Bình Hub.`;
+      const okFb = hasValidFb(s.fb), okP = hasValidPhone(s.phone);
+      const msg = `Chào ${s.shop}! Mình muốn chốt đơn ${s.name} (${fmtVND(s.price)} / ${s.unit}) từ Ninh Bình – Miền Di Sản Hub.`;
+      const mUrl = buildMessengerUrl(s.fb, msg);
+      const { slug } = parseFacebookSlug(s.fb);
+      const cleanP = sanitizePhone(s.phone), dispP = formatPhoneDisplay(s.phone);
       cards.push(`
         <article class="smart-card">
           <div class="card-head" style="background:${s.grad};">
@@ -1541,7 +2221,7 @@ function renderMarket() {
               <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;font-size:21px;">${s.emoji||'🎁'}</div>
               <div style="min-width:0;">
                 <div style="font-size:12.5px; font-weight:800;">${esc(s.shop)}</div>
-                <div style="font-size:10.5px; opacity:0.9;">✓ fb.com/${esc(cleanFb(s.fb))}</div>
+                <div style="font-size:10.5px; opacity:0.92;">${okFb ? `💬 m.me/${esc(slug)}` : 'Chưa liên kết Facebook'} • ${okP ? `📞 ${esc(dispP)}` : 'Chưa cập nhật SĐT'}</div>
               </div>
             </div>
           </div>
@@ -1556,10 +2236,14 @@ function renderMarket() {
               <span class="card-price">${fmtVND(s.price)}</span>
               <span style="font-size:11.5px; color:var(--muted);">/ ${esc(s.unit)}</span>
             </div>
-            <a href="${mMe(s.fb, msg)}" target="_blank" rel="noopener noreferrer" class="btn btn-fb btn-sm">💬 Chốt đơn thẳng Facebook</a>
+            ${okFb
+              ? `<a href="${mUrl}" target="_blank" rel="noopener noreferrer" onclick="openMessengerModal('${esc(s.fb)}','${esc(s.shop)}','${esc(msg)}')" class="btn btn-fb btn-sm">💬 Chốt đơn qua Messenger</a>`
+              : `<button class="btn btn-soft-fb btn-sm" onclick="copyText(${JSON.stringify(msg)},'Đã sao chép nội dung hỏi mua!')">📋 Sao chép nội dung hỏi mua</button>`}
             <div class="row-3">
               <button class="btn btn-soft-fb btn-xs" onclick="addToCart('${s.id}')">🛒 Giỏ</button>
-              <a href="tel:${s.phone.replace(/\s+/g,'')}" class="btn btn-soft-jade btn-xs">📞 Gọi</a>
+              ${okP
+                ? `<a href="tel:${cleanP}" onclick="handleCallClick(event,'${esc(cleanP)}','${esc(s.shop)}','${esc(s.name)}')" class="btn btn-soft-jade btn-xs">📞 ${esc(dispP)}</a>`
+                : `<button class="btn btn-soft btn-xs" onclick="editItemFromShortcut('specialties','${s.id}')">✏️ + SĐT/FB</button>`}
               <button class="btn btn-soft btn-xs" onclick="switchTab('map'); onPinClick('specialty','${s.id}',true);">📍 Bản đồ</button>
             </div>
           </div>
@@ -1572,7 +2256,11 @@ function renderMarket() {
       if (reg !== 'all' && r.region !== reg) return;
       if (ward !== 'all' && r.ward !== ward) return;
       if (q && !`${r.name} ${r.signature} ${r.ward} ${r.desc}`.toLowerCase().includes(q)) return;
-      const msg = `Chào ${r.name}! Mình muốn đặt bàn qua Ninh Bình Hub. Nhà hàng xác nhận giúp mình nhé!`;
+      const okFb = hasValidFb(r.fb), okP = hasValidPhone(r.phone);
+      const msg = `Chào ${r.name}! Mình muốn đặt bàn qua Ninh Bình – Miền Di Sản Hub. Nhà hàng xác nhận giúp mình nhé!`;
+      const mUrl = buildMessengerUrl(r.fb, msg);
+      const { slug } = parseFacebookSlug(r.fb);
+      const cleanP = sanitizePhone(r.phone), dispP = formatPhoneDisplay(r.phone);
       cards.push(`
         <article class="smart-card">
           <div class="card-head" style="background:linear-gradient(135deg,#5b21b6,#9333ea);">
@@ -1580,17 +2268,25 @@ function renderMarket() {
               <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;font-size:21px;">🍽️</div>
               <div style="min-width:0;">
                 <div style="font-size:13.5px; font-weight:800;">${esc(r.name)}</div>
-                <div style="font-size:10.5px; opacity:0.9;">📍 ${esc(r.ward)} • ${REGIONS[r.region]?.short}</div>
+                <div style="font-size:10.5px; opacity:0.92;">📍 ${esc(r.ward)} • ${okFb ? `💬 m.me/${esc(slug)}` : 'Chưa liên kết Facebook'}</div>
               </div>
             </div>
           </div>
           <div class="card-body">
-            <span class="tag tag-food" style="align-self:flex-start;">💰 ${esc(r.priceRange)}</span>
+            <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
+              <span class="tag tag-food">💰 ${esc(r.priceRange)}</span>
+              ${!okP ? '<span class="tag tag-slate">Chưa cập nhật SĐT</span>' : ''}
+              ${!okFb ? '<span class="tag tag-slate">Chưa liên kết Facebook</span>' : ''}
+            </div>
             <div style="font-size:12.5px;"><b style="color:var(--food-dark);">🔥 Đặc trưng:</b> ${esc(r.signature)}</div>
             <p style="font-size:12.2px; color:var(--muted); flex:1;">${esc(r.desc)}</p>
-            <a href="${mMe(r.fb, msg)}" target="_blank" rel="noopener noreferrer" class="btn btn-food btn-sm">💬 Đặt bàn Facebook Messenger</a>
+            ${okFb
+              ? `<a href="${mUrl}" target="_blank" rel="noopener noreferrer" onclick="openMessengerModal('${esc(r.fb)}','${esc(r.name)}','${esc(msg)}')" class="btn btn-food btn-sm">💬 Đặt bàn qua Messenger</a>`
+              : `<button class="btn btn-soft-food btn-sm" onclick="copyText(${JSON.stringify(msg)},'Đã sao chép nội dung đặt bàn!')">📋 Sao chép nội dung đặt bàn</button>`}
             <div class="row-3">
-              <a href="tel:${r.phone.replace(/\s+/g,'')}" class="btn btn-soft-jade btn-xs">📞 Gọi</a>
+              ${okP
+                ? `<a href="tel:${cleanP}" onclick="handleCallClick(event,'${esc(cleanP)}','${esc(r.name)}','${esc(r.ward)}')" class="btn btn-soft-jade btn-xs">📞 ${esc(dispP)}</a>`
+                : `<button class="btn btn-soft btn-xs" onclick="editItemFromShortcut('restaurants','${r.id}')">✏️ + SĐT/FB</button>`}
               <a href="${gMaps(r.lat, r.lng)}" target="_blank" rel="noopener noreferrer" class="btn btn-soft-gold btn-xs">🗺️ Đường</a>
               <button class="btn btn-soft btn-xs" onclick="switchTab('map'); onPinClick('restaurant','${r.id}',true);">📍 Bản đồ</button>
             </div>
@@ -1630,17 +2326,21 @@ function renderCart() {
   db.cart.forEach(c => {
     const s = db.specialties.find(x => x.id === c.id);
     if (!s) return;
-    const k = s.fb + '||' + s.shop;
-    if (!groups[k]) groups[k] = { shop: s.shop, fb: s.fb, ward: s.ward, items: [] };
+    const { slug } = parseFacebookSlug(s.fb);
+    const k = (slug || s.id) + '||' + s.shop;
+    if (!groups[k]) groups[k] = { id: s.id, shop: s.shop, fb: s.fb, phone: s.phone, ward: s.ward, items: [] };
     groups[k].items.push({ s, qty: c.qty });
   });
   body.innerHTML = Object.values(groups).map(g => {
     let sum = 0;
     const lines = g.items.map(({s, qty}, idx) => { sum += s.price * qty; return `${idx+1}. ${s.name} x${qty} = ${fmtVND(s.price*qty)}`; });
-    const msg = `Chào ${g.shop}! Mình chốt đơn đặc sản Ninh Bình:\n${lines.join('\n')}\nTổng tạm tính: ${fmtVND(sum)}\nShop xác nhận giúp mình nhé!`;
+    const msg = `Chào ${g.shop}! Mình chốt đơn đặc sản Ninh Bình – Miền Di Sản:\n${lines.join('\n')}\nTổng tạm tính: ${fmtVND(sum)}\nShop xác nhận giúp mình nhé!`;
+    const okFb = hasValidFb(g.fb), okP = hasValidPhone(g.phone);
+    const mUrl = buildMessengerUrl(g.fb, msg);
+    const cleanP = sanitizePhone(g.phone), dispP = formatPhoneDisplay(g.phone);
     return `
       <div style="border:1px solid var(--border); border-radius:12px; overflow:hidden;">
-        <div style="background:#f3f7fa; padding:8px 12px; font-weight:800; font-size:13px; display:flex; justify-content:space-between;">
+        <div style="background:#f3f7fa; padding:8px 12px; font-weight:800; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
           <span>🏪 ${esc(g.shop)}</span><span class="tag tag-jade">${esc(g.ward)}</span>
         </div>
         ${g.items.map(({s, qty}) => `
@@ -1654,14 +2354,21 @@ function renderCart() {
           </div>`).join('')}
         <div style="padding:10px 12px; background:#f8fbff;">
           <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;"><span>Tổng tạm tính:</span><b style="color:var(--fb);">${fmtVND(sum)}</b></div>
-          <a href="${mMe(g.fb, msg)}" target="_blank" rel="noopener noreferrer" class="btn btn-fb btn-sm" style="width:100%;">💬 Gửi đơn thẳng Messenger</a>
+          <div class="row-2">
+            ${okFb
+              ? `<a href="${mUrl}" target="_blank" rel="noopener noreferrer" onclick="openMessengerModal('${esc(g.fb)}','${esc(g.shop)}','${esc(msg)}')" class="btn btn-fb btn-sm">💬 Gửi Messenger</a>`
+              : `<button class="btn btn-soft-fb btn-sm" onclick="copyText(${JSON.stringify(msg)},'Đã sao chép nội dung đơn hàng!')">📋 Copy đơn</button>`}
+            ${okP
+              ? `<a href="tel:${cleanP}" onclick="handleCallClick(event,'${esc(cleanP)}','${esc(g.shop)}','${esc(g.ward)}')" class="btn btn-soft-jade btn-sm">📞 ${esc(dispP)}</a>`
+              : `<button class="btn btn-soft btn-sm" onclick="closeCart(); editItemFromShortcut('specialties','${g.id}')">✏️ + SĐT/FB</button>`}
+          </div>
         </div>
       </div>`;
   }).join('');
 }
 
 /* =========================================================================
-   7. TAB 3: KẾT NỐI FB, XƯỞNG CANVAS 900x900, META CSV & MÃ QR THUẦN JS
+   10. TAB 3: KẾT NỐI FB, XƯỞNG CANVAS 900x900, META CSV & MÃ QR THUẦN JS
    ========================================================================= */
 function populateFBSelect() {
   const sel = document.getElementById('fb-item-select');
@@ -1673,7 +2380,6 @@ function populateFBSelect() {
   sel.innerHTML = opts.join('');
   if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
 }
-
 function getSelectedFBItem() {
   const v = document.getElementById('fb-item-select').value || `sp:${db.specialties[0]?.id}`;
   const [t, id] = v.split(':');
@@ -1681,50 +2387,47 @@ function getSelectedFBItem() {
   if (t === 'rs') return { type: 'rs', item: db.restaurants.find(x => x.id === id) || db.restaurants[0] };
   return { type: 'lm', item: db.landmarks.find(x => x.id === id) || db.landmarks[0] };
 }
-
 function renderFBHub() {
   const { type, item } = getSelectedFBItem();
   if (!item) return;
-
-  // 1. Bài đăng Facebook
+  const okFb = hasValidFb(item.fb), okP = hasValidPhone(item.phone);
+  const mapsLink = gMaps(item.lat, item.lng);
   let post = '', qrLink = '';
+
   if (type === 'sp') {
-    qrLink = mMe(item.fb, `Chào ${item.shop}, mình muốn đặt ${item.name}!`);
-    post = `⛰️ ĐẶC SẢN NINH BÌNH — CHỐT ĐƠN THẲNG FACEBOOK 🔥\n` +
+    qrLink = okFb ? buildMessengerUrl(item.fb, `Chào ${item.shop}, mình muốn đặt ${item.name}!`) : mapsLink;
+    post = `⛰️ ĐẶC SẢN NINH BÌNH – MIỀN DI SẢN 🔥\n` +
            `🎁 ${item.name} (${item.sku})\n` +
            `💰 Giá: ${fmtVND(item.price)} / ${item.unit}\n` +
            `🏪 Cơ sở: ${item.shop}\n` +
-           `📍 Địa chỉ: ${item.ward}, Tỉnh Ninh Bình (${REGIONS[item.region]?.short})\n` +
+           `📍 Địa chỉ: ${item.ward}, Ninh Bình – Miền Di Sản (${REGIONS[item.region]?.short})\n` +
            `📝 ${item.desc}\n` +
-           `📞 Hotline: ${item.phone}\n` +
-           `💬 Chốt đơn ngay: ${qrLink}\n` +
-           `🗺️ Chỉ đường Maps: ${gMaps(item.lat, item.lng)}\n#NinhBinhMoi #DacSanNinhBinh #FBConnectHub`;
+           (okP ? `📞 Hotline: ${formatPhoneDisplay(item.phone)}\n` : '') +
+           (okFb ? `💬 Chốt đơn ngay: ${qrLink}\n` : '') +
+           `🗺️ Chỉ đường Maps: ${mapsLink}\n#NinhBinhMienDiSan #DacSanNinhBinh #FBConnectHub`;
   } else if (type === 'rs') {
-    qrLink = mMe(item.fb, `Chào ${item.name}, mình muốn đặt bàn!`);
-    post = `🍽️ ẨM THỰC NINH BÌNH — ${item.name.toUpperCase()} 🔥\n` +
+    qrLink = okFb ? buildMessengerUrl(item.fb, `Chào ${item.name}, mình muốn đặt bàn!`) : mapsLink;
+    post = `🍽️ ẨM THỰC NINH BÌNH – MIỀN DI SẢN — ${item.name.toUpperCase()} 🔥\n` +
            `🔥 Món đặc trưng: ${item.signature}\n` +
            `💰 Khoảng giá: ${item.priceRange}\n` +
-           `📍 Địa chỉ: ${item.ward}, Tỉnh Ninh Bình (${REGIONS[item.region]?.short})\n` +
-           `📞 Đặt bàn: ${item.phone}\n` +
-           `💬 Nhắn Messenger: ${qrLink}\n` +
-           `🗺️ Chỉ đường Maps: ${gMaps(item.lat, item.lng)}\n#NinhBinhMoi #AmThucNinhBinh`;
+           `📍 Địa chỉ: ${item.ward}, Ninh Bình – Miền Di Sản (${REGIONS[item.region]?.short})\n` +
+           (okP ? `📞 Đặt bàn: ${formatPhoneDisplay(item.phone)}\n` : '') +
+           (okFb ? `💬 Nhắn Messenger: ${qrLink}\n` : '') +
+           `🗺️ Chỉ đường Maps: ${mapsLink}\n#NinhBinhMienDiSan #AmThucNinhBinh`;
   } else {
-    qrLink = gMaps(item.lat, item.lng);
-    post = `🏛️ KHÁM PHÁ DANH THẮNG NINH BÌNH: ${item.name.toUpperCase()} ✨\n` +
-           `📍 Địa chỉ: ${item.ward}, Tỉnh Ninh Bình (${REGIONS[item.region]?.short})\n` +
+    qrLink = mapsLink;
+    post = `🏛️ KHÁM PHÁ NINH BÌNH – MIỀN DI SẢN: ${item.name.toUpperCase()} ✨\n` +
+           `📍 Địa chỉ: ${item.ward}, Ninh Bình – Miền Di Sản (${REGIONS[item.region]?.short})\n` +
            `🎟️ Vé tham khảo: ${item.ticket} | 🕒 ${item.hours}\n` +
            `📝 ${item.desc}\n` +
-           `🗺️ Chỉ đường Google Maps: ${qrLink}\n#NinhBinhMoi #DuLichNinhBinh`;
+           `🗺️ Chỉ đường Google Maps: ${mapsLink}\n#NinhBinhMienDiSan #DuLichNinhBinh`;
   }
   document.getElementById('fb-post-box').value = post;
   document.getElementById('qr-label').textContent = item.name;
   document.getElementById('qr-url').value = qrLink;
   document.getElementById('qr-open').href = qrLink;
 
-  // 2. Vẽ Poster 900x900
   drawPosterCanvas(type, item);
-
-  // 3. Vẽ Mã QR thuần JS
   drawPureQR(qrLink, document.getElementById('qr-canvas'));
 }
 
@@ -1742,7 +2445,6 @@ function wrapCanvas(ctx, txt, x, y, maxW, lh, maxL) {
   }
   ctx.fillText(line.trim(), x, y); return y + lh;
 }
-
 function drawPosterCanvas(type, item) {
   const cv = document.getElementById('poster-canvas'), ctx = cv.getContext('2d');
   const W = 900, H = 900;
@@ -1754,16 +2456,15 @@ function drawPosterCanvas(type, item) {
 
   ctx.strokeStyle = 'rgba(253,230,138,0.6)'; ctx.lineWidth = 4;
   rRect(ctx, 26, 26, W-52, H-52, 28); ctx.stroke();
-
   rRect(ctx, 56, 56, W-112, H-112, 26); ctx.fillStyle = '#fffdf9'; ctx.fill();
 
-  rRect(ctx, 190, 92, 520, 48, 24); ctx.fillStyle = '#1877f2'; ctx.fill();
-  ctx.fillStyle = '#fde68a'; ctx.font = '800 20px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('⛰️ NINH BÌNH • FB-CONNECT HUB', W/2, 123);
+  rRect(ctx, 150, 92, 600, 48, 24); ctx.fillStyle = '#1877f2'; ctx.fill();
+  ctx.fillStyle = '#fde68a'; ctx.font = '800 19px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('⛰️ NINH BÌNH – MIỀN DI SẢN • FB-CONNECT HUB', W/2, 123);
 
   ctx.textAlign = 'left';
   ctx.fillStyle = '#0b6e63'; ctx.font = '700 22px sans-serif';
-  ctx.fillText(`📍 ${item.ward}, Tỉnh Ninh Bình  •  ${REGIONS[item.region]?.short || ''}`, 96, 200);
+  ctx.fillText(`📍 ${item.ward}  •  ${REGIONS[item.region]?.short || ''}`, 96, 200);
 
   ctx.fillStyle = '#14222b'; ctx.font = '800 42px sans-serif';
   const ny = wrapCanvas(ctx, item.name, 96, 270, W-192, 52, 2);
@@ -1778,16 +2479,19 @@ function drawPosterCanvas(type, item) {
   ctx.fillText(hl.slice(0, 26), 124, 612);
 
   ctx.fillStyle = '#14222b'; ctx.font = '700 21px monospace';
-  ctx.fillText(`🛰️ GPS: ${item.lat.toFixed(4)}, ${item.lng.toFixed(4)}   ${item.phone ? '•  📞 ' + item.phone : ''}`, 96, 706);
+  const phoneTxt = hasValidPhone(item.phone) ? `  •  📞 ${formatPhoneDisplay(item.phone)}` : '';
+  ctx.fillText(`🛰️ GPS: ${item.lat.toFixed(4)}, ${item.lng.toFixed(4)}${phoneTxt}`, 96, 706);
 
+  const okFb = hasValidFb(item.fb);
+  const { slug } = parseFacebookSlug(item.fb);
   rRect(ctx, 96, 742, W-192, 64, 16); ctx.fillStyle = '#1877f2'; ctx.fill();
   ctx.fillStyle = '#fff'; ctx.font = '800 23px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText(item.fb ? `💬 Kết nối ngay: m.me/${cleanFb(item.fb)}` : '🗺️ Quét mã QR để mở chỉ đường Google Maps', W/2, 782);
+  ctx.fillText(okFb ? `💬 Kết nối ngay: https://m.me/${slug}` : '🗺️ Quét mã QR để mở chỉ đường Google Maps', W/2, 782);
 }
 
 function downloadPoster() {
   const a = document.createElement('a');
-  a.download = 'Poster-NinhBinhMoi.png';
+  a.download = 'Poster-NinhBinh-MienDiSan.png';
   a.href = document.getElementById('poster-canvas').toDataURL('image/png');
   a.click();
   toast('Đã tải ảnh Poster PNG 900×900!');
@@ -1795,16 +2499,19 @@ function downloadPoster() {
 function copyFBPost() { copyText(document.getElementById('fb-post-box').value, 'Đã sao chép bài đăng Facebook!'); }
 function downloadQR() {
   const a = document.createElement('a');
-  a.download = 'QR-NinhBinhMoi.png';
+  a.download = 'QR-NinhBinh-MienDiSan.png';
   a.href = document.getElementById('qr-canvas').toDataURL('image/png');
   a.click();
   toast('Đã tải mã QR PNG!');
 }
 function downloadMetaCSV() {
   const q = v => `"${String(v||'').replace(/"/g,'""')}"`;
-  const rows = db.specialties.map(s => [q(s.sku), q(s.name), q(`${s.desc} | ${s.ward}, Ninh Bình`), q('in stock'), q('new'), q(`${s.price} VND`), q(mMe(s.fb, s.name)), q(s.shop)].join(','));
+  const rows = db.specialties.map(s => {
+    const link = hasValidFb(s.fb) ? buildMessengerUrl(s.fb, s.name) : gMaps(s.lat, s.lng);
+    return [q(s.sku), q(s.name), q(`${s.desc} | ${s.ward}, Ninh Bình – Miền Di Sản`), q('in stock'), q('new'), q(`${s.price} VND`), q(link), q(s.shop)].join(',');
+  });
   const blob = new Blob(['\uFEFF' + ['id,title,description,availability,condition,price,link,brand', ...rows].join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Meta-Catalog-NinhBinhMoi.csv'; a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Meta-Catalog-NinhBinh-MienDiSan.csv'; a.click();
   toast(`Đã xuất ${db.specialties.length} đặc sản ra Meta Catalog CSV!`);
 }
 
@@ -1847,7 +2554,7 @@ function drawPureQR(text, canvas) {
   const allBits = []; cw.forEach(b=>{ for(let i=7;i>=0;i--) allBits.push((b>>i)&1); });
   let bi = 0;
   for(let col=N-1;col>0;col-=2){ if(col===6) col--; for(let row=0;row<N;row++){ const r=((col+1)&2)?row:(N-1-row); for(let dc=0;dc<2;dc++){ const c=col-dc; if(!fn[r][c]){ const bit=bi<allBits.length?allBits[bi++]:0; mat[r][c]=bit^((r+c)%2===0?1:0); } } } }
-  const fmt = 0x77c4; // ECC-L, Mask 0
+  const fmt = 0x77c4;
   for(let i=0;i<15;i++){ const b=(fmt>>(14-i))&1; if(i<6) mat[i][8]=b; else if(i===6) mat[7][8]=b; else if(i===7) mat[8][8]=b; else if(i===8) mat[8][7]=b; else mat[8][14-i]=b; if(i<8) mat[8][N-1-i]=b; else mat[N-15+i][8]=b; }
   const ctx = canvas.getContext('2d'), sz = canvas.width, cell = sz / (N + 4);
   ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, sz, sz);
@@ -1856,7 +2563,7 @@ function drawPureQR(text, canvas) {
 }
 
 /* =========================================================================
-   8. TAB 4: QUẢN TRỊ ADMIN (PIN: 2026, CRUD 4 DANH MỤC, BACKUP/RESTORE JSON)
+   11. TAB 5: QUẢN TRỊ ADMIN (PIN: 2026, VALIDATE SĐT/FB, CRUD 4 DANH MỤC)
    ========================================================================= */
 function loginAdmin() {
   const v = document.getElementById('admin-pin-input').value.trim();
@@ -1864,7 +2571,7 @@ function loginAdmin() {
     ui.adminLoggedIn = true;
     document.getElementById('admin-pin-input').value = '';
     renderAdminView();
-    toast('Đăng nhập Quản Trị Admin thành công!');
+    toast('Đăng nhập Quản Trị Ninh Bình – Miền Di Sản thành công!');
   } else {
     toast('Sai mã PIN! (Mặc định: 2026)', 'error');
   }
@@ -1888,8 +2595,9 @@ function renderAdminTable() {
   const list = db[ui.adminTab].filter(x => !q || JSON.stringify(x).toLowerCase().includes(q));
 
   if (ui.adminTab === 'wards') {
-    th.innerHTML = '<tr><th>Tên Phường / Xã mới</th><th>Vùng</th><th>Tọa độ GPS</th><th>Thao tác</th></tr>';
-    tb.innerHTML = list.map(w => `<tr>
+    th.innerHTML = '<tr><th>STT</th><th>Tên Phường / Xã</th><th>Phân khu</th><th>Tọa độ GPS</th><th>Thao tác</th></tr>';
+    tb.innerHTML = list.map((w, idx) => `<tr>
+      <td>${idx + 1}</td>
       <td><b>${esc(w.name)}</b></td>
       <td>${REGIONS[w.region]?.short}</td>
       <td style="font-family:monospace;">${w.lat}, ${w.lng}</td>
@@ -1898,30 +2606,38 @@ function renderAdminTable() {
     return;
   }
 
-  th.innerHTML = '<tr><th>Tên mục</th><th>Phường / Xã</th><th>Vùng</th><th>Trạng thái</th><th>Thao tác</th></tr>';
-  tb.innerHTML = list.map(item => `<tr>
-    <td><b>${esc(item.name)}</b><div style="font-size:11px; color:var(--muted);">${esc(item.theme || item.shop || item.priceRange || '')}</div></td>
-    <td>${esc(item.ward)}</td>
-    <td>${REGIONS[item.region]?.short}</td>
-    <td><span class="tag ${item.visible!==false?'tag-jade':'tag-red'}">${item.visible!==false?'Đang hiện':'Đang ẩn'}</span></td>
-    <td style="white-space:nowrap;">
-      <button class="btn btn-soft-fb btn-xs" onclick="openAdminForm('${item.id}')">Sửa</button>
-      <button class="btn btn-soft-gold btn-xs" onclick="toggleVisible('${item.id}')">${item.visible!==false?'Ẩn':'Hiện'}</button>
-      <button class="btn btn-soft btn-xs" style="color:var(--danger);" onclick="deleteAdminItem('${item.id}')">Xóa</button>
-    </td>
-  </tr>`).join('');
+  th.innerHTML = '<tr><th>Tên mục</th><th>Phường / Xã</th><th>SĐT &amp; Facebook xác thực</th><th>Trạng thái</th><th>Thao tác</th></tr>';
+  tb.innerHTML = list.map(item => {
+    const okFb = hasValidFb(item.fb), okP = hasValidPhone(item.phone);
+    return `<tr>
+      <td><b>${esc(item.name)}</b><div style="font-size:11px; color:var(--muted);">${esc(item.theme || item.shop || item.priceRange || '')}</div></td>
+      <td>${esc(item.ward)}</td>
+      <td style="font-size:11px;">
+        ${okP ? `📞 <b>${esc(formatPhoneDisplay(item.phone))}</b><br>` : '<span class="tag tag-slate">Chưa cập nhật SĐT</span> '}
+        ${okFb ? `💬 <code>m.me/${esc(parseFacebookSlug(item.fb).slug)}</code>` : '<span class="tag tag-slate">Chưa liên kết Facebook</span>'}
+      </td>
+      <td><span class="tag ${item.visible!==false?'tag-jade':'tag-red'}">${item.visible!==false?'Đang hiện':'Đang ẩn'}</span></td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-soft-fb btn-xs" onclick="openAdminForm('${item.id}')">Sửa</button>
+        <button class="btn btn-soft-gold btn-xs" onclick="toggleVisible('${item.id}')">${item.visible!==false?'Ẩn':'Hiện'}</button>
+        <button class="btn btn-soft btn-xs" style="color:var(--danger);" onclick="deleteAdminItem('${item.id}')">Xóa</button>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
-function toggleVisible(id) {
+async function toggleVisible(id) {
   const item = db[ui.adminTab].find(x => x.id === id);
   if (!item) return;
   item.visible = item.visible === false ? true : false;
   saveDB(); updateCounts(); renderAdminTable();
+  if (db.firebase?.autoSync) await pushFirebaseREST(true);
 }
 function deleteAdminItem(id) {
-  openConfirm('Xóa mục này?', 'Hành động này sẽ xóa mục khỏi danh sách hiện tại.', () => {
+  openConfirm('Xóa mục này?', 'Hành động này sẽ xóa mục khỏi danh sách hiện tại.', async () => {
     db[ui.adminTab] = db[ui.adminTab].filter(x => x.id !== id);
     saveDB(); updateCounts(); renderAdminTable(); toast('Đã xóa thành công.', 'info');
+    if (db.firebase?.autoSync) await pushFirebaseREST(true);
   });
 }
 
@@ -1937,146 +2653,31 @@ function openAdminForm(id = null) {
 
   if (ui.adminTab === 'wards') {
     form.innerHTML = `
-      <div class="form-group"><label class="form-label">Tên Phường / Xã mới *</label><input name="name" class="form-control" required value="${esc(item.name)}"></div>
-      <div class="form-group"><label class="form-label">Vùng *</label><select name="region" class="form-control">${regOpts}</select></div>
+      <div class="form-group"><label class="form-label">Tên Phường / Xã *</label><input id="f-name" class="form-control" required value="${esc(item.name||'')}" placeholder="VD: Xã Gia Vân"></div>
+      <div class="form-group"><label class="form-label">Phân khu di sản</label><select id="f-region" class="form-control">${regOpts}</select></div>
       <div class="row-2">
-        <div class="form-group"><label class="form-label">Vĩ độ (Lat)</label><input name="lat" type="number" step="0.0001" class="form-control" required value="${item.lat||20.2506}"></div>
-        <div class="form-group"><label class="form-label">Kinh độ (Lng)</label><input name="lng" type="number" step="0.0001" class="form-control" required value="${item.lng||105.9745}"></div>
+        <div class="form-group"><label class="form-label">Vĩ độ (Lat)</label><input id="f-lat" type="number" step="0.0001" class="form-control" value="${item.lat||20.2539}"></div>
+        <div class="form-group"><label class="form-label">Kinh độ (Lng)</label><input id="f-lng" type="number" step="0.0001" class="form-control" value="${item.lng||105.9750}"></div>
       </div>`;
   } else if (ui.adminTab === 'landmarks') {
     form.innerHTML = `
-      <div class="form-group"><label class="form-label">Tên Danh thắng *</label><input name="name" class="form-control" required value="${esc(item.name)}"></div>
+      <div class="form-group"><label class="form-label">Tên Danh lam thắng cảnh *</label><input id="f-name" class="form-control" required value="${esc(item.name||'')}"></div>
       <div class="row-2">
-        <div class="form-group"><label class="form-label">Vùng</label><select name="region" class="form-control">${regOpts}</select></div>
-        <div class="form-group"><label class="form-label">Phường / Xã mới</label><select name="ward" class="form-control">${wardOpts}</select></div>
+        <div class="form-group"><label class="form-label">Phân khu</label><select id="f-region" class="form-control">${regOpts}</select></div>
+        <div class="form-group"><label class="form-label">Phường / Xã</label><select id="f-ward" class="form-control">${wardOpts}</select></div>
       </div>
-      <div class="row-3">
-        <div class="form-group"><label class="form-label">Chủ đề</label><select name="theme" class="form-control">
-          ${['Di sản / Thiên nhiên','Tâm linh / Di tích','Công giáo','Biển / Sinh thái'].map(t=>`<option ${item.theme===t?'selected':''}>${t}</option>`).join('')}
+      <div class="row-2">
+        <div class="form-group"><label class="form-label">Chủ đề</label><select id="f-theme" class="form-control">
+          <option ${item.theme==='Di sản / Thiên nhiên'?'selected':''}>Di sản / Thiên nhiên</option>
+          <option ${item.theme==='Tâm linh / Di tích'?'selected':''}>Tâm linh / Di tích</option>
+          <option ${item.theme==='Công giáo'?'selected':''}>Công giáo</option>
+          <option ${item.theme==='Biển / Sinh thái'?'selected':''}>Biển / Sinh thái</option>
         </select></div>
-        <div class="form-group"><label class="form-label">Giá vé</label><input name="ticket" class="form-control" value="${esc(item.ticket||'Miễn phí')}"></div>
-        <div class="form-group"><label class="form-label">Giờ mở cửa</label><input name="hours" class="form-control" value="${esc(item.hours||'07:00 - 18:00')}"></div>
+        <div class="form-group"><label class="form-label">Giá vé tham khảo</label><input id="f-ticket" class="form-control" value="${esc(item.ticket||'Miễn phí')}"></div>
       </div>
       <div class="row-2">
-        <div class="form-group"><label class="form-label">Lat</label><input name="lat" type="number" step="0.0001" class="form-control" required value="${item.lat||20.2506}"></div>
-        <div class="form-group"><label class="form-label">Lng</label><input name="lng" type="number" step="0.0001" class="form-control" required value="${item.lng||105.9375}"></div>
-      </div>
-      <div class="form-group"><label class="form-label">Mô tả chi tiết *</label><textarea name="desc" class="form-control" rows="3" required>${esc(item.desc)}</textarea></div>`;
-  } else if (ui.adminTab === 'specialties') {
-    form.innerHTML = `
-      <div class="row-2">
-        <div class="form-group"><label class="form-label">Tên Đặc sản *</label><input name="name" class="form-control" required value="${esc(item.name)}"></div>
-        <div class="form-group"><label class="form-label">Cửa hàng *</label><input name="shop" class="form-control" required value="${esc(item.shop)}"></div>
+        <div class="form-group"><label class="form-label">Giờ mở cửa</label><input id="f-hours" class="form-control" value="${esc(item.hours||'07:00 - 17:30')}"></div>
+        <div class="form-group"><label class="form-label">SĐT BQL (Để trống nếu chưa có)</label><input id="f-phone" class="form-control" value="${esc(item.phone||'')}" placeholder="VD: 0912.345.678"></div>
       </div>
       <div class="row-2">
-        <div class="form-group"><label class="form-label">Vùng</label><select name="region" class="form-control">${regOpts}</select></div>
-        <div class="form-group"><label class="form-label">Phường / Xã</label><select name="ward" class="form-control">${wardOpts}</select></div>
-      </div>
-      <div class="row-3">
-        <div class="form-group"><label class="form-label">Giá (VNĐ)</label><input name="price" type="number" class="form-control" required value="${item.price||100000}"></div>
-        <div class="form-group"><label class="form-label">Đơn vị</label><input name="unit" class="form-control" required value="${esc(item.unit||'Hộp 500g')}"></div>
-        <div class="form-group"><label class="form-label">Biểu tượng</label><input name="emoji" class="form-control" value="${esc(item.emoji||'🎁')}"></div>
-      </div>
-      <div class="row-2">
-        <div class="form-group"><label class="form-label">Facebook Username</label><input name="fb" class="form-control" required value="${esc(item.fb||'ninhbinhmoihub')}"></div>
-        <div class="form-group"><label class="form-label">Điện thoại</label><input name="phone" class="form-control" required value="${esc(item.phone||'0912 345 678')}"></div>
-      </div>
-      <div class="row-2">
-        <div class="form-group"><label class="form-label">Lat</label><input name="lat" type="number" step="0.0001" class="form-control" required value="${item.lat||20.2506}"></div>
-        <div class="form-group"><label class="form-label">Lng</label><input name="lng" type="number" step="0.0001" class="form-control" required value="${item.lng||105.9745}"></div>
-      </div>
-      <div class="form-group"><label class="form-label">Mô tả *</label><textarea name="desc" class="form-control" rows="2" required>${esc(item.desc)}</textarea></div>`;
-  } else {
-    form.innerHTML = `
-      <div class="form-group"><label class="form-label">Tên Nhà hàng *</label><input name="name" class="form-control" required value="${esc(item.name)}"></div>
-      <div class="row-2">
-        <div class="form-group"><label class="form-label">Vùng</label><select name="region" class="form-control">${regOpts}</select></div>
-        <div class="form-group"><label class="form-label">Phường / Xã</label><select name="ward" class="form-control">${wardOpts}</select></div>
-      </div>
-      <div class="row-2">
-        <div class="form-group"><label class="form-label">Khoảng giá</label><input name="priceRange" class="form-control" required value="${esc(item.priceRange||'150k - 250k/người')}"></div>
-        <div class="form-group"><label class="form-label">Món đặc trưng</label><input name="signature" class="form-control" required value="${esc(item.signature)}"></div>
-      </div>
-      <div class="row-2">
-        <div class="form-group"><label class="form-label">Facebook Username</label><input name="fb" class="form-control" required value="${esc(item.fb||'nhahangninhbinh')}"></div>
-        <div class="form-group"><label class="form-label">Điện thoại</label><input name="phone" class="form-control" required value="${esc(item.phone||'0912 345 678')}"></div>
-      </div>
-      <div class="row-2">
-        <div class="form-group"><label class="form-label">Lat</label><input name="lat" type="number" step="0.0001" class="form-control" required value="${item.lat||20.2506}"></div>
-        <div class="form-group"><label class="form-label">Lng</label><input name="lng" type="number" step="0.0001" class="form-control" required value="${item.lng||105.9745}"></div>
-      </div>
-      <div class="form-group"><label class="form-label">Mô tả *</label><textarea name="desc" class="form-control" rows="2" required>${esc(item.desc)}</textarea></div>`;
-  }
-  document.getElementById('admin-modal').classList.add('open');
-}
-
-function saveAdminForm(e) {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const obj = Object.fromEntries(fd.entries());
-  obj.lat = parseFloat(obj.lat) || 20.2506;
-  obj.lng = parseFloat(obj.lng) || 105.9745;
-  if (obj.price) obj.price = parseInt(obj.price, 10) || 100000;
-
-  if (ui.editingId) {
-    const idx = db[ui.adminTab].findIndex(x => x.id === ui.editingId);
-    if (idx !== -1) db[ui.adminTab][idx] = { ...db[ui.adminTab][idx], ...obj };
-  } else {
-    obj.id = ui.adminTab.slice(0,2) + '_' + Date.now();
-    obj.visible = true;
-    if (ui.adminTab === 'specialties') { obj.sku = 'NB-' + Math.floor(1000+Math.random()*9000); obj.grad = 'linear-gradient(135deg,#0b6e63,#1877f2)'; }
-    db[ui.adminTab].unshift(obj);
-  }
-  saveDB(); updateCounts(); renderAdminTable(); closeModal('admin-modal');
-  toast('Đã lưu dữ liệu thành công!');
-}
-
-function openChangePinModal() { document.getElementById('new-pin-inp').value = ''; document.getElementById('pin-modal').classList.add('open'); }
-function saveNewPin() {
-  const p = document.getElementById('new-pin-inp').value.trim();
-  if (p.length < 4) { toast('Mã PIN cần tối thiểu 4 ký tự!', 'error'); return; }
-  db.pin = p; saveDB(); closeModal('pin-modal'); toast('Đã đổi mã PIN Admin thành công!');
-}
-function exportBackupJSON() {
-  const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'NinhBinhMoi-Backup.json'; a.click();
-  toast('Đã xuất file sao lưu JSON!');
-}
-function importBackupJSON(ev) {
-  const f = ev.target.files[0]; if (!f) return;
-  const rd = new FileReader();
-  rd.onload = () => {
-    try {
-      const data = JSON.parse(rd.result);
-      if (!data.landmarks || !data.specialties) throw new Error();
-      db = data; saveDB(); updateCounts(); renderAdminTable();
-      toast('Đã khôi phục dữ liệu từ file JSON!');
-    } catch (e) { toast('File JSON không hợp lệ.', 'error'); }
-  };
-  rd.readAsText(f);
-}
-function askResetDefault() {
-  openConfirm('Khôi phục dữ liệu gốc?', 'Toàn bộ 47 danh thắng, 22 đặc sản, 12 nhà hàng và 28 Phường/Xã mặc định sẽ được khôi phục.', () => {
-    resetDBObject(); saveDB(); updateCounts(); renderAdminTable(); renderMap();
-    toast('Đã khôi phục toàn bộ dữ liệu gốc!');
-  });
-}
-
-/* =========================================================================
-   9. KHỞI TẠO ỨNG DỤNG
-   ========================================================================= */
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    loadDB();
-    updateCounts();
-    renderMap();
-    renderRoutesGrid();
-    renderLandmarkQuickGrid();
-  } catch (err) {
-    console.error(err);
-    toast('Có lỗi khi khởi tạo ứng dụng.', 'error');
-  }
-});
-</script>
-</body>
-</html>
+        <div class="form-group"><label class="form-label">Vĩ độ (Lat)</label><input id="f-lat" type="number" step
