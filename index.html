@@ -490,8 +490,8 @@
   <section id="tab-map" class="tab-panel active">
     <div class="hero">
       <div>
-        <div class="hero-pill"><span class="dot-live"></span> Chính quyền 2 cấp Tỉnh Ninh Bình Mới (Phường / Xã trực thuộc Tỉnh)</div>
-        <h2>Bản Đồ Du Lịch, Ẩm Thực & <span class="gold">Đặc Sản Ninh Bình Mới</span></h2>
+        <div class="hero-pill"><span class="dot-live"></span> Chính quyền 2 cấp Tỉnh Ninh Bình (Phường / Xã trực thuộc Tỉnh)</div>
+        <h2>Bản Đồ Du Lịch, Ẩm Thực & <span class="gold">Đặc Sản Ninh Bình</span></h2>
         <p>Hợp nhất 3 vùng di sản: <strong>Vùng Cố Đô Hoa Lư</strong> (Tỉnh lỵ), <strong>Vùng Tam Chúc – Phủ Lý</strong> và <strong>Vùng Thành Nam – Biển Đông</strong>. Chạm từng ghim để xem mô tả, gợi ý đặc sản & nhà hàng gần nhất và chốt đơn thẳng Facebook.</p>
       </div>
       <div class="hero-stats">
@@ -506,7 +506,7 @@
     <div class="map-card" id="map-anchor">
       <div class="map-top">
         <div>
-          <div style="font-size:15.5px; font-weight:800;">📍 Bản Đồ Tương Tác Tỉnh Ninh Bình Mới (Zoom, Kéo Thả & Vẽ Cung Đường)</div>
+          <div style="font-size:15.5px; font-weight:800;">📍 Bản Đồ Tương Tác Tỉnh Ninh Bình (Zoom, Kéo Thả & Vẽ Cung Đường)</div>
           <div id="gps-status" style="font-size:12px; color:var(--muted);">Bấm vào ghim trên bản đồ hoặc chọn điểm ở bảng tra cứu nhanh bên dưới.</div>
         </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -559,7 +559,7 @@
                 <!-- Biển Đông -->
                 <path d="M495,640 L920,640 L920,250 C875,310 845,380 795,435 C740,495 650,535 568,580 C530,602 510,620 495,640 Z" fill="url(#seaG)" opacity="0.82"/>
                 <text x="805" y="555" class="river-lbl" font-size="13" text-anchor="middle">Biển Đông</text>
-                <text x="805" y="572" class="river-lbl" font-size="10" text-anchor="middle">(Vịnh Bắc Bộ — Bờ biển Ninh Bình Mới)</text>
+                <text x="805" y="572" class="river-lbl" font-size="10" text-anchor="middle">(Vịnh Bắc Bộ — Bờ biển Ninh Bình)</text>
 
                 <!-- 3 Vùng sau hợp nhất -->
                 <g filter="url(#dropSh)">
@@ -613,7 +613,7 @@
     <div class="panel">
       <div class="panel-head">
         <div>
-          <div style="font-size:15.5px; font-weight:800;">🛣️ 6 Cung Đường Du Lịch Liên Vùng Ninh Bình Mới</div>
+          <div style="font-size:15.5px; font-weight:800;">🛣️ 6 Cung Đường Du Lịch Liên Vùng Ninh Bình</div>
           <div style="font-size:12px; color:var(--muted);">Bấm "Vẽ lên bản đồ" để xem lộ trình hoặc "Google Maps" để dẫn đường đa điểm ngay</div>
         </div>
       </div>
@@ -744,7 +744,7 @@
     <!-- Cổng đăng nhập PIN -->
     <div id="admin-login-box" class="panel" style="max-width:420px; margin:30px auto; text-align:center; padding:28px;">
       <div style="font-size:42px; margin-bottom:8px;">🛡️</div>
-      <h2 style="font-size:18px; font-weight:800;">Cổng Quản Trị Admin Ninh Bình Mới</h2>
+      <h2 style="font-size:18px; font-weight:800;">Cổng Quản Trị Admin Ninh Bình</h2>
       <p style="font-size:12.5px; color:var(--muted); margin:6px 0 16px;">Nhập mã PIN quản trị (mặc định: <b>2026</b>) để quản lý Danh thắng, Đặc sản, Nhà hàng, Phường/Xã mới & Sao lưu dữ liệu.</p>
       <input type="password" id="admin-pin-input" class="form-control" style="text-align:center; font-size:18px; letter-spacing:4px; margin-bottom:12px;" placeholder="••••" onkeydown="if(event.key==='Enter') loginAdmin()">
       <button class="btn btn-fb" style="width:100%;" onclick="loginAdmin()">🔓 Đăng Nhập Quản Trị</button>
@@ -792,7 +792,7 @@
 </main>
 
 <footer class="app-footer">
-  <strong>Bản Đồ Du Lịch, Đặc Sản & Nhà Hàng Ninh Bình Mới — FB-Connect Hub</strong> • Chính quyền 2 cấp (Tỉnh Ninh Bình → Phường/Xã mới) • 100% HTML/CSS/JS thuần chạy mượt ngoại tuyến.
+  <strong>Bản Đồ Du Lịch, Đặc Sản & Nhà Hàng Ninh Bình — FB-Connect Hub</strong> • Chính quyền 2 cấp (Tỉnh Ninh Bình → Phường/Xã mới) • 100% HTML/CSS/JS thuần chạy mượt ngoại tuyến.
 </footer>
 
 <!-- ==================== DRAWER GIỎ HÀNG GOM ĐƠN MESSENGER ==================== -->
@@ -1399,7 +1399,7 @@ function renderMapDetail() {
   }
 
   if (type === 'specialty') {
-    const msg = `Chào ${item.shop}! Mình muốn chốt đơn ${item.name} (${fmtVND(item.price)} / ${item.unit}) từ Bản đồ Ninh Bình Mới.`;
+    const msg = `Chào ${item.shop}! Mình muốn chốt đơn ${item.name} (${fmtVND(item.price)} / ${item.unit}) từ Bản đồ Ninh Bình`;
     box.innerHTML = `
       <div style="display:flex; gap:10px; align-items:flex-start;">
         <div style="width:44px;height:44px;border-radius:12px;background:${item.grad};color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${item.emoji||'🎁'}</div>
@@ -1423,7 +1423,7 @@ function renderMapDetail() {
   }
 
   // Restaurant
-  const rMsg = `Chào ${item.name}! Mình muốn đặt bàn (4 khách) qua Bản đồ Ninh Bình Mới. Nhà hàng xác nhận giúp mình nhé!`;
+  const rMsg = `Chào ${item.name}! Mình muốn đặt bàn (4 khách) qua Bản đồ Ninh Bình. Nhà hàng xác nhận giúp mình nhé!`;
   box.innerHTML = `
     <div style="display:flex; gap:10px; align-items:flex-start;">
       <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#5b21b6,#9333ea);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🍽️</div>
@@ -1533,7 +1533,7 @@ function renderMarket() {
       if (reg !== 'all' && s.region !== reg) return;
       if (ward !== 'all' && s.ward !== ward) return;
       if (q && !`${s.name} ${s.shop} ${s.ward} ${s.desc}`.toLowerCase().includes(q)) return;
-      const msg = `Chào ${s.shop}! Mình muốn chốt đơn ${s.name} (${fmtVND(s.price)} / ${s.unit}) từ Ninh Bình Mới Hub.`;
+      const msg = `Chào ${s.shop}! Mình muốn chốt đơn ${s.name} (${fmtVND(s.price)} / ${s.unit}) từ Ninh Bình Hub.`;
       cards.push(`
         <article class="smart-card">
           <div class="card-head" style="background:${s.grad};">
@@ -1572,7 +1572,7 @@ function renderMarket() {
       if (reg !== 'all' && r.region !== reg) return;
       if (ward !== 'all' && r.ward !== ward) return;
       if (q && !`${r.name} ${r.signature} ${r.ward} ${r.desc}`.toLowerCase().includes(q)) return;
-      const msg = `Chào ${r.name}! Mình muốn đặt bàn qua Ninh Bình Mới Hub. Nhà hàng xác nhận giúp mình nhé!`;
+      const msg = `Chào ${r.name}! Mình muốn đặt bàn qua Ninh Bình Hub. Nhà hàng xác nhận giúp mình nhé!`;
       cards.push(`
         <article class="smart-card">
           <div class="card-head" style="background:linear-gradient(135deg,#5b21b6,#9333ea);">
@@ -1637,7 +1637,7 @@ function renderCart() {
   body.innerHTML = Object.values(groups).map(g => {
     let sum = 0;
     const lines = g.items.map(({s, qty}, idx) => { sum += s.price * qty; return `${idx+1}. ${s.name} x${qty} = ${fmtVND(s.price*qty)}`; });
-    const msg = `Chào ${g.shop}! Mình chốt đơn đặc sản Ninh Bình Mới:\n${lines.join('\n')}\nTổng tạm tính: ${fmtVND(sum)}\nShop xác nhận giúp mình nhé!`;
+    const msg = `Chào ${g.shop}! Mình chốt đơn đặc sản Ninh Bình:\n${lines.join('\n')}\nTổng tạm tính: ${fmtVND(sum)}\nShop xác nhận giúp mình nhé!`;
     return `
       <div style="border:1px solid var(--border); border-radius:12px; overflow:hidden;">
         <div style="background:#f3f7fa; padding:8px 12px; font-weight:800; font-size:13px; display:flex; justify-content:space-between;">
@@ -1690,7 +1690,7 @@ function renderFBHub() {
   let post = '', qrLink = '';
   if (type === 'sp') {
     qrLink = mMe(item.fb, `Chào ${item.shop}, mình muốn đặt ${item.name}!`);
-    post = `⛰️ ĐẶC SẢN NINH BÌNH MỚI — CHỐT ĐƠN THẲNG FACEBOOK 🔥\n` +
+    post = `⛰️ ĐẶC SẢN NINH BÌNH — CHỐT ĐƠN THẲNG FACEBOOK 🔥\n` +
            `🎁 ${item.name} (${item.sku})\n` +
            `💰 Giá: ${fmtVND(item.price)} / ${item.unit}\n` +
            `🏪 Cơ sở: ${item.shop}\n` +
@@ -1701,7 +1701,7 @@ function renderFBHub() {
            `🗺️ Chỉ đường Maps: ${gMaps(item.lat, item.lng)}\n#NinhBinhMoi #DacSanNinhBinh #FBConnectHub`;
   } else if (type === 'rs') {
     qrLink = mMe(item.fb, `Chào ${item.name}, mình muốn đặt bàn!`);
-    post = `🍽️ ẨM THỰC NINH BÌNH MỚI — ${item.name.toUpperCase()} 🔥\n` +
+    post = `🍽️ ẨM THỰC NINH BÌNH — ${item.name.toUpperCase()} 🔥\n` +
            `🔥 Món đặc trưng: ${item.signature}\n` +
            `💰 Khoảng giá: ${item.priceRange}\n` +
            `📍 Địa chỉ: ${item.ward}, Tỉnh Ninh Bình (${REGIONS[item.region]?.short})\n` +
@@ -1710,7 +1710,7 @@ function renderFBHub() {
            `🗺️ Chỉ đường Maps: ${gMaps(item.lat, item.lng)}\n#NinhBinhMoi #AmThucNinhBinh`;
   } else {
     qrLink = gMaps(item.lat, item.lng);
-    post = `🏛️ KHÁM PHÁ DANH THẮNG NINH BÌNH MỚI: ${item.name.toUpperCase()} ✨\n` +
+    post = `🏛️ KHÁM PHÁ DANH THẮNG NINH BÌNH: ${item.name.toUpperCase()} ✨\n` +
            `📍 Địa chỉ: ${item.ward}, Tỉnh Ninh Bình (${REGIONS[item.region]?.short})\n` +
            `🎟️ Vé tham khảo: ${item.ticket} | 🕒 ${item.hours}\n` +
            `📝 ${item.desc}\n` +
@@ -1759,7 +1759,7 @@ function drawPosterCanvas(type, item) {
 
   rRect(ctx, 190, 92, 520, 48, 24); ctx.fillStyle = '#1877f2'; ctx.fill();
   ctx.fillStyle = '#fde68a'; ctx.font = '800 20px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('⛰️ NINH BÌNH MỚI • FB-CONNECT HUB', W/2, 123);
+  ctx.fillText('⛰️ NINH BÌNH • FB-CONNECT HUB', W/2, 123);
 
   ctx.textAlign = 'left';
   ctx.fillStyle = '#0b6e63'; ctx.font = '700 22px sans-serif';
