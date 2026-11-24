@@ -5968,6 +5968,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (ui.tab === 'market') { populateWardFilter(); renderMarket(); populateFeedRestaurantFilter(); renderRestaurantPostsFeed(); }
       if (ui.tab === 'merchant') renderMerchantPortal();
       if (ui.tab === 'admin' && ui.adminLoggedIn) renderAdminView();
+      if (typeof window.refreshOpenCustomerInvoiceIfAny === 'function') window.refreshOpenCustomerInvoiceIfAny(true);
 
       lastSyncAt = data._meta?.updatedAtVN || (typeof formatNowVN === 'function' ? formatNowVN() : '');
       updateSyncUI('ok', `🟢 Đã kết nối Firebase Firestore`, `Cập nhật gần nhất: ${lastSyncAt}`);
@@ -7441,10 +7442,15 @@ window.addEventListener('DOMContentLoaded', () => {
     const ord = ensureOrdersArray().find(o => o.id === orderId);
     if (!ord) return;
     ord.status = newStatus;
+    if (newStatus === 'Hoàn tất') {
+      ord.paymentStatus = 'Đã thanh toán';
+      if (!ord.paidAt) ord.paidAt = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+    }
     saveDB();
     if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
     renderMerchantOrdersPanel();
     if (document.getElementById('admin-orders-modal')?.classList.contains('open')) renderAdminOrdersModal();
+    if (typeof window.refreshOpenCustomerInvoiceIfAny === 'function') window.refreshOpenCustomerInvoiceIfAny(false);
     toast(`Đã chuyển trạng thái đơn ${ord.code} -> ${newStatus}`);
   };
 
@@ -8959,6 +8965,7 @@ window.addEventListener('DOMContentLoaded', () => {
         ord.finalAmount = amount;
         ord.totalText = fmtVND(amount);
         ord.status = 'Hoàn tất';
+        ord.paymentStatus = 'Đã thanh toán';
         ord.paidAt = nowVN;
       }
       toast(`✅ Đã ghi nhận thanh toán ${fmtVND(amount)} & Hoàn tất đơn!`);
@@ -9694,9 +9701,10 @@ window.addEventListener('DOMContentLoaded', () => {
     const partySize = Math.max(1, Number(ord.partySize) || totalQty || 1);
     const bank = rs?.bank && rs.bank.accountNo ? rs.bank : null;
     const payMemo = `TT ${ord.code} ${stripVN19(ord.customerName || '').slice(0, 14)}`.trim();
-    const payStatus = ord.paymentStatus || 'Chưa thanh toán';
-    const payBadge = payStatus === 'Đã thanh toán'
-      ? `<span class="pay-pill pay-paid">✅ Đã xác nhận thanh toán (${esc(ord.paidAt || '')})</span>`
+    const isConfirmedPaid = ord.paymentStatus === 'Đã thanh toán' || ord.status === 'Hoàn tất' || Boolean(ord.paidAt);
+    const payStatus = isConfirmedPaid ? 'Đã thanh toán' : (ord.paymentStatus || 'Chưa thanh toán');
+    const payBadge = isConfirmedPaid
+      ? `<span class="pay-pill pay-paid">✅ Quán đã xác nhận thanh toán${ord.paidAt ? ' (' + esc(ord.paidAt) + ')' : ''}</span>`
       : (payStatus === 'Khách báo đã thanh toán'
         ? `<span class="pay-pill pay-reported">🟡 Bạn đã báo thanh toán (${esc(ord.customerPaidAt || '')}) — Chờ quán xác nhận</span>`
         : `<span class="pay-pill pay-unpaid">🔴 Chưa thanh toán</span>`);
@@ -9737,11 +9745,18 @@ window.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
 
-    const confirmBtnHtml = payStatus === 'Đã thanh toán'
-      ? ''
+    const confirmBtnHtml = isConfirmedPaid
+      ? `<div style="margin-top:9px; padding:10px 12px; border-radius:11px; background:#dcfce7; border:1.5px solid #22c55e; color:#14532d; font-size:12.5px; font-weight:800; text-align:center;">
+          🎉 NHÀ HÀNG ĐÃ XÁC NHẬN THANH TOÁN THÀNH CÔNG CHO ĐƠN #${esc(ord.code)}!
+          ${ord.paidAt ? `<div style="font-size:11.2px; font-weight:700; margin-top:2px;">🕒 Thời gian xác nhận: ${esc(ord.paidAt)}</div>` : ''}
+        </div>`
       : (payStatus === 'Khách báo đã thanh toán'
-        ? `<div style="margin-top:8px; font-size:12px; color:#065f46; font-weight:700;">✅ Bạn đã gửi xác nhận chuyển khoản trên đơn <b>${esc(ord.code)}</b>. Nhà hàng sẽ đối soát và hoàn tất đơn ngay!</div>`
-        : `<button type="button" class="btn btn-jade btn-sm" style="width:100%; margin-top:9px;" onclick="customerReportOrderPaid('${ord.id}')">✅ Tôi Đã Thanh Toán Thành Công (Xác Nhận Trên Đơn)</button>`);
+        ? `<div style="margin-top:8px; font-size:12px; color:#065f46; font-weight:700;">✅ Bạn đã gửi xác nhận chuyển khoản trên đơn <b>${esc(ord.code)}</b>. Nhà hàng đang đối soát!</div>
+           <button type="button" class="btn btn-soft-fb btn-xs" style="width:100%; margin-top:6px;" onclick="manualCheckCustomerInvoiceStatus('${ord.id}')">🔄 Kiểm tra lại trạng thái xác nhận từ quán</button>`
+        : `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:9px;">
+             <button type="button" class="btn btn-jade btn-sm" style="flex:1;" onclick="customerReportOrderPaid('${ord.id}')">✅ Tôi Đã Thanh Toán Thành Công</button>
+             <button type="button" class="btn btn-soft-fb btn-sm" onclick="manualCheckCustomerInvoiceStatus('${ord.id}')" title="Cập nhật trạng thái mới nhất">🔄 Kiểm tra</button>
+           </div>`);
 
     invWrap.innerHTML = `
       <div class="inv-box">
@@ -9823,8 +9838,95 @@ window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('report-analytics-modal')?.classList.contains('open') && typeof window.renderAnalyticsReport === 'function') {
       window.renderAnalyticsReport();
     }
+    if (typeof window.refreshOpenCustomerInvoiceIfAny === 'function') {
+      window.refreshOpenCustomerInvoiceIfAny(false);
+    }
     toast(`✅ Đã xác nhận thanh toán thành công cho đơn ${ord.code}!`);
   };
+
+  // Tự động làm mới Hóa đơn đang mở của khách khi Nhà hàng / Admin xác nhận (cùng tab, khác tab, hoặc qua Firebase)
+  let _lastNotifiedPaidOrderId = null;
+  window.refreshOpenCustomerInvoiceIfAny = function(notifyIfJustPaid = false) {
+    const modal = document.getElementById('quick-order-modal');
+    const succView = document.getElementById('qo-success-view');
+    if (!modal || !modal.classList.contains('open') || !succView || succView.classList.contains('hidden')) return;
+    if (!qoExt.lastOrderId) return;
+
+    const ord = (db.orders || []).find(o => o.id === qoExt.lastOrderId);
+    if (!ord) return;
+    const rs = findPartnerById(ord.partnerId)?.item || qoExt.partner;
+    const nowPaid = ord.paymentStatus === 'Đã thanh toán' || ord.status === 'Hoàn tất' || Boolean(ord.paidAt);
+
+    renderCustomerInvoiceQR(ord, rs);
+
+    if (notifyIfJustPaid && nowPaid && _lastNotifiedPaidOrderId !== ord.id) {
+      _lastNotifiedPaidOrderId = ord.id;
+      toast(`🎉 Nhà hàng đã xác nhận thanh toán thành công cho đơn #${ord.code}!`);
+    }
+  };
+
+  // Đọc lại đơn mới nhất từ localStorage (và kéo từ Firebase nếu đang kết nối) khi khách bấm "Kiểm tra"
+  window.manualCheckCustomerInvoiceStatus = async function(orderId) {
+    if (orderId) qoExt.lastOrderId = orderId;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.orders)) db.orders = parsed.orders;
+      }
+    } catch (e) {}
+
+    if (typeof window.pullFromFirebase === 'function') {
+      try { await window.pullFromFirebase(false); } catch (e) {}
+    }
+
+    window.refreshOpenCustomerInvoiceIfAny(true);
+    const ord = (db.orders || []).find(o => o.id === qoExt.lastOrderId);
+    if (ord) {
+      const isPaid = ord.paymentStatus === 'Đã thanh toán' || ord.status === 'Hoàn tất' || Boolean(ord.paidAt);
+      if (!isPaid) {
+        toast(`Đơn #${ord.code} hiện ở trạng thái: ${ord.paymentStatus || ord.status || 'Chờ quán xác nhận'}.`, 'info');
+      }
+    }
+  };
+
+  // Đồng bộ tức thì giữa 2 tab trên cùng trình duyệt (Tab 1: Khách mở hóa đơn, Tab 2: Nhà hàng bấm xác nhận)
+  window.addEventListener('storage', (ev) => {
+    if (ev.key !== STORAGE_KEY && ev.key !== 'nb_heritage_persistent_vault_v1') return;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed.orders)) {
+        db.orders = parsed.orders;
+        window.refreshOpenCustomerInvoiceIfAny(true);
+        if (ui.merchantRestaurantId && typeof renderMerchantPortal === 'function') renderMerchantPortal();
+      }
+    } catch (e) {}
+  });
+
+  // Kiểm tra định kỳ nhẹ mỗi 2.5 giây CHỈ KHI modal hóa đơn của khách đang mở và chưa thấy xác nhận
+  setInterval(() => {
+    const modal = document.getElementById('quick-order-modal');
+    const succView = document.getElementById('qo-success-view');
+    if (!modal || !modal.classList.contains('open') || !succView || succView.classList.contains('hidden')) return;
+    if (!qoExt.lastOrderId) return;
+    const curOrd = (db.orders || []).find(o => o.id === qoExt.lastOrderId);
+    if (curOrd && (curOrd.paymentStatus === 'Đã thanh toán' || curOrd.status === 'Hoàn tất' || Boolean(curOrd.paidAt))) return;
+
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed.orders)) {
+        const fresh = parsed.orders.find(o => o.id === qoExt.lastOrderId);
+        if (fresh && (fresh.paymentStatus === 'Đã thanh toán' || fresh.status === 'Hoàn tất' || Boolean(fresh.paidAt))) {
+          db.orders = parsed.orders;
+          window.refreshOpenCustomerInvoiceIfAny(true);
+        }
+      }
+    } catch (e) {}
+  }, 2500);
 
   // Ghi đè submitQuickOrderToZalo: đọc lại trực tiếp DOM (đơn giá + số khách) trước khi tính hóa đơn
   window.submitQuickOrderToZalo = function(e) {
