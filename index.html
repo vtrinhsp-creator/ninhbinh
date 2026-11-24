@@ -3038,11 +3038,26 @@ function renderMapDetail() {
       ${slug
         ? `<button type="button" onclick="openMessengerOrder('${esc(item.shop)}','${esc(item.fb)}',${JSON.stringify(msg).replace(/"/g,'&quot;')})" class="btn btn-fb btn-sm">💬 Chốt đơn qua Messenger</button>`
         : `<div class="btn btn-soft btn-sm" style="color:var(--muted); cursor:default;">💬 Chưa liên kết Facebook</div>`}
+      ${(() => {
+        const spPosts = getPostsForRestaurant(item.id);
+        const lp = spPosts[0];
+        if (!lp) return '';
+        return `<div class="post-mini-preview" style="cursor:pointer;" onclick="openRestaurantWall('${item.id}')">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:3px;">
+            <b>📰 ${esc(lp.title)}</b>
+            <span class="tag tag-food">${spPosts.length} bài</span>
+          </div>
+          <div style="font-size:10.8px; color:var(--muted); margin-bottom:3px;">🕒 Đăng lúc: <b>${esc(lp.createdAt || '')}</b></div>
+          ${lp.availableHours ? `<div style="font-size:11px; color:var(--jade-dark); font-weight:700; margin-bottom:3px;">⏰ Khung giờ có hàng: ${esc(lp.availableHours)}</div>` : ''}
+          <div style="color:#4c1d95;">${esc(lp.content.slice(0, 90))}${lp.content.length > 90 ? '...' : ''}</div>
+        </div>`;
+      })()}
       <div style="display:flex; gap:6px; flex-wrap:wrap;">
         <button type="button" class="btn btn-soft-fb btn-xs" style="flex:1;" onclick="addToCart('${item.id}')">🛒 + Giỏ</button>
         ${cleanPhone
           ? `<button type="button" class="btn btn-soft-jade btn-xs" style="flex:1;" onclick="handlePhoneCall('${esc(item.shop)}','${esc(cleanPhone)}','${esc(item.name)}')">📞 ${esc(dispP)}</button>`
           : `<span class="btn btn-soft btn-xs" style="flex:1; color:var(--muted); cursor:default;">📞 Chưa cập nhật SĐT</span>`}
+        <button type="button" onclick="openRestaurantWall('${item.id}')" class="btn btn-soft-food btn-xs">📰 Bảng tin (${getPostsForRestaurant(item.id).length})</button>
         ${cleanSite ? `<a href="${esc(cleanSite)}" target="_blank" rel="noopener noreferrer" class="btn btn-soft-gold btn-xs">🌐 Web</a>` : ''}
         <a href="${gMaps(item.lat, item.lng)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-xs">🗺️ Đường</a>
       </div>`;
@@ -3212,10 +3227,21 @@ function renderMarket() {
             <div style="display:flex; gap:5px; flex-wrap:wrap;">
               <span class="tag tag-jade">📍 ${esc(s.ward)}</span>
               <span class="tag tag-slate">${REGIONS[s.region]?.short}</span>
+              ${getPostsForRestaurant(s.id).length ? `<span class="tag tag-gold" style="cursor:pointer;" onclick="openRestaurantWall('${s.id}')">📰 ${getPostsForRestaurant(s.id).length} bài đăng</span>` : ''}
               ${cleanSite ? `<a href="${esc(cleanSite)}" target="_blank" rel="noopener noreferrer" class="tag tag-fb">🌐 ${esc(formatWebsiteDisplay(cleanSite))}</a>` : ''}
             </div>
             <div style="font-size:15.5px; font-weight:800;">${esc(s.name)}</div>
             <p style="font-size:12.2px; color:var(--muted); flex:1;">${esc(s.desc)}</p>
+            ${(() => {
+              const lp = getPostsForRestaurant(s.id)[0];
+              if (!lp) return '';
+              return `<div class="post-mini-preview" style="cursor:pointer;" onclick="openRestaurantWall('${s.id}')">
+                <div style="font-weight:800; margin-bottom:2px;">📢 ${esc(lp.title)}</div>
+                <div style="font-size:10.5px; color:var(--muted); margin-bottom:2px;">🕒 Đăng: ${esc(lp.createdAt || '')}</div>
+                ${lp.availableHours ? `<div style="font-size:11px; color:var(--jade-dark); font-weight:700; margin-bottom:2px;">⏰ Có hàng: ${esc(lp.availableHours)}</div>` : ''}
+                <div style="font-size:11px; color:#5b21b6;">${esc(lp.content.slice(0, 72))}${lp.content.length > 72 ? '...' : ''}</div>
+              </div>`;
+            })()}
             <div style="border-top:1px solid #eef3f7; padding-top:8px;">
               <div style="font-size:11px; color:var(--muted); font-weight:700;">Giá tham khảo</div>
               <div class="card-price" style="font-size:16px;">${esc(pText)}</div>
@@ -3228,6 +3254,7 @@ function renderMarket() {
               ${cleanPhone
                 ? `<button type="button" class="btn btn-soft-jade btn-xs" style="flex:1;" onclick="handlePhoneCall('${esc(s.shop)}','${esc(cleanPhone)}','${esc(s.name)}')">📞 ${esc(dispP)}</button>`
                 : `<span class="btn btn-soft btn-xs" style="flex:1; color:var(--muted); cursor:default;">📞 Chưa cập nhật SĐT</span>`}
+              <button type="button" class="btn btn-soft-food btn-xs" onclick="openRestaurantWall('${s.id}')">📰 Bảng tin (${getPostsForRestaurant(s.id).length})</button>
               ${cleanSite ? `<a href="${esc(cleanSite)}" target="_blank" rel="noopener noreferrer" class="btn btn-soft-gold btn-xs">🌐 Web</a>` : ''}
               <button type="button" class="btn btn-soft btn-xs" onclick="switchTab('map'); onPinClick('specialty','${s.id}',true);">📍 Bản đồ</button>
             </div>
@@ -3609,15 +3636,31 @@ function getUserReferencePoint() {
   return { lat: 20.2539, lng: 105.9750, label: 'Trung tâm Hoa Lư', isExact: false };
 }
 
+function findPartnerById(id) {
+  const rs = (db.restaurants || []).find(r => r.id === id);
+  if (rs) return { type: 'restaurant', icon: '🍽️', label: 'Nhà hàng', item: rs, displayName: rs.name };
+  const sp = (db.specialties || []).find(s => s.id === id);
+  if (sp) return { type: 'specialty', icon: sp.emoji || '🎁', label: 'Đặc sản', item: sp, displayName: sp.name + (sp.shop ? ' — ' + sp.shop : '') };
+  return null;
+}
+
+function getAllPartners() {
+  const list = [];
+  (db.restaurants || []).forEach(r => list.push({ type: 'restaurant', icon: '🍽️', label: 'Nhà hàng', item: r, displayName: r.name }));
+  (db.specialties || []).forEach(s => list.push({ type: 'specialty', icon: s.emoji || '🎁', label: 'Đặc sản', item: s, displayName: s.name + (s.shop ? ' — ' + s.shop : '') }));
+  return list;
+}
+
 function getPrioritizedNewPosts() {
   const ref = getUserReferencePoint();
   return db.restaurantPosts
     .filter(p => p.visible !== false)
     .map(p => {
-      const rs = db.restaurants.find(r => r.id === p.restaurantId);
-      if (!rs || rs.visible === false) return null;
+      const partner = findPartnerById(p.restaurantId);
+      if (!partner || partner.item.visible === false) return null;
+      const rs = partner.item;
       const km = calcKm(ref.lat, ref.lng, rs.lat, rs.lng);
-      return { post: p, rs, km, refLabel: ref.label, isExact: ref.isExact };
+      return { post: p, rs, partnerType: partner.type, partnerIcon: partner.icon, km, refLabel: ref.label, isExact: ref.isExact };
     })
     .filter(Boolean)
     // Ưu tiên cửa hàng gần nhất trước, nếu cùng khoảng cách ưu tiên bài ghim / mới nhất
@@ -3646,14 +3689,16 @@ function renderLiveNewItemsBanner() {
       </div>
     </div>
     <div class="live-alert-list">
-      ${items.map(({ post, rs, km }) => {
+      ${items.map(({ post, rs, partnerType, partnerIcon, km }) => {
         const cleanPhone = sanitizePhone(rs.phone);
         const slug = extractFbSlug(rs.fb);
-        const msg = `Chào ${rs.name}! Mình thấy thông báo hàng mới "${post.title}" trên Ninh Bình – Miền Di Sản Hub, muốn đặt bàn / giữ suất nhé!`;
+        const pType = partnerType || 'restaurant';
+        const pIcon = partnerIcon || '🍽️';
+        const msg = `Chào ${rs.shop || rs.name}! Mình thấy thông báo hàng mới "${post.title}" trên Ninh Bình – Miền Di Sản, muốn đặt hàng / giữ suất nhé!`;
         return `
-          <div class="live-alert-item" onclick="onPinClick('restaurant','${rs.id}',true)">
+          <div class="live-alert-item" onclick="onPinClick('${pType}','${rs.id}',true)">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
-              <span style="font-size:12px; font-weight:800; color:var(--food-dark); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🍽️ ${esc(rs.name)}</span>
+              <span style="font-size:12px; font-weight:800; color:var(--food-dark); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${pIcon} ${esc(rs.name)}</span>
               <span class="dist-pill">📍 ${km.toFixed(1)} km</span>
             </div>
             <div style="font-size:13px; font-weight:800; color:var(--text); line-height:1.3;">${esc(post.title)}</div>
@@ -3683,11 +3728,11 @@ function populateFeedRestaurantFilter() {
   if (!sel) return;
   const prev = sel.value;
   const ref = getUserReferencePoint();
-  const sorted = db.restaurants
-    .map(r => ({ r, km: calcKm(ref.lat, ref.lng, r.lat, r.lng) }))
+  const all = getAllPartners()
+    .map(p => ({ p, km: calcKm(ref.lat, ref.lng, p.item.lat, p.item.lng) }))
     .sort((a, b) => a.km - b.km);
-  sel.innerHTML = `<option value="all">🍽️ Tất cả ${db.restaurants.length} nhà hàng (Ưu tiên gần nhất)</option>` +
-    sorted.map(({ r, km }) => `<option value="${r.id}">🍽️ ${esc(r.name)} • ${km.toFixed(1)} km (${getPostsForRestaurant(r.id).length} bài)</option>`).join('');
+  sel.innerHTML = `<option value="all">🍽️🎁 Tất cả Nhà hàng &amp; Đặc sản (Ưu tiên gần nhất)</option>` +
+    all.map(({ p, km }) => `<option value="${p.item.id}">${p.icon} ${esc(p.item.name)} • ${km.toFixed(1)} km (${getPostsForRestaurant(p.item.id).length} bài)</option>`).join('');
   if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
 }
 
@@ -3699,9 +3744,12 @@ function renderRestaurantPostsFeed() {
   const posts = db.restaurantPosts
     .filter(p => p.visible !== false && (flt === 'all' || p.restaurantId === flt))
     .map(p => {
-      const rs = db.restaurants.find(r => r.id === p.restaurantId) || { id: p.restaurantId, name: 'Nhà hàng đối tác', ward: 'Ninh Bình', phone: '', fb: '', lat: ref.lat, lng: ref.lng };
+      const partner = findPartnerById(p.restaurantId);
+      const rs = partner ? partner.item : { id: p.restaurantId, name: 'Cơ sở đối tác', ward: 'Ninh Bình', phone: '', fb: '', lat: ref.lat, lng: ref.lng };
+      const pType = partner ? partner.type : 'restaurant';
+      const pIcon = partner ? partner.icon : '🍽️';
       const km = calcKm(ref.lat, ref.lng, rs.lat, rs.lng);
-      return { p, rs, km };
+      return { p, rs, pType, pIcon, km };
     })
     .sort((a, b) => a.km - b.km || (b.p.pinned ? 1 : 0) - (a.p.pinned ? 1 : 0) || String(b.p.createdAt || '').localeCompare(String(a.p.createdAt || '')));
 
@@ -3710,16 +3758,16 @@ function renderRestaurantPostsFeed() {
     return;
   }
 
-  grid.innerHTML = posts.map(({ p, rs, km }) => {
+  grid.innerHTML = posts.map(({ p, rs, pType, pIcon, km }) => {
     const cleanPhone = sanitizePhone(rs.phone);
     const dispP = cleanPhone ? formatPhoneDisplay(cleanPhone) : '';
     const slug = extractFbSlug(rs.fb);
-    const msg = `Chào ${rs.name}! Mình đọc bài "${p.title}" trên Ninh Bình – Miền Di Sản Hub và muốn đặt bàn / hỏi thêm ưu đãi nhé!`;
+    const msg = `Chào ${rs.shop || rs.name}! Mình đọc bài "${p.title}" trên Ninh Bình – Miền Di Sản và muốn đặt hàng / đặt bàn nhé!`;
     return `
       <article class="post-card">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
           <div style="min-width:0;">
-            <div style="font-size:13px; font-weight:800; color:var(--food-dark); cursor:pointer;" onclick="openRestaurantWall('${rs.id}')">🍽️ ${esc(rs.name)}</div>
+            <div style="font-size:13px; font-weight:800; color:var(--food-dark); cursor:pointer;" onclick="openRestaurantWall('${rs.id}')">${pIcon} ${esc(rs.name)}</div>
             <div style="font-size:11px; color:var(--muted);">📍 ${esc(rs.ward)} • <span class="dist-pill">Cách ${km.toFixed(1)} km</span></div>
             <div style="font-size:11px; color:var(--muted); margin-top:2px;">🕒 Thời gian đăng: <b>${esc(p.createdAt || 'Chưa rõ')}</b></div>
           </div>
@@ -3742,22 +3790,25 @@ function renderRestaurantPostsFeed() {
           ${cleanPhone
             ? `<button type="button" class="btn btn-soft-jade btn-xs" style="flex:1;" onclick="handlePhoneCall('${esc(rs.name)}','${esc(cleanPhone)}','${esc(rs.ward)}')">📞 ${esc(dispP)}</button>`
             : `<button type="button" class="btn btn-soft-food btn-xs" style="flex:1;" onclick="openRestaurantWall('${rs.id}')">📰 Xem nhà hàng</button>`}
-          <button type="button" class="btn btn-soft btn-xs" onclick="switchTab('map'); onPinClick('restaurant','${rs.id}',true);">📍 Bản đồ</button>
+          <button type="button" class="btn btn-soft btn-xs" onclick="switchTab('map'); onPinClick('${pType}','${rs.id}',true);">📍 Bản đồ</button>
         </div>
       </article>`;
   }).join('');
 }
 
 function openRestaurantWall(restaurantId) {
-  const rs = db.restaurants.find(r => r.id === restaurantId);
-  if (!rs) return;
+  const partner = findPartnerById(restaurantId);
+  if (!partner) return;
+  const rs = partner.item;
   const canEdit = ui.adminLoggedIn || ui.merchantRestaurantId === restaurantId;
   const posts = db.restaurantPosts
     .filter(p => p.restaurantId === restaurantId && (canEdit || p.visible !== false))
     .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
 
-  document.getElementById('rsw-title').textContent = `📰 Bảng Tin: ${rs.name}`;
-  document.getElementById('rsw-sub').textContent = `📍 ${rs.ward} • 💰 ${rs.priceRange} • 🔥 ${rs.signature}`;
+  document.getElementById('rsw-title').textContent = `📰 Bảng Tin ${partner.label}: ${rs.name}`;
+  document.getElementById('rsw-sub').textContent = partner.type === 'restaurant'
+    ? `📍 ${rs.ward} • 💰 ${rs.priceRange} • 🔥 ${rs.signature}`
+    : `📍 ${rs.ward} • 🏪 ${rs.shop || ''} • 💰 ${getSpecialtyPriceInfo(rs).pText}`;
   document.getElementById('rsw-new-post-btn').onclick = () => {
     closeModal('rs-wall-modal');
     if (ui.adminLoggedIn || ui.merchantRestaurantId === restaurantId) {
@@ -3942,7 +3993,8 @@ function syncMerchantWardCoords() {
 
 function saveMerchantProfile(e) {
   e.preventDefault();
-  const rs = db.restaurants.find(r => r.id === ui.merchantRestaurantId);
+  const partner = findPartnerById(ui.merchantRestaurantId);
+  const rs = partner?.item;
   if (!rs) return;
 
   const name = document.getElementById('mcp-name').value.trim();
@@ -3968,8 +4020,13 @@ function saveMerchantProfile(e) {
   rs.ward = ward;
   rs.address = address;
   rs.phone = phone;
-  rs.priceRange = priceRange;
-  rs.signature = signature;
+  if (partner.type === 'specialty') {
+    rs.priceText = priceRange;
+    if (signature) rs.shop = signature;
+  } else {
+    rs.priceRange = priceRange;
+    rs.signature = signature;
+  }
   rs.desc = desc;
   rs.fb = fb;
   rs.website = website;
@@ -3987,7 +4044,8 @@ function saveMerchantProfile(e) {
 }
 
 function renderMerchantPortal() {
-  const rs = db.restaurants.find(r => r.id === ui.merchantRestaurantId);
+  const partner = findPartnerById(ui.merchantRestaurantId);
+  const rs = partner?.item;
   const logged = Boolean(rs && rs.account && rs.account.active !== false);
   if (!logged) ui.merchantRestaurantId = null;
 
@@ -4009,8 +4067,8 @@ function renderMerchantPortal() {
   document.getElementById('mcp-name').value = rs.name || '';
   document.getElementById('mcp-address').value = rs.address || '';
   document.getElementById('mcp-phone').value = rs.phone || '';
-  document.getElementById('mcp-priceRange').value = rs.priceRange || '';
-  document.getElementById('mcp-signature').value = rs.signature || '';
+  document.getElementById('mcp-priceRange').value = rs.priceRange || rs.priceText || '';
+  document.getElementById('mcp-signature').value = rs.signature || rs.shop || '';
   document.getElementById('mcp-desc').value = rs.desc || '';
   document.getElementById('mcp-fb').value = rs.fb || '';
   document.getElementById('mcp-website').value = rs.website || '';
@@ -4065,7 +4123,7 @@ function openMerchantChangePassModal() {
 }
 
 function saveMerchantNewPassword() {
-  const rs = db.restaurants.find(r => r.id === ui.merchantRestaurantId);
+  const rs = findPartnerById(ui.merchantRestaurantId)?.item;
   if (!rs || !rs.account) return;
   const np = document.getElementById('mc-new-pass-inp').value.trim();
   if (np.length < 4) {
@@ -4105,12 +4163,17 @@ function openRestaurantPostForm(postId = null, presetRestaurantId = null) {
 
   const sel = document.getElementById('rsp-restaurant-id');
   if (isMerchant) {
-    const myRs = db.restaurants.find(r => r.id === ui.merchantRestaurantId);
-    sel.innerHTML = myRs ? `<option value="${myRs.id}">${esc(myRs.name)} (${esc(myRs.ward)})</option>` : '';
+    const myP = findPartnerById(ui.merchantRestaurantId);
+    sel.innerHTML = myP ? `<option value="${myP.item.id}">${myP.icon} ${esc(myP.item.name)} (${esc(myP.item.ward)})</option>` : '';
     sel.disabled = true;
   } else {
     sel.disabled = false;
-    sel.innerHTML = db.restaurants.map(r => `<option value="${r.id}">${esc(r.name)} (${esc(r.ward)})</option>`).join('');
+    sel.innerHTML =
+      `<optgroup label="🍽️ Nhà hàng (${db.restaurants.length})">` +
+      db.restaurants.map(r => `<option value="${r.id}">🍽️ ${esc(r.name)} (${esc(r.ward)})</option>`).join('') +
+      `</optgroup><optgroup label="🎁 Đặc sản (${db.specialties.length})">` +
+      db.specialties.map(s => `<option value="${s.id}">${s.emoji || '🎁'} ${esc(s.name)} — ${esc(s.shop || '')} (${esc(s.ward)})</option>`).join('') +
+      `</optgroup>`;
     if (post?.restaurantId) sel.value = post.restaurantId;
     else if (presetRestaurantId) sel.value = presetRestaurantId;
   }
@@ -4205,13 +4268,13 @@ function saveRestaurantPost(e) {
   saveDB();
   updateCounts();
   closeModal('rs-post-modal');
-  if (ui.adminLoggedIn && (ui.adminTab === 'posts' || ui.adminTab === 'restaurants')) renderAdminTable();
+  if (ui.adminLoggedIn && (ui.adminTab === 'posts' || ui.adminTab === 'restaurants' || ui.adminTab === 'specialties')) renderAdminTable();
   if (ui.merchantRestaurantId) renderMerchantPortal();
   renderLiveNewItemsBanner();
   renderRestaurantPostsFeed();
   renderMarket();
   renderMap();
-  const rsName = db.restaurants.find(r => r.id === restaurantId)?.name || 'Nhà hàng';
+  const rsName = findPartnerById(restaurantId)?.item?.name || 'Cơ sở';
   toast(ui.editingPostId ? 'Đã cập nhật thông tin mặt hàng!' : `🔔 ${rsName} đã báo hàng mới lên giao diện người dùng!`);
 }
 
@@ -4231,15 +4294,18 @@ function deleteRestaurantPost(postId, reopenWallRestaurantId = null) {
 }
 
 /* --- ADMIN CẤP / QUẢN LÝ TÀI KHOẢN CHO TỪNG NHÀ HÀNG --- */
-function openRestaurantAccountModal(restaurantId) {
-  const rs = db.restaurants.find(r => r.id === restaurantId);
-  if (!rs) return;
+function openRestaurantAccountModal(partnerId) {
+  const partner = findPartnerById(partnerId);
+  if (!partner) return;
+  const rs = partner.item;
   document.getElementById('rsa-restaurant-id').value = rs.id;
-  document.getElementById('rsa-restaurant-name').textContent = rs.name;
+  document.getElementById('rsa-restaurant-name').textContent = `${partner.icon} ${rs.name}${rs.shop ? ' (' + rs.shop + ')' : ''}`;
   document.getElementById('rsa-restaurant-ward').textContent = `📍 ${rs.ward} • ${REGIONS[rs.region]?.short || ''}`;
 
   const suggestedUser = rs.id;
-  document.getElementById('rsa-modal-title').textContent = rs.account ? '🔑 Quản Lý Tài Khoản Nhà Hàng' : '➕ Cấp Tài Khoản Mới Cho Nhà Hàng';
+  document.getElementById('rsa-modal-title').textContent = rs.account
+    ? `🔑 Quản Lý Tài Khoản ${partner.label}`
+    : `➕ Cấp Tài Khoản Mới Cho ${partner.label}`;
   document.getElementById('rsa-username').value = rs.account?.username || suggestedUser;
   document.getElementById('rsa-password').value = rs.account?.password || '123456';
   document.getElementById('rsa-active').value = rs.account?.active === false ? 'false' : 'true';
@@ -4251,8 +4317,9 @@ function openRestaurantAccountModal(restaurantId) {
 function saveRestaurantAccount(e) {
   e.preventDefault();
   const rsId = document.getElementById('rsa-restaurant-id').value;
-  const rs = db.restaurants.find(r => r.id === rsId);
-  if (!rs) return;
+  const partner = findPartnerById(rsId);
+  if (!partner) return;
+  const rs = partner.item;
   const username = document.getElementById('rsa-username').value.trim().toLowerCase().replace(/\s+/g, '');
   const password = document.getElementById('rsa-password').value.trim();
   const active = document.getElementById('rsa-active').value === 'true';
@@ -4261,15 +4328,15 @@ function saveRestaurantAccount(e) {
     toast('Tên đăng nhập tối thiểu 3 ký tự, mật khẩu tối thiểu 4 ký tự.', 'error');
     return;
   }
-  const dup = db.restaurants.find(r => r.id !== rsId && r.account && r.account.username.toLowerCase() === username);
+  const dup = getAllPartners().find(p => p.item.id !== rsId && p.item.account && String(p.item.account.username || '').toLowerCase() === username);
   if (dup) {
-    toast(`Tên đăng nhập "${username}" đã được cấp cho ${dup.name}!`, 'error');
+    toast(`Tên đăng nhập "${username}" đã được cấp cho ${dup.item.name}!`, 'error');
     return;
   }
 
   rs.account = { username, password, active };
   const curAdm = getCurrentAdminAccount();
-  logAdminActivity(curAdm?.username, `Cấp/cập nhật TK "${username}" cho ${rs.name}`);
+  logAdminActivity(curAdm?.username, `Cấp/cập nhật TK "${username}" cho ${partner.label} ${rs.name}`);
   saveDB();
   if (ui.adminTab === 'accounts') renderAdminAccountsManager();
   else renderAdminTable();
@@ -4279,9 +4346,10 @@ function saveRestaurantAccount(e) {
 
 function revokeRestaurantAccount() {
   const rsId = document.getElementById('rsa-restaurant-id').value;
-  const rs = db.restaurants.find(r => r.id === rsId);
-  if (!rs) return;
-  openConfirm('Thu hồi tài khoản nhà hàng?', `Xóa quyền đăng nhập của "${rs.name}"? Các bài viết đã đăng vẫn được giữ lại.`, () => {
+  const partner = findPartnerById(rsId);
+  if (!partner) return;
+  const rs = partner.item;
+  openConfirm(`Thu hồi tài khoản ${partner.label.toLowerCase()}?`, `Xóa quyền đăng nhập của "${rs.name}"? Các bài viết đã đăng vẫn được giữ lại.`, () => {
     rs.account = null;
     if (ui.merchantRestaurantId === rsId) ui.merchantRestaurantId = null;
     const curAdm = getCurrentAdminAccount();
@@ -4410,8 +4478,8 @@ function setAdminTab(t) {
     rsFlt.classList.toggle('hidden', t !== 'posts');
     if (t === 'posts') {
       const prev = rsFlt.value;
-      rsFlt.innerHTML = `<option value="all">🍽️ Tất cả nhà hàng (${db.restaurantPosts.length} bài)</option>` +
-        db.restaurants.map(r => `<option value="${r.id}">${esc(r.name)} (${db.restaurantPosts.filter(p => p.restaurantId === r.id).length})</option>`).join('');
+      rsFlt.innerHTML = `<option value="all">🍽️🎁 Tất cả Nhà hàng &amp; Đặc sản (${db.restaurantPosts.length} bài)</option>` +
+        getAllPartners().map(p => `<option value="${p.item.id}">${p.icon} ${esc(p.item.name)} (${db.restaurantPosts.filter(x => x.restaurantId === p.item.id).length})</option>`).join('');
       if (prev && [...rsFlt.options].some(o => o.value === prev)) rsFlt.value = prev;
     }
   }
@@ -4427,8 +4495,9 @@ function renderAdminAccountsManager() {
   if (!box) return;
   const admins = db.adminAccounts || [];
   const curAdm = getCurrentAdminAccount();
-  const rsWithAcc = db.restaurants.filter(r => r.account);
-  const rsWithoutAcc = db.restaurants.filter(r => !r.account);
+  const allPartners = getAllPartners();
+  const rsWithAcc = allPartners.filter(p => p.item.account);
+  const rsWithoutAcc = allPartners.filter(p => !p.item.account);
   const logs = (db.adminLogs || []).slice(0, 12);
 
   box.innerHTML = `
@@ -4492,7 +4561,7 @@ function renderAdminAccountsManager() {
     <div class="info-box" style="margin-bottom:16px; background:#fcfaff;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
         <div>
-          <div style="font-size:15px; font-weight:800; color:var(--food-dark);">🏪 2. Quản Lý Tài Khoản Đối Tác Nhà Hàng (Đã cấp: ${rsWithAcc.length}/${db.restaurants.length})</div>
+          <div style="font-size:15px; font-weight:800; color:var(--food-dark);">🏪 2. Quản Lý Tài Khoản Nhà Hàng &amp; Cơ Sở Đặc Sản (Đã cấp: ${rsWithAcc.length}/${allPartners.length})</div>
           <div style="font-size:12px; color:var(--muted);">Theo dõi nhanh tài khoản đăng nhập của từng nhà hàng để cập nhật hàng mới; cấp mới hoặc khóa quyền truy cập ngay tại đây.</div>
         </div>
         ${rsWithoutAcc.length ? `<button type="button" class="btn btn-food btn-sm" onclick="bulkIssueRestaurantAccounts()">⚡ Cấp nhanh TK cho ${rsWithoutAcc.length} nhà hàng chưa có</button>` : ''}
@@ -4510,12 +4579,13 @@ function renderAdminAccountsManager() {
             </tr>
           </thead>
           <tbody>
-            ${db.restaurants.map(r => {
+            ${allPartners.map(pt => {
+              const r = pt.item;
               const acc = r.account;
               const pCnt = db.restaurantPosts.filter(p => p.restaurantId === r.id).length;
               return `<tr>
                 <td>
-                  <b>🍽️ ${esc(r.name)}</b>
+                  <b>${pt.icon} ${esc(r.name)}</b> <span class="tag ${pt.type==='restaurant'?'tag-food':'tag-jade'}">${pt.label}</span>
                   <div style="font-size:11px; color:var(--muted);">📍 ${esc(r.ward)} • ${REGIONS[r.region]?.short || ''}</div>
                 </td>
                 <td style="font-size:11.5px;">
@@ -4673,15 +4743,18 @@ function renderAdminTable() {
     const rsFlt = document.getElementById('admin-rs-filter')?.value || 'all';
     const list = db.restaurantPosts.filter(p => {
       if (rsFlt !== 'all' && p.restaurantId !== rsFlt) return false;
-      const rs = db.restaurants.find(r => r.id === p.restaurantId);
-      if (q && !`${p.title} ${p.content} ${p.category} ${p.promo} ${rs?.name || ''}`.toLowerCase().includes(q)) return false;
+      const partner = findPartnerById(p.restaurantId);
+      const rs = partner?.item;
+      if (q && !`${p.title} ${p.content} ${p.category} ${p.promo} ${rs?.name || ''} ${rs?.shop || ''}`.toLowerCase().includes(q)) return false;
       return true;
     });
-    th.innerHTML = '<tr><th>Nhà hàng</th><th>Tiêu đề &amp; Nội dung bài viết</th><th>Khung giờ có hàng &amp; Thời gian đăng</th><th>Trạng thái</th><th>Thao tác</th></tr>';
+    th.innerHTML = '<tr><th>Nhà hàng / Đặc sản</th><th>Tiêu đề &amp; Nội dung bài viết</th><th>Khung giờ có hàng &amp; Thời gian đăng</th><th>Trạng thái</th><th>Thao tác</th></tr>';
     tb.innerHTML = list.map(p => {
-      const rs = db.restaurants.find(r => r.id === p.restaurantId);
+      const partner = findPartnerById(p.restaurantId);
+      const rs = partner?.item;
+      const pIcon = partner?.icon || '🍽️';
       return `<tr>
-        <td><b>🍽️ ${esc(rs?.name || 'Nhà hàng')}</b><div style="font-size:11px; color:var(--muted);">${esc(rs?.ward || '')}</div></td>
+        <td><b>${pIcon} ${esc(rs?.name || 'Cơ sở đối tác')}</b><div style="font-size:11px; color:var(--muted);">${esc(rs?.ward || '')}</div></td>
         <td style="max-width:320px;">
           <div style="font-weight:800;">${p.pinned ? '📌 ' : ''}${esc(p.title)}</div>
           <div style="font-size:11.5px; color:var(--muted);">${esc(p.content.slice(0, 90))}${p.content.length > 90 ? '...' : ''}</div>
@@ -4729,22 +4802,19 @@ function renderAdminTable() {
     const slug = extractFbSlug(item.fb);
     const cleanSite = normalizeWebsiteUrl(item.website);
     const priceLabel = ui.adminTab === 'specialties' ? getSpecialtyPriceInfo(item).pText : (item.priceRange || item.ticket || '');
-    const postCount = ui.adminTab === 'restaurants' ? db.restaurantPosts.filter(p => p.restaurantId === item.id).length : 0;
-    const acc = (ui.adminTab === 'restaurants' || ui.adminTab === 'specialties') ? item.account : null;
+    const isPartnerTab = (ui.adminTab === 'restaurants' || ui.adminTab === 'specialties');
+    const postCount = isPartnerTab ? db.restaurantPosts.filter(p => p.restaurantId === item.id).length : 0;
+    const acc = isPartnerTab ? item.account : null;
     return `<tr>
     <td>
       <b>${esc(item.name)}</b>
       <div style="font-size:11px; color:var(--muted);">${esc(item.theme || item.shop || item.signature || '')}</div>
-      ${ui.adminTab === 'restaurants' ? `
+      ${isPartnerTab ? `
         <div style="margin-top:4px; display:flex; gap:4px; flex-wrap:wrap;">
           <span class="tag tag-food">📰 ${postCount} bài</span>
           ${acc
             ? `<span class="tag ${acc.active!==false?'tag-jade':'tag-red'}">🔑 TK: ${esc(acc.username)} (${acc.active!==false?'Mở':'Khóa'})</span>`
             : `<span class="tag tag-slate">Chưa cấp TK</span>`}
-        </div>` : ''}
-      ${ui.adminTab === 'specialties' && acc ? `
-        <div style="margin-top:4px; display:flex; gap:4px; flex-wrap:wrap;">
-          <span class="tag ${acc.active!==false?'tag-jade':'tag-red'}">🔑 TK: ${esc(acc.username)} (${acc.active!==false?'Mở':'Khóa'})</span>
         </div>` : ''}
     </td>
     <td><b>${esc(item.ward)}</b><div style="font-size:10.5px; font-family:monospace; color:var(--jade-dark);">${Number(item.lat).toFixed(4)}, ${Number(item.lng).toFixed(4)}</div></td>
@@ -4756,7 +4826,7 @@ function renderAdminTable() {
     </td>
     <td><span class="tag ${item.visible!==false?'tag-jade':'tag-red'}">${item.visible!==false?'Đang hiện':'Đang ẩn'}</span></td>
     <td style="white-space:nowrap;">
-      ${ui.adminTab === 'restaurants' ? `
+      ${isPartnerTab ? `
         <button type="button" class="btn btn-soft-jade btn-xs" onclick="openRestaurantAccountModal('${item.id}')">🔑 ${acc ? 'Sửa TK' : 'Cấp TK'}</button>
         <button type="button" class="btn btn-food btn-xs" onclick="openRestaurantPostForm(null,'${item.id}')">+ Đăng bài</button>` : ''}
       <button type="button" class="btn btn-soft-fb btn-xs" onclick="openAdminForm('${item.id}')">Sửa</button>
@@ -4784,7 +4854,7 @@ function deleteAdminItem(id) {
   const arrKey = ui.adminTab === 'posts' ? 'restaurantPosts' : ui.adminTab;
   openConfirm('Xác nhận xóa mục này?', 'Dữ liệu đã xóa sẽ không thể hoàn tác trừ khi khôi phục từ bản sao lưu JSON.', () => {
     db[arrKey] = db[arrKey].filter(x => x.id !== id);
-    if (arrKey === 'restaurants') {
+    if (arrKey === 'restaurants' || arrKey === 'specialties') {
       db.restaurantPosts = db.restaurantPosts.filter(p => p.restaurantId !== id);
     }
     saveDB();
@@ -5284,7 +5354,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Mở Modal cập nhật vị trí nhanh cho tài khoản nhà hàng đang đăng nhập
   window.openMerchantLocationModal = function() {
-    const rs = db.restaurants.find(r => r.id === ui.merchantRestaurantId);
+    const rs = findPartnerById(ui.merchantRestaurantId)?.item;
     if (!rs) { toast('Vui lòng đăng nhập tài khoản nhà hàng trước.', 'error'); return; }
     document.getElementById('mcl-rs-name').textContent = '🍽️ ' + rs.name;
     document.getElementById('mcl-rs-ward').textContent = `📍 ${rs.address ? rs.address + ', ' : ''}${rs.ward}`;
@@ -5345,7 +5415,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Lưu nhanh tọa độ mới vào hồ sơ nhà hàng
   window.saveMerchantQuickLocation = function() {
-    const rs = db.restaurants.find(r => r.id === ui.merchantRestaurantId);
+    const rs = findPartnerById(ui.merchantRestaurantId)?.item;
     if (!rs) return;
     const lat = parseFloat(document.getElementById('mcl-lat').value);
     const lng = parseFloat(document.getElementById('mcl-lng').value);
@@ -6284,18 +6354,19 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const rs = (db.restaurants || []).find(r =>
-      r.account &&
-      String(r.account.username || '').trim().toLowerCase() === u &&
-      String(r.account.password ?? '').trim() === p
+    const found = getAllPartners().find(pt =>
+      pt.item.account &&
+      String(pt.item.account.username || '').trim().toLowerCase() === u &&
+      String(pt.item.account.password ?? '').trim() === p
     );
+    const rs = found?.item;
 
     if (!rs) {
-      toast('Sai tên đăng nhập hoặc mật khẩu nhà hàng! Hãy bấm 👁️ để kiểm tra lại.', 'error');
+      toast('Sai tên đăng nhập hoặc mật khẩu cơ sở! Hãy bấm 👁️ để kiểm tra lại.', 'error');
       return;
     }
     if (rs.account.active === false) {
-      toast('Tài khoản nhà hàng này đang bị Admin tạm khóa.', 'error');
+      toast('Tài khoản này đang bị Admin tạm khóa.', 'error');
       return;
     }
 
@@ -6335,6 +6406,317 @@ window.addEventListener('DOMContentLoaded', () => {
       btn.onclick = resetDefaultLoginAccounts;
       box.appendChild(btn);
     });
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN BỔ SUNG: BẢO TOÀN DỮ LIỆU KHI THÊM/XÓA & CẬP NHẬT BẢN MỚI ==================== -->
+<div id="vault-modal" class="modal-bg" onclick="if(event.target===this)closeModal('vault-modal')">
+  <div class="modal-box" style="max-width:540px;">
+    <div class="modal-head">
+      <div style="font-size:15px; font-weight:800;">🛡️ Bảo Toàn Dữ Liệu &amp; Cập Nhật Bản Mới</div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('vault-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+      <div class="info-box" style="background:#ecfdf5; border-color:#6ee7b7;">
+        <div style="font-weight:800; color:var(--jade-dark);">✅ Cơ chế chống mất dữ liệu đang hoạt động</div>
+        <div style="font-size:12px; color:#065f46;">
+          • Mọi thao tác <b>Thêm / Sửa / Xóa Nhà hàng &amp; Đặc sản</b> đều được lưu song song vào <b>Kho bảo toàn vĩnh viễn</b> và tự động đẩy ngay lên Firebase (nếu đã kết nối).<br>
+          • Khi bạn nâng cấp lên file HTML phiên bản mới trên cùng trình duyệt hoặc tên miền, dữ liệu đã thêm/xóa sẽ tự động được giữ nguyên 100%.
+        </div>
+      </div>
+
+      <div class="info-box" style="background:#eff6ff; border-color:#93c5fd;">
+        <div style="font-weight:800; color:var(--fb); margin-bottom:4px;">📦 Xuất bản HTML tích hợp sẵn dữ liệu hiện tại</div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">
+          Dùng khi bạn muốn đưa file mới lên máy khác hoặc cập nhật lên GitHub Pages mà vẫn giữ nguyên toàn bộ nhà hàng/đặc sản đã thêm hoặc xóa:
+        </div>
+        <button type="button" class="btn btn-fb btn-sm" style="width:100%;" onclick="exportHtmlWithCurrentData()">📦 Tải file HTML mới kèm toàn bộ dữ liệu hiện tại</button>
+      </div>
+
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="font-size:13px; font-weight:800;">🕒 Bản chụp tự động gần nhất (Auto-Snapshot)</div>
+          <button type="button" class="btn btn-soft-jade btn-xs" onclick="createManualSnapshot()">+ Tạo bản chụp ngay</button>
+        </div>
+        <div id="vault-snap-list" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto;"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('vault-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initVersionSafePersistenceAddon() {
+  const VAULT_KEY = 'nb_heritage_persistent_vault_v1';
+  const SNAP_KEY = 'nb_heritage_auto_snapshots_v1';
+
+  function getSnapshots() {
+    try { return JSON.parse(localStorage.getItem(SNAP_KEY) || '[]') || []; }
+    catch (e) { return []; }
+  }
+
+  function saveSnapshots(list) {
+    try { localStorage.setItem(SNAP_KEY, JSON.stringify(list.slice(0, 6))); }
+    catch (e) {}
+  }
+
+  function buildCleanDbSnapshot() {
+    return {
+      pin: db.pin,
+      adminAccounts: db.adminAccounts || [],
+      adminLogs: (db.adminLogs || []).slice(0, 40),
+      siteTitles: db.siteTitles || {},
+      landmarks: db.landmarks || [],
+      specialties: db.specialties || [],
+      restaurants: db.restaurants || [],
+      restaurantPosts: db.restaurantPosts || [],
+      wards: db.wards || [],
+      reviews: db.reviews || [],
+      _deletedIds: db._deletedIds || [],
+      _lastModified: Date.now()
+    };
+  }
+
+  function writeVault() {
+    try {
+      const payload = buildCleanDbSnapshot();
+      localStorage.setItem(VAULT_KEY, JSON.stringify(payload));
+    } catch (e) {}
+  }
+
+  function recordAutoSnapshot(reason) {
+    const snaps = getSnapshots();
+    snaps.unshift({
+      id: 'sn_' + Date.now().toString(36),
+      time: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN'),
+      reason: reason || 'Cập nhật dữ liệu',
+      rsCount: (db.restaurants || []).length,
+      spCount: (db.specialties || []).length,
+      data: buildCleanDbSnapshot()
+    });
+    saveSnapshots(snaps);
+  }
+
+  function applySnapshotToDB(data) {
+    if (!data) return;
+    const localCart = db.cart || [];
+    db.pin = data.pin || db.pin || '2026';
+    if (Array.isArray(data.adminAccounts) && data.adminAccounts.length) db.adminAccounts = data.adminAccounts;
+    if (Array.isArray(data.adminLogs)) db.adminLogs = data.adminLogs;
+    if (data.siteTitles) db.siteTitles = Object.assign({}, DEFAULT_SITE_TITLES, data.siteTitles);
+    if (Array.isArray(data.landmarks)) db.landmarks = data.landmarks;
+    if (Array.isArray(data.specialties)) db.specialties = data.specialties;
+    if (Array.isArray(data.restaurants)) db.restaurants = data.restaurants;
+    if (Array.isArray(data.restaurantPosts)) db.restaurantPosts = data.restaurantPosts;
+    if (Array.isArray(data.wards)) db.wards = data.wards;
+    if (Array.isArray(data.reviews)) db.reviews = data.reviews;
+    if (Array.isArray(data._deletedIds)) db._deletedIds = data._deletedIds;
+    db._lastModified = data._lastModified || Date.now();
+    db.cart = localCart;
+  }
+
+  // 1. Tự động kế thừa dữ liệu từ Vault, bản nhúng (embedded-seed-db) hoặc các khóa cũ khi update bản mới
+  function hydrateFromVaultOrSeed() {
+    try {
+      const mainRaw = localStorage.getItem(STORAGE_KEY);
+      const vaultRaw = localStorage.getItem(VAULT_KEY);
+      const seedEl = document.getElementById('embedded-seed-db');
+      let seedData = null;
+      if (seedEl && seedEl.textContent.trim()) {
+        try { seedData = JSON.parse(seedEl.textContent.trim()); } catch (e) {}
+      }
+
+      const mainData = mainRaw ? JSON.parse(mainRaw) : null;
+      const vaultData = vaultRaw ? JSON.parse(vaultRaw) : null;
+
+      // Chọn nguồn mới nhất giữa STORAGE_KEY, VAULT_KEY và dữ liệu nhúng trong file HTML
+      let best = mainData;
+      const mainTs = Number(mainData?._lastModified || 0);
+      const vaultTs = Number(vaultData?._lastModified || 0);
+      const seedTs = Number(seedData?._lastModified || 0);
+
+      if (vaultData && (!best || vaultTs > mainTs)) best = vaultData;
+      if (seedData && (!best || seedTs > Math.max(mainTs, vaultTs))) best = seedData;
+
+      // Nếu chưa có dữ liệu nào, tìm kế thừa từ các khóa nb_heritage_* cũ hơn
+      if (!best) {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('nb_heritage_') && k !== STORAGE_KEY && k !== VAULT_KEY && k !== SNAP_KEY) {
+            try {
+              const old = JSON.parse(localStorage.getItem(k));
+              if (old && Array.isArray(old.restaurants) && Array.isArray(old.specialties)) {
+                best = old;
+                break;
+              }
+            } catch (e) {}
+          }
+        }
+      }
+
+      if (best && best !== mainData) {
+        applySnapshotToDB(best);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        writeVault();
+        applySiteTitles();
+        updateCounts();
+        renderLiveNewItemsBanner();
+        renderMap();
+        renderLandmarkQuickGrid();
+        renderRoutesGrid();
+        if (ui.tab === 'market') { populateWardFilter(); renderMarket(); renderRestaurantPostsFeed(); }
+        if (ui.tab === 'admin' && ui.adminLoggedIn) renderAdminView();
+      } else {
+        writeVault();
+      }
+    } catch (e) {
+      console.error('Vault hydrate error:', e);
+    }
+  }
+
+  // 2. Bọc saveDB để luôn cập nhật _lastModified & ghi song song vào Vault bảo toàn
+  if (typeof window.saveDB === 'function') {
+    const _prevSaveDB = window.saveDB;
+    window.saveDB = function() {
+      db._lastModified = Date.now();
+      _prevSaveDB();
+      writeVault();
+    };
+  }
+
+  // 3. Bọc saveAdminForm để tạo Auto-Snapshot & đẩy Firebase ngay lập tức khi Thêm / Sửa Nhà hàng, Đặc sản
+  if (typeof window.saveAdminForm === 'function') {
+    const _prevSaveAdminForm = window.saveAdminForm;
+    window.saveAdminForm = function(e) {
+      const tabBefore = ui.adminTab;
+      const isEdit = Boolean(ui.editingId);
+      const nameVal = (document.getElementById('f-name')?.value || '').trim();
+      _prevSaveAdminForm(e);
+      if (tabBefore === 'restaurants' || tabBefore === 'specialties') {
+        const label = tabBefore === 'restaurants' ? 'Nhà hàng' : 'Đặc sản';
+        recordAutoSnapshot(`${isEdit ? 'Sửa' : 'Thêm'} ${label}: ${nameVal || 'Mới'}`);
+        if (typeof window.pushAllToFirebase === 'function') {
+          window.pushAllToFirebase(false);
+        }
+      }
+    };
+  }
+
+  // 4. Bọc deleteAdminItem để lưu ID đã xóa, tạo Auto-Snapshot & đẩy Firebase ngay lập tức
+  if (typeof window.deleteAdminItem === 'function') {
+    const _prevDeleteAdminItem = window.deleteAdminItem;
+    window.deleteAdminItem = function(id) {
+      const tabBefore = ui.adminTab;
+      const arrKey = tabBefore === 'posts' ? 'restaurantPosts' : tabBefore;
+      const targetItem = (db[arrKey] || []).find(x => x.id === id);
+      const origOpenConfirm = window.openConfirm;
+      window.openConfirm = function(title, msg, cb) {
+        origOpenConfirm(title, msg, () => {
+          if (tabBefore === 'restaurants' || tabBefore === 'specialties') {
+            recordAutoSnapshot(`Trước khi xóa ${tabBefore === 'restaurants' ? 'Nhà hàng' : 'Đặc sản'}: ${targetItem?.name || id}`);
+            if (!Array.isArray(db._deletedIds)) db._deletedIds = [];
+            if (!db._deletedIds.includes(id)) db._deletedIds.push(id);
+          }
+          cb();
+          writeVault();
+          if (typeof window.pushAllToFirebase === 'function') {
+            window.pushAllToFirebase(false);
+          }
+        });
+      };
+      try {
+        _prevDeleteAdminItem(id);
+      } finally {
+        window.openConfirm = origOpenConfirm;
+      }
+    };
+  }
+
+  // 5. Giao diện quản lý Vault & Xuất file HTML bản mới kèm dữ liệu hiện tại
+  window.openVaultModal = function() {
+    renderVaultSnapshots();
+    document.getElementById('vault-modal').classList.add('open');
+  };
+
+  window.createManualSnapshot = function() {
+    recordAutoSnapshot('Lưu thủ công bởi Admin');
+    renderVaultSnapshots();
+    toast('✅ Đã tạo bản chụp bảo toàn dữ liệu!');
+  };
+
+  window.restoreVaultSnapshot = function(snapId) {
+    const snap = getSnapshots().find(s => s.id === snapId);
+    if (!snap || !snap.data) return;
+    openConfirm('Khôi phục bản chụp này?', `Khôi phục dữ liệu về mốc "${snap.time}" (${snap.rsCount} nhà hàng, ${snap.spCount} đặc sản)?`, () => {
+      applySnapshotToDB(snap.data);
+      saveDB();
+      applySiteTitles();
+      updateCounts();
+      renderAdminView();
+      renderLiveNewItemsBanner();
+      renderMap();
+      renderMarket();
+      renderRestaurantPostsFeed();
+      if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
+      closeModal('vault-modal');
+      toast('✅ Đã khôi phục dữ liệu từ bản chụp an toàn!');
+    });
+  };
+
+  function renderVaultSnapshots() {
+    const box = document.getElementById('vault-snap-list');
+    if (!box) return;
+    const snaps = getSnapshots();
+    if (!snaps.length) {
+      box.innerHTML = '<div style="font-size:12px; color:var(--muted); text-align:center; padding:12px;">Chưa có bản chụp nào. Hệ thống sẽ tự động chụp mỗi khi bạn Thêm hoặc Xóa Nhà hàng / Đặc sản.</div>';
+      return;
+    }
+    box.innerHTML = snaps.map(s => `
+      <div style="padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:#f8fafc; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+        <div style="font-size:12px;">
+          <b>${esc(s.reason)}</b>
+          <div style="font-size:11px; color:var(--muted);">🕒 ${esc(s.time)} • 🍽️ ${s.rsCount} nhà hàng • 🎁 ${s.spCount} đặc sản</div>
+        </div>
+        <button type="button" class="btn btn-soft-fb btn-xs" onclick="restoreVaultSnapshot('${s.id}')">↺ Khôi phục</button>
+      </div>
+    `).join('');
+  }
+
+  window.exportHtmlWithCurrentData = function() {
+    const payload = buildCleanDbSnapshot();
+    const jsonSafe = JSON.stringify(payload).replace(/<\/script>/gi, '<\\/script>');
+    let docHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const seedTag = `<script id="embedded-seed-db" type="application/json">${jsonSafe}<\/script>`;
+    if (docHtml.includes('id="embedded-seed-db"')) {
+      docHtml = docHtml.replace(/<script id="embedded-seed-db" type="application\/json">[\s\S]*?<\/script>/i, seedTag);
+    } else {
+      docHtml = docHtml.replace(/<\/body>/i, seedTag + '\n</body>');
+    }
+    const blob = new Blob([docHtml], { type: 'text/html;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'ninh-binh-mien-di-san-updated.html';
+    a.click();
+    toast('📦 Đã xuất file HTML mới tích hợp toàn bộ dữ liệu hiện tại!');
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(hydrateFromVaultOrSeed, 50);
+
+    // Chèn nút Bảo toàn dữ liệu vào thanh công cụ Quản trị Admin
+    const adminToolbar = document.querySelector('#admin-panel .panel-head > div:last-child');
+    if (adminToolbar && !document.getElementById('btn-vault-open')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'btn-vault-open';
+      btn.className = 'btn btn-soft-gold btn-sm';
+      btn.textContent = '🛡️ Bảo toàn & Xuất bản';
+      btn.onclick = openVaultModal;
+      adminToolbar.insertBefore(btn, adminToolbar.firstChild);
+    }
   });
 })();
 </script>
