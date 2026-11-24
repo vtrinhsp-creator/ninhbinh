@@ -4493,5 +4493,208 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+<!-- ==================== MÔ-ĐUN BỔ SUNG: CẬP NHẬT VỊ TRÍ NHÀ HÀNG ==================== -->
+<div id="mc-loc-modal" class="modal-bg" onclick="if(event.target===this)closeModal('mc-loc-modal')">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-head">
+      <div style="font-size:15px; font-weight:800;">📍 Cập Nhật Vị Trí Nhà Hàng</div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('mc-loc-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-box" style="margin-bottom:10px; background:#f2fbf9; border-color:#99f6e4;">
+        <div style="font-weight:800; color:var(--jade-dark);" id="mcl-rs-name">🍽️ Nhà hàng</div>
+        <div style="font-size:11.5px; color:var(--muted);" id="mcl-rs-ward"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">🔗 Dán link Google Maps hoặc chuỗi tọa độ (tự động tách)</label>
+        <div style="display:flex; gap:6px;">
+          <input id="mcl-gmaps-url" class="form-control" placeholder="VD: https://maps.google.com/?q=20.2539,105.9750">
+          <button type="button" class="btn btn-soft-fb btn-sm" onclick="parseMerchantGmapsLink()">Tách</button>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label class="form-label">Vĩ độ (Latitude)</label>
+          <input id="mcl-lat" type="number" step="0.00001" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kinh độ (Longitude)</label>
+          <input id="mcl-lng" type="number" step="0.00001" class="form-control">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+        <button type="button" class="btn btn-jade btn-xs" onclick="pickMerchantGPSInModal()">🎯 GPS hiện tại</button>
+        <button type="button" class="btn btn-gold btn-xs" onclick="startMerchantMapPick()">🗺️ Chấm trực tiếp trên Bản đồ</button>
+        <a id="mcl-preview-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-xs">🔎 Kiểm tra Maps</a>
+      </div>
+      <div style="font-size:11px; color:var(--muted);">💡 Bấm <b>Lưu vị trí</b> để cập nhật ngay ghim nhà hàng trên bản đồ và danh sách ưu tiên gần nhất.</div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('mc-loc-modal')">Hủy</button>
+      <button type="button" class="btn btn-food btn-sm" onclick="saveMerchantQuickLocation()">💾 Lưu Vị Trí</button>
+    </div>
+  </div>
+</div>
+
+<!-- Thanh nổi hướng dẫn khi đang chấm điểm trên bản đồ -->
+<div id="mc-map-pick-bar" class="hidden" style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:95; background:#14222b; color:#fff; padding:10px 16px; border-radius:14px; box-shadow:0 12px 30px rgba(0,0,0,0.28); display:flex; align-items:center; gap:12px; border:2px solid #f59e0b;">
+  <span style="font-size:12.5px; font-weight:700;">🎯 Nhấp chuột vào vị trí mới của nhà hàng trên bản đồ SVG</span>
+  <button type="button" class="btn btn-danger btn-xs" onclick="cancelMerchantMapPick()">Hủy chọn</button>
+</div>
+
+<script>
+(function initMerchantLocationAddon() {
+  let isPickingMerchantLoc = false;
+
+  // Quy đổi ngược tọa độ SVG (x, y) -> GPS (lat, lng) khớp với gpsToSvg()
+  function svgToGps(x, y) {
+    const minLng = 105.52, maxLng = 106.62, minLat = 19.96, maxLat = 20.68;
+    const lng = minLng + ((x - 45) / 830) * (maxLng - minLng);
+    const lat = minLat + ((595 - y) / 545) * (maxLat - minLat);
+    return {
+      lat: Number(Math.max(minLat, Math.min(maxLat, lat)).toFixed(5)),
+      lng: Number(Math.max(minLng, Math.min(maxLng, lng)).toFixed(5))
+    };
+  }
+
+  function updateModalPreviewLink() {
+    const lat = parseFloat(document.getElementById('mcl-lat').value);
+    const lng = parseFloat(document.getElementById('mcl-lng').value);
+    const a = document.getElementById('mcl-preview-link');
+    if (a && Number.isFinite(lat) && Number.isFinite(lng)) a.href = gMaps(lat, lng);
+  }
+
+  // Mở Modal cập nhật vị trí nhanh cho tài khoản nhà hàng đang đăng nhập
+  window.openMerchantLocationModal = function() {
+    const rs = db.restaurants.find(r => r.id === ui.merchantRestaurantId);
+    if (!rs) { toast('Vui lòng đăng nhập tài khoản nhà hàng trước.', 'error'); return; }
+    document.getElementById('mcl-rs-name').textContent = '🍽️ ' + rs.name;
+    document.getElementById('mcl-rs-ward').textContent = `📍 ${rs.address ? rs.address + ', ' : ''}${rs.ward}`;
+    document.getElementById('mcl-gmaps-url').value = '';
+    document.getElementById('mcl-lat').value = Number(rs.lat).toFixed(5);
+    document.getElementById('mcl-lng').value = Number(rs.lng).toFixed(5);
+    updateModalPreviewLink();
+    document.getElementById('mc-loc-modal').classList.add('open');
+  };
+
+  // Tách tọa độ từ link Google Maps (@lat,lng | q=lat,lng | !3dlat!4dlng | lat, lng)
+  window.parseMerchantGmapsLink = function() {
+    const raw = (document.getElementById('mcl-gmaps-url').value || '').trim();
+    if (!raw) { toast('Vui lòng dán link Google Maps hoặc cặp tọa độ.', 'error'); return; }
+    const m = raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+           || raw.match(/[?&](?:q|ll|destination)=(-?\d+\.\d+),(-?\d+\.\d+)/)
+           || raw.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/)
+           || raw.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{2,3}\.\d{3,})/);
+    if (!m) { toast('Không tìm thấy tọa độ hợp lệ trong đường dẫn này.', 'error'); return; }
+    document.getElementById('mcl-lat').value = Number(parseFloat(m[1]).toFixed(5));
+    document.getElementById('mcl-lng').value = Number(parseFloat(m[2]).toFixed(5));
+    updateModalPreviewLink();
+    toast(`✅ Đã tách tọa độ: ${m[1]}, ${m[2]}`);
+  };
+
+  // Lấy GPS hiện tại ngay trong Modal
+  window.pickMerchantGPSInModal = function() {
+    if (!navigator.geolocation) { toast('Trình duyệt không hỗ trợ GPS.', 'error'); return; }
+    toast('⏳ Đang lấy tọa độ GPS hiện tại...', 'info');
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        document.getElementById('mcl-lat').value = Number(pos.coords.latitude.toFixed(5));
+        document.getElementById('mcl-lng').value = Number(pos.coords.longitude.toFixed(5));
+        updateModalPreviewLink();
+        toast('✅ Đã lấy tọa độ GPS thành công!');
+      },
+      () => toast('Không thể lấy GPS. Hãy bật quyền định vị hoặc chấm trên bản đồ.', 'error'),
+      { enableHighAccuracy: true, timeout: 7000 }
+    );
+  };
+
+  // Bật chế độ nhấp chọn trực tiếp trên Bản đồ SVG
+  window.startMerchantMapPick = function() {
+    isPickingMerchantLoc = true;
+    closeModal('mc-loc-modal');
+    switchTab('map');
+    document.getElementById('mc-map-pick-bar').classList.remove('hidden');
+    document.getElementById('map-svg-wrap').style.cursor = 'crosshair';
+    toast('Hãy nhấp vào vị trí mới của nhà hàng trên bản đồ!', 'info');
+  };
+
+  window.cancelMerchantMapPick = function() {
+    isPickingMerchantLoc = false;
+    document.getElementById('mc-map-pick-bar').classList.add('hidden');
+    document.getElementById('map-svg-wrap').style.cursor = '';
+    switchTab('merchant');
+  };
+
+  // Lưu nhanh tọa độ mới vào hồ sơ nhà hàng
+  window.saveMerchantQuickLocation = function() {
+    const rs = db.restaurants.find(r => r.id === ui.merchantRestaurantId);
+    if (!rs) return;
+    const lat = parseFloat(document.getElementById('mcl-lat').value);
+    const lng = parseFloat(document.getElementById('mcl-lng').value);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      toast('Vĩ độ và Kinh độ không hợp lệ.', 'error');
+      return;
+    }
+    rs.lat = lat;
+    rs.lng = lng;
+    if (typeof logAdminActivity === 'function') {
+      logAdminActivity(`Nhà hàng: ${rs.name} (${rs.account?.username || ''})`, `Cập nhật vị trí GPS (${lat}, ${lng})`);
+    }
+    saveDB();
+    renderMerchantPortal();
+    renderLiveNewItemsBanner();
+    renderMap();
+    renderMarket();
+    renderRestaurantPostsFeed();
+    closeModal('mc-loc-modal');
+    toast('✅ Đã cập nhật vị trí mới của nhà hàng lên bản đồ!');
+  };
+
+  // Lắng nghe sự kiện nhấp bản đồ SVG khi đang ở chế độ chọn vị trí
+  window.addEventListener('DOMContentLoaded', () => {
+    const svg = document.getElementById('nb-svg');
+    const viewport = document.getElementById('svg-viewport');
+    if (svg && viewport) {
+      svg.addEventListener('click', (e) => {
+        if (!isPickingMerchantLoc) return;
+        e.stopPropagation();
+        const pt = svg.createSVGPoint();
+        pt.x = e.clientX;
+        pt.y = e.clientY;
+        const loc = pt.matrixTransform(viewport.getScreenCTM().inverse());
+        const gps = svgToGps(loc.x, loc.y);
+
+        isPickingMerchantLoc = false;
+        document.getElementById('mc-map-pick-bar').classList.add('hidden');
+        document.getElementById('map-svg-wrap').style.cursor = '';
+
+        switchTab('merchant');
+        openMerchantLocationModal();
+        document.getElementById('mcl-lat').value = gps.lat;
+        document.getElementById('mcl-lng').value = gps.lng;
+        updateModalPreviewLink();
+        toast(`📍 Đã chọn điểm (${gps.lat}, ${gps.lng}). Bấm "Lưu Vị Trí" để hoàn tất!`);
+      }, true);
+    }
+
+    // Tự động chèn nút kích hoạt vào Banner Cổng Nhà Hàng (không sửa HTML gốc)
+    const bannerBtnWrap = document.querySelector('#merchant-dashboard .merchant-banner > div:last-child');
+    if (bannerBtnWrap) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-jade btn-sm';
+      btn.textContent = '📍 Cập nhật vị trí';
+      btn.onclick = openMerchantLocationModal;
+      bannerBtnWrap.insertBefore(btn, bannerBtnWrap.firstChild);
+    }
+
+    document.getElementById('mcl-lat')?.addEventListener('input', updateModalPreviewLink);
+    document.getElementById('mcl-lng')?.addEventListener('input', updateModalPreviewLink);
+  });
+})();
+</script>
 </body>
 </html>
