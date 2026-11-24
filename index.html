@@ -690,6 +690,260 @@
     }
   }
 
+
+  /* =========================================================================
+     10. VIBRANT MOBILE THEME — PHỐI MÀU SỐNG ĐỘNG & TỐI ƯU TRẢI NGHIỆM DI ĐỘNG
+     ========================================================================= */
+  :root {
+    --grad-brand: linear-gradient(135deg, #1d4ed8 0%, #0284c7 45%, #0d9488 80%, #f59e0b 100%);
+    --grad-fb: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    --grad-jade: linear-gradient(135deg, #0d9488 0%, #10b981 100%);
+    --grad-gold: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    --grad-food: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    --grad-rainbow: linear-gradient(90deg, #2563eb 0%, #06b6d4 28%, #10b981 55%, #f59e0b 80%, #ec4899 100%);
+  }
+
+  /* Thanh viền màu sống động trên cùng Header */
+  .app-header::before {
+    content: "";
+    display: block;
+    height: 3.5px;
+    width: 100%;
+    background: var(--grad-rainbow);
+  }
+
+  /* Nút bấm chuyển sang gradient rực rỡ, có chiều sâu */
+  .btn-fb { background: var(--grad-fb); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28); }
+  .btn-fb:hover { filter: brightness(1.06); }
+  .btn-jade { background: var(--grad-jade); box-shadow: 0 4px 14px rgba(13, 148, 136, 0.28); }
+  .btn-jade:hover { filter: brightness(1.06); }
+  .btn-gold { background: var(--grad-gold); box-shadow: 0 4px 14px rgba(245, 158, 11, 0.30); }
+  .btn-gold:hover { filter: brightness(1.06); }
+  .btn-food { background: var(--grad-food); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.28); }
+  .btn-food:hover { filter: brightness(1.06); }
+
+  .hero {
+    background: var(--grad-brand);
+    box-shadow: 0 12px 28px rgba(2, 132, 199, 0.24);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    left: -35px;
+    bottom: -45px;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.28) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  @media (max-width: 820px) {
+    /* Nền chuyển sắc pastel tươi sáng thay cho nền xám đơn điệu */
+    body {
+      background: linear-gradient(180deg, #eef6ff 0%, #f0fdfa 45%, #fffbeb 100%);
+      background-attachment: fixed;
+    }
+
+    /* Header trong suốt mượt mà + giỏ hàng nổi bật */
+    .app-header {
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+    }
+    .brand-logo {
+      background: var(--grad-brand);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.32);
+    }
+    .cart-trigger {
+      background: var(--grad-fb);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(37, 99, 235, 0.28);
+    }
+    .cart-badge {
+      background: #fde047;
+      color: #1e293b;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Thanh điều hướng Mobile dạng viên thuốc rực rỡ theo từng mục */
+    .nav-mobile {
+      background: linear-gradient(90deg, #f8fafc 0%, #f0f9ff 50%, #fdf4ff 100%);
+      padding: 7px 8px;
+      gap: 5px;
+      border-top: 1px solid rgba(203, 213, 225, 0.7);
+    }
+    .nav-mobile .nav-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 7px 4px;
+      color: #475569;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+      transition: all 0.2s ease;
+    }
+    .nav-mobile .nav-btn span:first-child {
+      font-size: 16px;
+      line-height: 1.1;
+    }
+    .nav-mobile #nm-map.active {
+      background: var(--grad-jade);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.32);
+      transform: translateY(-1px);
+    }
+    .nav-mobile #nm-market.active {
+      background: var(--grad-gold);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.34);
+      transform: translateY(-1px);
+    }
+    .nav-mobile #nm-fb.active {
+      background: var(--grad-fb);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.32);
+      transform: translateY(-1px);
+    }
+    .nav-mobile #nm-merchant.active {
+      background: var(--grad-food);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.34);
+      transform: translateY(-1px);
+    }
+    .nav-mobile #nm-admin.active {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      color: #fde68a;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.28);
+      transform: translateY(-1px);
+    }
+
+    /* Hero & Stat-box kính mờ sống động */
+    .hero {
+      border: 1px solid rgba(255, 255, 255, 0.28);
+    }
+    .stat-box {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+    .stat-box .num {
+      color: #fef08a;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Thanh thông báo hàng mới rực rỡ, dễ chạm */
+    .live-alert-bar {
+      background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 50%, #fae8ff 100%);
+      border: 1.5px solid #fb923c;
+      box-shadow: 0 6px 18px rgba(249, 115, 22, 0.14);
+    }
+    .live-alert-item {
+      border: 1px solid #fed7aa;
+      border-left: 4px solid #ec4899;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
+    }
+    .new-pulse-badge {
+      background: linear-gradient(135deg, #ef4444 0%, #ec4899 100%);
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+    }
+
+    /* Thanh chip lọc cuộn ngang mượt mà trên điện thoại (không bị vỡ nhiều dòng) */
+    .map-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 7px;
+      background: linear-gradient(90deg, #f0f9ff 0%, #f0fdfa 100%);
+    }
+    .chip-bar {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 3px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .chip-bar::-webkit-scrollbar { display: none; }
+    .layer-chip, .reg-chip {
+      flex-shrink: 0;
+      padding: 6px 11px;
+    }
+    .reg-chip.active {
+      background: var(--grad-fb);
+      box-shadow: 0 3px 8px rgba(37, 99, 235, 0.26);
+    }
+
+    /* Khung bản đồ, thẻ đặc sản, danh thắng & bài đăng sắc nét hơn */
+    .map-card, .panel {
+      border: 1px solid rgba(186, 230, 253, 0.85);
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+    }
+    .map-top {
+      background: linear-gradient(135deg, #eff6ff 0%, #ecfdf5 100%);
+    }
+    .smart-card {
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
+    }
+    .lm-card {
+      border-left: 4px solid #f59e0b;
+      background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+    }
+    .route-item {
+      border-left: 4px solid #0d9488;
+      background: linear-gradient(180deg, #ffffff 0%, #f0fdfa 100%);
+    }
+    .post-card {
+      border-top: 3.5px solid #a855f7;
+      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.08);
+    }
+    .merchant-banner {
+      background: var(--grad-food);
+      box-shadow: 0 8px 22px rgba(124, 58, 237, 0.28);
+    }
+
+    /* Modal dạng Bottom-Sheet hiện đại có thanh kéo trực quan */
+    .modal-box {
+      border-radius: 22px 22px 14px 14px;
+      border-top: 3px solid #38bdf8;
+    }
+    .modal-head {
+      position: relative;
+      padding-top: 18px;
+      background: linear-gradient(90deg, #f8fafc 0%, #eff6ff 100%);
+    }
+    .modal-head::before {
+      content: "";
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 42px;
+      height: 4px;
+      border-radius: 999px;
+      background: #cbd5e1;
+    }
+
+    /* Thanh nổi chọn điểm bản đồ gọn đẹp trên mobile */
+    #mc-map-pick-bar {
+      width: calc(100% - 24px);
+      max-width: 420px;
+      justify-content: space-between;
+      bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%) !important;
+      border: 2px solid #fbbf24 !important;
+    }
+
+    /* Nhấn nhẹ khi chạm vào thẻ */
+    .smart-card:active, .lm-card:active, .live-alert-item:active {
+      transform: scale(0.985);
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -4857,6 +5111,380 @@ window.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('mcl-lat')?.addEventListener('input', updateModalPreviewLink);
     document.getElementById('mcl-lng')?.addEventListener('input', updateModalPreviewLink);
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN BỔ SUNG: ĐỒNG BỘ DỮ LIỆU FIREBASE FIRESTORE ==================== -->
+<div id="fb-sync-modal" class="modal-bg" onclick="if(event.target===this)closeModal('fb-sync-modal')">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-head">
+      <div style="font-size:15px; font-weight:800;">☁️ Đồng Bộ Dữ Liệu Lên Firebase Firestore</div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('fb-sync-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="fbs-status-box" class="info-box" style="margin-bottom:12px; background:#f8fafc;">
+        <div style="font-weight:800;" id="fbs-status-txt">⚪ Chưa kết nối Firebase (Đang lưu cục bộ trên máy)</div>
+        <div style="font-size:11.5px; color:var(--muted);" id="fbs-status-sub">Chỉ cần copy đoạn mã <code>firebaseConfig</code> từ Firebase Console, dán vào ô bên dưới và bấm <b>Lưu &amp; Kết Nối</b>.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📋 Dán nguyên đoạn mã cấu hình Firebase (firebaseConfig) *</label>
+        <textarea id="fbs-config-code" class="form-control" rows="6" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; line-height:1.45;" placeholder='const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  authDomain: "ten-du-an.firebaseapp.com",
+  projectId: "ten-du-an",
+  appId: "1:123456:web:abcdef"
+};'></textarea>
+      </div>
+
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin:8px 0 12px; font-size:12.5px; font-weight:700;">
+        <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="fbs-autoSync" checked> 🔄 Tự động đẩy lên Firebase khi lưu
+        </label>
+        <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="fbs-realtime" checked> ⚡ Nhận cập nhật thời gian thực
+        </label>
+      </div>
+
+      <div style="display:flex; gap:6px; flex-wrap:wrap; padding-top:8px; border-top:1px solid var(--border);">
+        <button type="button" class="btn btn-jade btn-sm" style="flex:1;" onclick="pushAllToFirebase(true)">⬆️ Đẩy dữ liệu lên Firebase</button>
+        <button type="button" class="btn btn-soft-fb btn-sm" style="flex:1;" onclick="pullFromFirebase(true)">⬇️ Tải dữ liệu từ Firebase</button>
+      </div>
+      <div style="font-size:11px; color:var(--muted); margin-top:8px;">
+        💡 Hệ thống tự động lưu vào Firestore (<code>nb_heritage_hub/main_db</code>). Giỏ hàng (<code>cart</code>) được giữ riêng trên máy từng khách.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-soft btn-sm" style="color:var(--danger); margin-right:auto;" onclick="disconnectFirebaseSync()">🔌 Ngắt kết nối</button>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('fb-sync-modal')">Đóng</button>
+      <button type="button" class="btn btn-fb btn-sm" onclick="saveAndConnectFirebase()">🚀 Lưu &amp; Kết Nối Firebase</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initFirebaseSyncAddon() {
+  const FB_CFG_KEY = 'nb_firebase_sync_cfg_v1';
+  const CLIENT_ID = 'cli_' + Math.random().toString(36).slice(2, 10);
+  const DEFAULT_COL = 'nb_heritage_hub';
+  const DEFAULT_DOC = 'main_db';
+
+  // TÙY CHỌN NHÚNG SẴN CONFIG CHO MỌI KHÁCH TRUY CẬP (Để trống nếu cấu hình qua giao diện Admin)
+  const HARDCODED_FIREBASE_CONFIG = null;
+
+  let fbApp = null;
+  let fbDb = null;
+  let fbUnsub = null;
+  let sdkPromise = null;
+  let pushTimer = null;
+  let isApplyingRemote = false;
+  let lastSyncAt = '';
+
+  function getSavedConfig() {
+    try {
+      const raw = localStorage.getItem(FB_CFG_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return HARDCODED_FIREBASE_CONFIG ? Object.assign({}, HARDCODED_FIREBASE_CONFIG) : null;
+  }
+
+  function extractConfigFromCode(raw) {
+    if (!raw) return null;
+    const pick = key => {
+      const m = raw.match(new RegExp(`["']?${key}["']?\\s*:\\s*["']([^"']+)["']`));
+      return m ? m[1].trim() : '';
+    };
+    const apiKey = pick('apiKey');
+    const projectId = pick('projectId');
+    if (!apiKey || !projectId) return null;
+    return {
+      apiKey,
+      projectId,
+      authDomain: pick('authDomain') || `${projectId}.firebaseapp.com`,
+      appId: pick('appId') || '',
+      collection: pick('collection') || DEFAULT_COL,
+      docId: pick('docId') || DEFAULT_DOC
+    };
+  }
+
+  function loadScriptOnce(src) {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('Không tải được SDK: ' + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  function ensureFirebaseSDK() {
+    if (window.firebase && window.firebase.firestore) return Promise.resolve();
+    if (!sdkPromise) {
+      sdkPromise = loadScriptOnce('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js')
+        .then(() => loadScriptOnce('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'));
+    }
+    return sdkPromise;
+  }
+
+  function updateSyncUI(state, text, sub = '') {
+    const box = document.getElementById('fbs-status-box');
+    const txt = document.getElementById('fbs-status-txt');
+    const subEl = document.getElementById('fbs-status-sub');
+    const badge = document.getElementById('fb-sync-header-badge');
+
+    if (txt) txt.textContent = text;
+    if (subEl && sub) subEl.textContent = sub;
+    if (box) {
+      box.style.background = state === 'ok' ? '#ecfdf5' : (state === 'err' ? '#fef2f2' : '#f8fafc');
+      box.style.borderColor = state === 'ok' ? '#6ee7b7' : (state === 'err' ? '#fca5a5' : 'var(--border)');
+    }
+    if (badge) {
+      badge.textContent = state === 'ok' ? '☁️ Đã đồng bộ' : (state === 'syncing' ? '⏳ Đang đồng bộ...' : (state === 'err' ? '⚠️ Lỗi Firebase' : '☁️ Firebase'));
+      badge.className = state === 'ok' ? 'btn btn-soft-jade btn-sm' : (state === 'err' ? 'btn btn-soft btn-sm' : 'btn btn-soft-fb btn-sm');
+    }
+  }
+
+  function buildSyncPayload() {
+    return {
+      pin: db.pin,
+      adminAccounts: db.adminAccounts || [],
+      adminLogs: (db.adminLogs || []).slice(0, 40),
+      siteTitles: db.siteTitles || {},
+      landmarks: db.landmarks || [],
+      specialties: db.specialties || [],
+      restaurants: db.restaurants || [],
+      restaurantPosts: db.restaurantPosts || [],
+      wards: db.wards || [],
+      _meta: {
+        updatedAt: Date.now(),
+        updatedAtVN: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN'),
+        clientId: CLIENT_ID
+      }
+    };
+  }
+
+  function applyRemoteData(data, silent = false) {
+    if (!data || (!data.landmarks && !data.restaurants && !data.specialties)) return;
+    isApplyingRemote = true;
+    try {
+      const localCart = db.cart || [];
+      if (data.pin) db.pin = data.pin;
+      if (Array.isArray(data.adminAccounts) && data.adminAccounts.length) db.adminAccounts = data.adminAccounts;
+      if (Array.isArray(data.adminLogs)) db.adminLogs = data.adminLogs;
+      if (data.siteTitles) db.siteTitles = Object.assign({}, DEFAULT_SITE_TITLES, data.siteTitles);
+      if (Array.isArray(data.landmarks)) db.landmarks = data.landmarks;
+      if (Array.isArray(data.specialties)) db.specialties = data.specialties;
+      if (Array.isArray(data.restaurants)) db.restaurants = data.restaurants;
+      if (Array.isArray(data.restaurantPosts)) db.restaurantPosts = data.restaurantPosts;
+      if (Array.isArray(data.wards)) db.wards = data.wards;
+      db.cart = localCart;
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+
+      applySiteTitles();
+      updateCounts();
+      renderLiveNewItemsBanner();
+      renderMap();
+      renderLandmarkQuickGrid();
+      renderRoutesGrid();
+      if (ui.tab === 'market') { populateWardFilter(); renderMarket(); populateFeedRestaurantFilter(); renderRestaurantPostsFeed(); }
+      if (ui.tab === 'merchant') renderMerchantPortal();
+      if (ui.tab === 'admin' && ui.adminLoggedIn) renderAdminView();
+
+      lastSyncAt = data._meta?.updatedAtVN || (typeof formatNowVN === 'function' ? formatNowVN() : '');
+      updateSyncUI('ok', `🟢 Đã kết nối Firebase Firestore`, `Cập nhật gần nhất: ${lastSyncAt}`);
+      if (!silent) toast('☁️ Đã đồng bộ dữ liệu mới nhất từ Firebase!');
+    } finally {
+      isApplyingRemote = false;
+    }
+  }
+
+  async function connectFirebase(cfg, silent = false) {
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      updateSyncUI('idle', '⚪ Chưa kết nối Firebase (Đang lưu cục bộ trên máy)');
+      return false;
+    }
+    try {
+      updateSyncUI('syncing', '⏳ Đang kết nối tới Firebase Firestore...');
+      await ensureFirebaseSDK();
+
+      if (fbUnsub) { fbUnsub(); fbUnsub = null; }
+      const appName = 'nb_hub_sync_' + cfg.projectId;
+      const existing = firebase.apps.find(a => a.name === appName);
+      fbApp = existing || firebase.initializeApp({
+        apiKey: cfg.apiKey,
+        authDomain: cfg.authDomain || `${cfg.projectId}.firebaseapp.com`,
+        projectId: cfg.projectId,
+        appId: cfg.appId || ''
+      }, appName);
+      fbDb = firebase.firestore(fbApp);
+
+      const col = cfg.collection || DEFAULT_COL;
+      const docId = cfg.docId || DEFAULT_DOC;
+      const docRef = fbDb.collection(col).doc(docId);
+
+      if (cfg.realtime !== false) {
+        fbUnsub = docRef.onSnapshot(
+          snap => {
+            if (!snap.exists) {
+              updateSyncUI('ok', `🟢 Đã kết nối Project: ${cfg.projectId}`, `Chưa có dữ liệu trên mây — bấm "Đẩy dữ liệu lên Firebase" để đồng bộ lần đầu.`);
+              return;
+            }
+            const data = snap.data();
+            if (data?._meta?.clientId === CLIENT_ID) {
+              lastSyncAt = data._meta.updatedAtVN || '';
+              updateSyncUI('ok', `🟢 Đã đồng bộ lên Firebase (${cfg.projectId})`, `Đồng bộ lần cuối: ${lastSyncAt}`);
+              return;
+            }
+            applyRemoteData(data, silent);
+            silent = false;
+          },
+          err => {
+            console.error('Firebase onSnapshot error:', err);
+            updateSyncUI('err', '⚠️ Không thể đồng bộ thời gian thực', err.message || 'Kiểm tra lại Firestore Rules hoặc kết nối mạng.');
+          }
+        );
+      } else {
+        updateSyncUI('ok', `🟢 Đã kết nối Firebase (${cfg.projectId})`, `Sẵn sàng đồng bộ tới ${col}/${docId}`);
+      }
+      return true;
+    } catch (err) {
+      console.error('Firebase init error:', err);
+      updateSyncUI('err', '⚠️ Lỗi kết nối Firebase', err.message || 'Kiểm tra lại đoạn mã cấu hình hoặc kết nối mạng.');
+      if (!silent) toast('Lỗi kết nối Firebase: ' + (err.message || ''), 'error');
+      return false;
+    }
+  }
+
+  window.pushAllToFirebase = async function(showToast = false) {
+    const cfg = getSavedConfig();
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      if (showToast) toast('Vui lòng dán đoạn mã Firebase và bấm "Lưu & Kết Nối" trước.', 'error');
+      return;
+    }
+    if (!fbDb) {
+      const ok = await connectFirebase(cfg, true);
+      if (!ok) return;
+    }
+    try {
+      updateSyncUI('syncing', '⏳ Đang đẩy dữ liệu lên Firebase...');
+      const col = cfg.collection || DEFAULT_COL;
+      const docId = cfg.docId || DEFAULT_DOC;
+      const payload = buildSyncPayload();
+      await fbDb.collection(col).doc(docId).set(payload, { merge: true });
+      lastSyncAt = payload._meta.updatedAtVN;
+      updateSyncUI('ok', `🟢 Đã đồng bộ lên Firebase (${cfg.projectId})`, `Đẩy dữ liệu thành công lúc ${lastSyncAt}`);
+      if (showToast) toast('☁️ Đã đẩy toàn bộ dữ liệu lên Firebase Firestore!');
+    } catch (err) {
+      console.error('Firebase push error:', err);
+      updateSyncUI('err', '⚠️ Lỗi đẩy dữ liệu lên Firebase', err.message || 'Kiểm tra Firestore Rules (cho phép đọc/ghi).');
+      if (showToast) toast('Không thể đẩy dữ liệu: ' + (err.message || ''), 'error');
+    }
+  };
+
+  window.pullFromFirebase = async function(showToast = false) {
+    const cfg = getSavedConfig();
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      if (showToast) toast('Vui lòng dán đoạn mã Firebase và bấm "Lưu & Kết Nối" trước.', 'error');
+      return;
+    }
+    if (!fbDb) {
+      const ok = await connectFirebase(cfg, true);
+      if (!ok) return;
+    }
+    try {
+      updateSyncUI('syncing', '⏳ Đang tải dữ liệu từ Firebase...');
+      const col = cfg.collection || DEFAULT_COL;
+      const docId = cfg.docId || DEFAULT_DOC;
+      const snap = await fbDb.collection(col).doc(docId).get();
+      if (!snap.exists) {
+        updateSyncUI('ok', `🟢 Đã kết nối (${cfg.projectId})`, `Chưa có dữ liệu trên Firebase.`);
+        if (showToast) toast('Chưa có dữ liệu trên Firebase. Hãy bấm "Đẩy dữ liệu lên Firebase" trước.', 'info');
+        return;
+      }
+      applyRemoteData(snap.data(), !showToast);
+    } catch (err) {
+      console.error('Firebase pull error:', err);
+      updateSyncUI('err', '⚠️ Lỗi tải dữ liệu từ Firebase', err.message || '');
+      if (showToast) toast('Không thể tải dữ liệu: ' + (err.message || ''), 'error');
+    }
+  };
+
+  window.openFirebaseSyncModal = function() {
+    const cfg = getSavedConfig() || {};
+    const codeBox = document.getElementById('fbs-config-code');
+    if (codeBox) {
+      codeBox.value = cfg.rawCode || (cfg.projectId ? JSON.stringify({
+        apiKey: cfg.apiKey,
+        authDomain: cfg.authDomain,
+        projectId: cfg.projectId,
+        appId: cfg.appId
+      }, null, 2) : '');
+    }
+    document.getElementById('fbs-autoSync').checked = cfg.autoSync !== false;
+    document.getElementById('fbs-realtime').checked = cfg.realtime !== false;
+    document.getElementById('fb-sync-modal').classList.add('open');
+  };
+
+  window.saveAndConnectFirebase = async function() {
+    const raw = (document.getElementById('fbs-config-code').value || '').trim();
+    const parsed = extractConfigFromCode(raw);
+    if (!parsed) {
+      toast('Đoạn mã chưa hợp lệ (cần có đủ apiKey và projectId từ Firebase Console).', 'error');
+      return;
+    }
+    const cfg = Object.assign({}, parsed, {
+      rawCode: raw,
+      autoSync: document.getElementById('fbs-autoSync').checked,
+      realtime: document.getElementById('fbs-realtime').checked
+    });
+    localStorage.setItem(FB_CFG_KEY, JSON.stringify(cfg));
+    const ok = await connectFirebase(cfg, false);
+    if (ok) toast(`✅ Đã kết nối Firebase (${cfg.projectId}) thành công!`);
+  };
+
+  window.disconnectFirebaseSync = function() {
+    if (fbUnsub) { fbUnsub(); fbUnsub = null; }
+    fbDb = null;
+    localStorage.removeItem(FB_CFG_KEY);
+    const codeBox = document.getElementById('fbs-config-code');
+    if (codeBox) codeBox.value = '';
+    updateSyncUI('idle', '⚪ Đã ngắt kết nối Firebase (Lưu cục bộ trên máy)', 'Bạn có thể dán lại đoạn mã cấu hình bất cứ lúc nào.');
+    toast('Đã ngắt đồng bộ Firebase.', 'info');
+  };
+
+  if (typeof window.saveDB === 'function') {
+    const _origSaveDB = window.saveDB;
+    window.saveDB = function() {
+      _origSaveDB();
+      if (isApplyingRemote) return;
+      const cfg = getSavedConfig();
+      if (cfg && cfg.autoSync !== false && cfg.apiKey && cfg.projectId) {
+        clearTimeout(pushTimer);
+        pushTimer = setTimeout(() => { window.pushAllToFirebase(false); }, 600);
+      }
+    };
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const adminToolbar = document.querySelector('#admin-panel .panel-head > div:last-child');
+    if (adminToolbar) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'fb-sync-header-badge';
+      btn.className = 'btn btn-soft-fb btn-sm';
+      btn.textContent = '☁️ Firebase';
+      btn.onclick = openFirebaseSyncModal;
+      adminToolbar.insertBefore(btn, adminToolbar.firstChild);
+    }
+
+    const cfg = getSavedConfig();
+    if (cfg && cfg.apiKey && cfg.projectId) {
+      connectFirebase(cfg, true);
+    }
   });
 })();
 </script>
