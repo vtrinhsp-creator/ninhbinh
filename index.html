@@ -5935,11 +5935,23 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function sanitizeForFirestore(obj) {
+    try {
+      return JSON.parse(JSON.stringify(obj, (k, v) => {
+        if (v === undefined) return null;
+        if (typeof v === 'number' && !Number.isFinite(v)) return 0;
+        return v;
+      }));
+    } catch (e) {
+      return obj;
+    }
+  }
+
   function buildSyncPayload() {
-    return {
-      pin: db.pin,
+    const raw = {
+      pin: db.pin || '2026',
       adminAccounts: db.adminAccounts || [],
-      adminLogs: (db.adminLogs || []).slice(0, 40),
+      adminLogs: (db.adminLogs || []).slice(0, 30),
       siteTitles: db.siteTitles || {},
       landmarks: db.landmarks || [],
       specialties: db.specialties || [],
@@ -5947,13 +5959,50 @@ window.addEventListener('DOMContentLoaded', () => {
       restaurantPosts: db.restaurantPosts || [],
       wards: db.wards || [],
       reviews: db.reviews || [],
-      orders: db.orders || [],
+      orders: (db.orders || []).slice(0, 200),
       _meta: {
         updatedAt: Date.now(),
         updatedAtVN: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN'),
         clientId: CLIENT_ID
       }
     };
+    let clean = sanitizeForFirestore(raw);
+    // Bảo vệ giới hạn 1 MiB của Firestore: nếu vượt 850KB tự động tách bớt ảnh base64 nặng trong bài đăng
+    try {
+      let bytes = new Blob([JSON.stringify(clean)]).size;
+      if (bytes > 850000 && Array.isArray(clean.restaurantPosts)) {
+        clean.restaurantPosts = clean.restaurantPosts.map(p => {
+          if (p && typeof p.image === 'string' && p.image.startsWith('data:image') && p.image.length > 35000) {
+            return Object.assign({}, p, { image: '' });
+          }
+          return p;
+        });
+        bytes = new Blob([JSON.stringify(clean)]).size;
+      }
+      if (bytes > 920000) {
+        clean.adminLogs = (clean.adminLogs || []).slice(0, 10);
+        clean.orders = (clean.orders || []).slice(0, 100);
+      }
+    } catch (e) {}
+    return clean;
+  }
+
+  function explainFirebaseErrorVN(err) {
+    const code = String(err?.code || '').toLowerCase();
+    const msg = String(err?.message || '');
+    if (code.includes('permission-denied') || /permission|insufficient/i.test(msg)) {
+      return 'Bị chặn quyền ghi (Permission Denied). Hãy mở Firebase Console → Firestore Database → Rules và cho phép đọc/ghi (allow read, write: if true;).';
+    }
+    if (code.includes('not-found') || /database.*not.*found/i.test(msg)) {
+      return 'Chưa tạo Cloud Firestore Database trong Firebase Console (vào Build → Firestore Database → Create database).';
+    }
+    if (code.includes('unavailable') || /offline|network|failed to fetch/i.test(msg)) {
+      return 'Không kết nối được máy chủ Firebase (kiểm tra mạng hoặc tường lửa).';
+    }
+    if (code.includes('invalid-argument') || /exceeds the maximum|too large/i.test(msg)) {
+      return 'Dữ liệu vượt kích thước hoặc định dạng không hợp lệ (hệ thống đã tự lọc gọn).';
+    }
+    return msg || 'Kiểm tra lại firebaseConfig & Firestore Rules.';
   }
 
   function applyRemoteData(data, silent = false) {
@@ -6025,6 +6074,13 @@ window.addEventListener('DOMContentLoaded', () => {
         appId: cfg.appId || ''
       }, appName);
       fbDb = firebase.firestore(fbApp);
+      try {
+        fbDb.settings({
+          experimentalAutoDetectLongPolling: true,
+          ignoreUndefinedProperties: true,
+          merge: true
+        });
+      } catch (setErr) {}
 
       const col = cfg.collection || DEFAULT_COL;
       const docId = cfg.docId || DEFAULT_DOC;
@@ -6086,13 +6142,24 @@ window.addEventListener('DOMContentLoaded', () => {
       } catch (mergeErr) {}
       const payload = buildSyncPayload();
       await fbDb.collection(col).doc(docId).set(payload, { merge: true });
+      // Đẩy kèm kênh orders_live nhẹ để điện thoại & máy tính luôn khớp đơn tức thì
+      try {
+        const cleanOrders = sanitizeForFirestore((db.orders || []).slice(0, 300));
+        await fbDb.collection(col).doc('orders_live').set({
+          orders: cleanOrders,
+          updatedAt: Date.now(),
+          updatedAtVN: payload._meta.updatedAtVN,
+          clientId: CLIENT_ID
+        }, { merge: true });
+      } catch (ordLiveErr) {}
       lastSyncAt = payload._meta.updatedAtVN;
-      updateSyncUI('ok', `🟢 Đã đồng bộ lên Firebase (${cfg.projectId})`, `Đẩy dữ liệu thành công lúc ${lastSyncAt}`);
-      if (showToast) toast('☁️ Đã đẩy toàn bộ dữ liệu lên Firebase Firestore!');
+      updateSyncUI('ok', `🟢 Đã lưu & đồng bộ lên Firebase (${cfg.projectId})`, `Lưu thành công lúc ${lastSyncAt} (${(db.orders||[]).length} đơn, ${(db.restaurants||[]).length} nhà hàng)`);
+      if (showToast) toast('☁️ Đã lưu toàn bộ dữ liệu lên Firebase Firestore thành công!');
     } catch (err) {
       console.error('Firebase push error:', err);
-      updateSyncUI('err', '⚠️ Lỗi đẩy dữ liệu lên Firebase', err.message || 'Kiểm tra Firestore Rules (cho phép đọc/ghi).');
-      if (showToast) toast('Không thể đẩy dữ liệu: ' + (err.message || ''), 'error');
+      const vnErr = explainFirebaseErrorVN(err);
+      updateSyncUI('err', '⚠️ Không lưu được lên Firebase', vnErr);
+      if (showToast) toast('Không lưu được lên Firebase: ' + vnErr, 'error');
     }
   };
 
@@ -6154,7 +6221,42 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     localStorage.setItem(FB_CFG_KEY, JSON.stringify(cfg));
     const ok = await connectFirebase(cfg, false);
-    if (ok) toast(`✅ Đã kết nối Firebase (${cfg.projectId}) thành công!`);
+    if (ok) {
+      const testOk = await window.testFirebaseWriteRead(false);
+      if (testOk) {
+        toast(`✅ Đã kết nối & kiểm tra LƯU Firebase (${cfg.projectId}) thành công!`);
+      }
+    }
+  };
+
+  window.testFirebaseWriteRead = async function(showSuccessToast = true) {
+    const cfg = getSavedConfig();
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      toast('Vui lòng dán đoạn mã firebaseConfig và bấm "Lưu & Kết Nối" trước.', 'error');
+      return false;
+    }
+    if (!fbDb) {
+      const ok = await connectFirebase(cfg, true);
+      if (!ok) return false;
+    }
+    try {
+      updateSyncUI('syncing', '🧪 Đang kiểm tra quyền Ghi / Đọc trên Firebase...');
+      const col = cfg.collection || DEFAULT_COL;
+      const nowVN = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+      const pingRef = fbDb.collection(col).doc('_health_check');
+      await pingRef.set({ ok: true, checkedAt: nowVN, ts: Date.now(), clientId: CLIENT_ID }, { merge: true });
+      const checkSnap = await pingRef.get();
+      if (!checkSnap.exists) throw new Error('Ghi xong nhưng không đọc lại được dữ liệu.');
+      updateSyncUI('ok', `🟢 Ghi & Đọc Firebase OK (${cfg.projectId})`, `Kiểm tra thành công lúc ${nowVN}. Hệ thống sẵn sàng lưu dữ liệu!`);
+      if (showSuccessToast) toast('✅ Kiểm tra thành công: Quyền Ghi & Đọc Firebase hoạt động tốt!');
+      return true;
+    } catch (err) {
+      console.error('testFirebaseWriteRead error:', err);
+      const vnErr = explainFirebaseErrorVN(err);
+      updateSyncUI('err', '❌ Lỗi quyền Ghi Firebase', vnErr);
+      toast('❌ Không ghi được lên Firebase: ' + vnErr, 'error');
+      return false;
+    }
   };
 
   window.disconnectFirebaseSync = function() {
@@ -11092,6 +11194,461 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     setTimeout(startOrdersLiveListener, 1400);
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN 23: CHẨN ĐOÁN GHI FIREBASE & LƯU SẴN TÊN ĐĂNG NHẬP + TÊN GIAN HÀNG ==================== -->
+<script>
+(function initFirebaseDiagnosticsAndSavedLoginAddon() {
+  const SAVED_MC_KEY = 'nb_saved_merchant_login_v2';
+  const SAVED_MC_LIST_KEY = 'nb_saved_merchant_list_v2';
+  const SAVED_ADM_KEY = 'nb_saved_admin_login_v2';
+
+  const FIRESTORE_RULES_SAMPLE = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /nb_heritage_hub/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}`;
+
+  function readJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function writeJSON(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  }
+
+  // =========================================================================
+  // PHẦN 1: BỔ SUNG NÚT KIỂM TRA LƯU FIREBASE & HƯỚNG DẪN RULES 1-CHẠM
+  // =========================================================================
+  function injectFirebaseDiagnosticsUI() {
+    const fbModalBody = document.querySelector('#fb-sync-modal .modal-body');
+    if (!fbModalBody || document.getElementById('fbs-diag-box')) return;
+
+    const diagBox = document.createElement('div');
+    diagBox.id = 'fbs-diag-box';
+    diagBox.className = 'info-box';
+    diagBox.style.cssText = 'margin-top:10px; background:#f0fdf4; border-color:#86efac;';
+    diagBox.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+        <b style="color:#166534;">🧪 Kiểm tra quyền Lưu Firebase &amp; Sửa lỗi chặn quyền</b>
+        <button type="button" class="btn btn-jade btn-xs" onclick="testFirebaseWriteRead(true)">🧪 Test Lưu/Đọc ngay</button>
+      </div>
+      <div style="font-size:11.3px; color:#15803d;">
+        Nếu báo lỗi <b>Permission Denied</b> (do Rules hết hạn 30 ngày hoặc đang khóa), hãy dán đoạn Rules chuẩn dưới đây vào <b>Firebase Console → Firestore Database → Rules → Publish</b>:
+      </div>
+      <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:4px;">
+        <button type="button" class="btn btn-soft-jade btn-xs" onclick="copyFirestoreRulesSample()">📋 Copy Firestore Rules chuẩn</button>
+        <button type="button" class="btn btn-soft-fb btn-xs" onclick="document.getElementById('fbs-rules-pre').classList.toggle('hidden')">👁️ Xem mã Rules</button>
+      </div>
+      <pre id="fbs-rules-pre" class="hidden" style="margin-top:6px; background:#0f172a; color:#e2e8f0; padding:8px 10px; border-radius:8px; font-size:11px; overflow-x:auto; line-height:1.45;"></pre>
+    `;
+    const crossBox = document.getElementById('fbs-cross-device-box');
+    if (crossBox) fbModalBody.insertBefore(diagBox, crossBox);
+    else fbModalBody.appendChild(diagBox);
+
+    const pre = document.getElementById('fbs-rules-pre');
+    if (pre) pre.textContent = FIRESTORE_RULES_SAMPLE;
+  }
+
+  window.copyFirestoreRulesSample = function() {
+    copyText(FIRESTORE_RULES_SAMPLE, '✅ Đã copy Firestore Rules chuẩn! Dán vào Firebase Console → Firestore → Rules → Publish.');
+  };
+
+  // =========================================================================
+  // PHẦN 2: LƯU SẴN TÊN ĐĂNG NHẬP, MẬT KHẨU & TÊN GIAN HÀNG (CỔNG NHÀ HÀNG)
+  // =========================================================================
+  function saveMerchantCredentials(info) {
+    if (!info || !info.username) return;
+    const rec = {
+      username: String(info.username).trim(),
+      password: String(info.password || ''),
+      shopName: String(info.shopName || '').trim(),
+      partnerId: info.partnerId || '',
+      partnerType: info.partnerType || 'restaurant',
+      savedAt: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN')
+    };
+    writeJSON(SAVED_MC_KEY, rec);
+
+    let list = readJSON(SAVED_MC_LIST_KEY, []);
+    if (!Array.isArray(list)) list = [];
+    list = list.filter(x => String(x.username || '').toLowerCase() !== rec.username.toLowerCase());
+    list.unshift(rec);
+    if (list.length > 8) list.length = 8;
+    writeJSON(SAVED_MC_LIST_KEY, list);
+  }
+
+  window.applySavedMerchantAccount = function(username) {
+    const list = readJSON(SAVED_MC_LIST_KEY, []);
+    const found = (Array.isArray(list) ? list : []).find(x => String(x.username || '').toLowerCase() === String(username || '').toLowerCase())
+      || readJSON(SAVED_MC_KEY, null);
+    if (!found) return;
+    const shopEl = document.getElementById('mc-shop-name-inp');
+    const userEl = document.getElementById('mc-user-inp');
+    const passEl = document.getElementById('mc-pass-inp');
+    if (shopEl) shopEl.value = found.shopName || '';
+    if (userEl) userEl.value = found.username || '';
+    if (passEl) passEl.value = found.password || '';
+    writeJSON(SAVED_MC_KEY, found);
+    renderSavedMerchantBox();
+    toast(`✅ Đã điền sẵn gian hàng: ${found.shopName || found.username}`, 'info');
+  };
+
+  window.clearSavedMerchantLogin = function(username = null) {
+    if (username) {
+      let list = readJSON(SAVED_MC_LIST_KEY, []);
+      list = (Array.isArray(list) ? list : []).filter(x => String(x.username || '').toLowerCase() !== String(username).toLowerCase());
+      writeJSON(SAVED_MC_LIST_KEY, list);
+      const cur = readJSON(SAVED_MC_KEY, null);
+      if (cur && String(cur.username || '').toLowerCase() === String(username).toLowerCase()) {
+        if (list[0]) writeJSON(SAVED_MC_KEY, list[0]);
+        else localStorage.removeItem(SAVED_MC_KEY);
+      }
+    } else {
+      localStorage.removeItem(SAVED_MC_KEY);
+      localStorage.removeItem(SAVED_MC_LIST_KEY);
+    }
+    const shopEl = document.getElementById('mc-shop-name-inp');
+    const userEl = document.getElementById('mc-user-inp');
+    const passEl = document.getElementById('mc-pass-inp');
+    if (shopEl) shopEl.value = '';
+    if (userEl) userEl.value = '';
+    if (passEl) passEl.value = '';
+    renderSavedMerchantBox();
+    toast('Đã xóa thông tin đăng nhập gian hàng đã lưu.', 'info');
+  };
+
+  function populateShopNameDatalist() {
+    let dl = document.getElementById('mc-shop-datalist');
+    if (!dl) {
+      dl = document.createElement('datalist');
+      dl.id = 'mc-shop-datalist';
+      document.body.appendChild(dl);
+    }
+    const allP = typeof getAllPartners === 'function' ? getAllPartners() : [];
+    const savedList = readJSON(SAVED_MC_LIST_KEY, []);
+    const names = new Set();
+    (Array.isArray(savedList) ? savedList : []).forEach(s => { if (s.shopName) names.add(s.shopName); });
+    allP.forEach(p => { if (p.item?.name) names.add(p.item.name); });
+    dl.innerHTML = Array.from(names).map(n => `<option value="${esc(n)}"></option>`).join('');
+  }
+
+  function renderSavedMerchantBox() {
+    const box = document.getElementById('mc-saved-accounts-bar');
+    if (!box) return;
+    const saved = readJSON(SAVED_MC_KEY, null);
+    const list = readJSON(SAVED_MC_LIST_KEY, []);
+    const arr = Array.isArray(list) && list.length ? list : (saved ? [saved] : []);
+
+    if (!arr.length) {
+      box.classList.add('hidden');
+      box.innerHTML = '';
+      return;
+    }
+    box.classList.remove('hidden');
+    box.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
+        <span style="font-size:11.8px; font-weight:800; color:#065f46;">💾 Gian hàng &amp; Tên đăng nhập đã lưu sẵn:</span>
+        <button type="button" class="btn btn-soft btn-xs" style="color:var(--danger);" onclick="clearSavedMerchantLogin()">✕ Xóa tất cả</button>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:5px;">
+        ${arr.map(item => `
+          <div style="display:inline-flex; align-items:center; gap:4px; background:#fff; border:1px solid #6ee7b7; border-radius:999px; padding:3px 8px; font-size:11.5px;">
+            <button type="button" style="font-weight:700; color:#065f46;" onclick="applySavedMerchantAccount('${esc(item.username)}')">
+              🏪 ${esc(item.shopName || item.username)} <span style="color:var(--muted); font-weight:600;">(${esc(item.username)})</span>
+            </button>
+            <button type="button" title="Bỏ lưu" style="color:var(--danger); font-weight:800; padding:0 2px;" onclick="clearSavedMerchantLogin('${esc(item.username)}')">×</button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function injectMerchantSavedLoginUI() {
+    const loginBox = document.getElementById('merchant-login-box');
+    const userInp = document.getElementById('mc-user-inp');
+    const loginBtn = loginBox?.querySelector('button[onclick*="loginMerchant"]');
+    if (!loginBox || !userInp || !loginBtn || document.getElementById('mc-shop-name-inp')) return;
+
+    populateShopNameDatalist();
+
+    // 1. Khung hiển thị danh sách gian hàng đã lưu sẵn
+    const savedBar = document.createElement('div');
+    savedBar.id = 'mc-saved-accounts-bar';
+    savedBar.className = 'info-box hidden';
+    savedBar.style.cssText = 'background:#ecfdf5; border-color:#6ee7b7; margin-bottom:10px; padding:8px 10px;';
+    const firstFormGroup = userInp.closest('.form-group');
+    loginBox.insertBefore(savedBar, firstFormGroup);
+
+    // 2. Ô Tên gian hàng / Nhà hàng (tự điền & tự lưu)
+    const shopGroup = document.createElement('div');
+    shopGroup.className = 'form-group';
+    shopGroup.innerHTML = `
+      <label class="form-label">🏪 Tên gian hàng / Nhà hàng (tự động lưu sẵn)</label>
+      <input type="text" id="mc-shop-name-inp" list="mc-shop-datalist" class="form-control" placeholder="VD: Nhà hàng Thịt Dê Chính Thư...">
+    `;
+    loginBox.insertBefore(shopGroup, firstFormGroup);
+
+    // Khi chọn/nhập tên gian hàng khớp với tài khoản đã lưu hoặc có trong db -> tự điền tên đăng nhập
+    const shopInp = document.getElementById('mc-shop-name-inp');
+    shopInp.addEventListener('change', () => {
+      const val = shopInp.value.trim().toLowerCase();
+      if (!val) return;
+      const list = readJSON(SAVED_MC_LIST_KEY, []);
+      const hitSaved = (Array.isArray(list) ? list : []).find(x => String(x.shopName || '').toLowerCase() === val);
+      if (hitSaved) {
+        userInp.value = hitSaved.username;
+        const passEl = document.getElementById('mc-pass-inp');
+        if (passEl && hitSaved.password) passEl.value = hitSaved.password;
+        return;
+      }
+      const allP = typeof getAllPartners === 'function' ? getAllPartners() : [];
+      const hitDb = allP.find(p => String(p.item?.name || '').toLowerCase() === val);
+      if (hitDb?.item?.account?.username) {
+        userInp.value = hitDb.item.account.username;
+      }
+    });
+
+    // 3. Checkbox Ghi nhớ đăng nhập & Tên gian hàng
+    const remWrap = document.createElement('div');
+    remWrap.style.cssText = 'margin:6px 0 10px; font-size:12.2px; font-weight:700; color:#334552;';
+    remWrap.innerHTML = `
+      <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+        <input type="checkbox" id="mc-remember-chk" checked> 💾 Lưu sẵn tên đăng nhập, tên gian hàng &amp; mật khẩu
+      </label>
+    `;
+    loginBox.insertBefore(remWrap, loginBtn);
+
+    // 4. Tự điền sẵn thông tin đã lưu từ lần đăng nhập trước
+    const saved = readJSON(SAVED_MC_KEY, null);
+    if (saved) {
+      shopInp.value = saved.shopName || '';
+      userInp.value = saved.username || '';
+      const passEl = document.getElementById('mc-pass-inp');
+      if (passEl && saved.password) passEl.value = saved.password;
+    }
+    renderSavedMerchantBox();
+  }
+
+  // =========================================================================
+  // PHẦN 3: LƯU SẴN TÊN ĐĂNG NHẬP & MẬT KHẨU ADMIN (CỔNG QUẢN TRỊ)
+  // =========================================================================
+  window.clearSavedAdminLogin = function() {
+    localStorage.removeItem(SAVED_ADM_KEY);
+    const uEl = document.getElementById('admin-user-input');
+    const pEl = document.getElementById('admin-pin-input');
+    if (uEl) uEl.value = 'admin';
+    if (pEl) pEl.value = '';
+    const bar = document.getElementById('adm-saved-login-bar');
+    if (bar) bar.classList.add('hidden');
+    toast('Đã xóa thông tin đăng nhập Admin đã lưu.', 'info');
+  };
+
+  function injectAdminSavedLoginUI() {
+    const loginBox = document.getElementById('admin-login-box');
+    const userInp = document.getElementById('admin-user-input');
+    const pinInp = document.getElementById('admin-pin-input');
+    const loginBtn = loginBox?.querySelector('button[onclick*="loginAdmin"]');
+    if (!loginBox || !userInp || !pinInp || !loginBtn || document.getElementById('adm-remember-chk')) return;
+
+    const savedBar = document.createElement('div');
+    savedBar.id = 'adm-saved-login-bar';
+    savedBar.className = 'info-box hidden';
+    savedBar.style.cssText = 'background:#eff6ff; border-color:#93c5fd; margin-bottom:10px; padding:7px 10px; flex-direction:row; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px;';
+    loginBox.insertBefore(savedBar, userInp.closest('.form-group'));
+
+    const remWrap = document.createElement('div');
+    remWrap.style.cssText = 'margin:6px 0 10px; font-size:12.2px; font-weight:700; color:#334552;';
+    remWrap.innerHTML = `
+      <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+        <input type="checkbox" id="adm-remember-chk" checked> 💾 Lưu sẵn tên đăng nhập &amp; mật khẩu Admin
+      </label>
+    `;
+    loginBox.insertBefore(remWrap, loginBtn);
+
+    const saved = readJSON(SAVED_ADM_KEY, null);
+    if (saved && saved.username) {
+      userInp.value = saved.username;
+      if (saved.password) pinInp.value = saved.password;
+      savedBar.classList.remove('hidden');
+      savedBar.innerHTML = `
+        <span style="font-size:11.8px; color:#1d4ed8;">✅ Đã điền sẵn: <b>${esc(saved.fullName || saved.username)}</b> (<code>${esc(saved.username)}</code>)</span>
+        <button type="button" class="btn btn-soft btn-xs" style="color:var(--danger);" onclick="clearSavedAdminLogin()">✕ Quên</button>
+      `;
+    }
+  }
+
+  // Hook loginMerchant để tự động lưu Tên đăng nhập + Mật khẩu + Tên gian hàng ngay khi đăng nhập thành công
+  if (typeof window.loginMerchant === 'function') {
+    const _prevLoginMc23 = window.loginMerchant;
+    window.loginMerchant = function() {
+      const uVal = String(document.getElementById('mc-user-inp')?.value || '').trim();
+      const pVal = String(document.getElementById('mc-pass-inp')?.value || '').trim();
+      const shopTyped = String(document.getElementById('mc-shop-name-inp')?.value || '').trim();
+      const remember = document.getElementById('mc-remember-chk')?.checked !== false;
+
+      _prevLoginMc23();
+
+      if (ui.merchantRestaurantId) {
+        const partner = typeof findPartnerById === 'function' ? findPartnerById(ui.merchantRestaurantId) : null;
+        const rs = partner?.item;
+        const finalShopName = rs?.name || shopTyped || uVal;
+        if (remember) {
+          saveMerchantCredentials({
+            username: rs?.account?.username || uVal,
+            password: pVal,
+            shopName: finalShopName,
+            partnerId: ui.merchantRestaurantId,
+            partnerType: partner?.type || 'restaurant'
+          });
+        }
+        renderSavedMerchantBox();
+      }
+    };
+  }
+
+  // Khi đăng xuất Cổng Nhà Hàng -> vẫn điền lại sẵn thông tin đã lưu để lần sau bấm Đăng nhập 1 chạm
+  if (typeof window.logoutMerchant === 'function') {
+    const _prevLogoutMc23 = window.logoutMerchant;
+    window.logoutMerchant = function() {
+      _prevLogoutMc23();
+      const saved = readJSON(SAVED_MC_KEY, null);
+      if (saved) {
+        const sEl = document.getElementById('mc-shop-name-inp');
+        const uEl = document.getElementById('mc-user-inp');
+        const pEl = document.getElementById('mc-pass-inp');
+        if (sEl) sEl.value = saved.shopName || '';
+        if (uEl) uEl.value = saved.username || '';
+        if (pEl) pEl.value = saved.password || '';
+      }
+      renderSavedMerchantBox();
+    };
+  }
+
+  // Hook loginAdmin để tự động lưu Tên đăng nhập & Mật khẩu Admin
+  if (typeof window.loginAdmin === 'function') {
+    const _prevLoginAdm23 = window.loginAdmin;
+    window.loginAdmin = function() {
+      const uVal = String(document.getElementById('admin-user-input')?.value || 'admin').trim();
+      const pVal = String(document.getElementById('admin-pin-input')?.value || '').trim();
+      const remember = document.getElementById('adm-remember-chk')?.checked !== false;
+
+      _prevLoginAdm23();
+
+      if (ui.adminLoggedIn && remember) {
+        const curAdm = typeof getCurrentAdminAccount === 'function' ? getCurrentAdminAccount() : null;
+        writeJSON(SAVED_ADM_KEY, {
+          username: curAdm?.username || uVal,
+          password: pVal,
+          fullName: curAdm?.fullName || 'Quản trị viên'
+        });
+      }
+    };
+  }
+
+  if (typeof window.logoutAdmin === 'function') {
+    const _prevLogoutAdm23 = window.logoutAdmin;
+    window.logoutAdmin = function() {
+      _prevLogoutAdm23();
+      const saved = readJSON(SAVED_ADM_KEY, null);
+      if (saved) {
+        const uEl = document.getElementById('admin-user-input');
+        const pEl = document.getElementById('admin-pin-input');
+        if (uEl) uEl.value = saved.username || 'admin';
+        if (pEl) pEl.value = saved.password || '';
+      }
+    };
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      injectFirebaseDiagnosticsUI();
+      injectMerchantSavedLoginUI();
+      injectAdminSavedLoginUI();
+    }, 180);
+  });
+})();
+</script>
+
+<!-- ==================== HOÀN THIỆN V27: HIỂN THỊ TRẠNG THÁI CLOUD TRÊN CỔNG NHÀ HÀNG & ĐỒNG BỘ TÊN GIAN HÀNG ==================== -->
+<script>
+(function initFinalPolishV27() {
+  function refreshMerchantCloudPill() {
+    const metaEl = document.getElementById('mc-dash-meta');
+    if (!metaEl) return;
+    let pill = document.getElementById('mc-cloud-status-pill');
+    if (!pill) {
+      pill = document.createElement('span');
+      pill.id = 'mc-cloud-status-pill';
+      pill.style.cssText = 'display:inline-flex; align-items:center; gap:4px; margin-top:5px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:800; cursor:pointer;';
+      pill.onclick = () => {
+        if (typeof window.pushOrdersLiveToFirebase === 'function') {
+          window.pushOrdersLiveToFirebase(false);
+        } else if (typeof window.openFirebaseSyncModal === 'function') {
+          window.openFirebaseSyncModal();
+        }
+      };
+      metaEl.parentElement?.appendChild(pill);
+    }
+    const cfg = typeof window.getActiveFirebaseConfig === 'function' ? window.getActiveFirebaseConfig() : null;
+    if (cfg && cfg.apiKey && cfg.projectId) {
+      pill.style.background = 'rgba(16, 185, 129, 0.25)';
+      pill.style.border = '1px solid rgba(110, 231, 183, 0.7)';
+      pill.style.color = '#d1fae5';
+      pill.textContent = `☁️ Cloud OK (${cfg.projectId}) • Bấm đồng bộ đơn ngay`;
+    } else {
+      pill.style.background = 'rgba(251, 191, 36, 0.22)';
+      pill.style.border = '1px solid rgba(253, 230, 138, 0.65)';
+      pill.style.color = '#fef3c7';
+      pill.textContent = '⚪ Đang lưu cục bộ (Kết nối Firebase trong Admin để đồng bộ Điện thoại ↔ Máy tính)';
+    }
+  }
+
+  if (typeof window.renderMerchantPortal === 'function') {
+    const _prevRenderMc27 = window.renderMerchantPortal;
+    window.renderMerchantPortal = function() {
+      _prevRenderMc27();
+      refreshMerchantCloudPill();
+    };
+  }
+
+  if (typeof window.saveMerchantProfile === 'function') {
+    const _prevSaveProf27 = window.saveMerchantProfile;
+    window.saveMerchantProfile = function(e) {
+      _prevSaveProf27(e);
+      try {
+        const rs = typeof findPartnerById === 'function' ? findPartnerById(ui.merchantRestaurantId)?.item : null;
+        if (rs && rs.account?.username) {
+          const cur = JSON.parse(localStorage.getItem('nb_saved_merchant_login_v2') || 'null');
+          if (cur && String(cur.username || '').toLowerCase() === String(rs.account.username).toLowerCase()) {
+            cur.shopName = rs.name;
+            localStorage.setItem('nb_saved_merchant_login_v2', JSON.stringify(cur));
+          }
+          const list = JSON.parse(localStorage.getItem('nb_saved_merchant_list_v2') || '[]');
+          if (Array.isArray(list)) {
+            list.forEach(item => {
+              if (String(item.username || '').toLowerCase() === String(rs.account.username).toLowerCase()) {
+                item.shopName = rs.name;
+              }
+            });
+            localStorage.setItem('nb_saved_merchant_list_v2', JSON.stringify(list));
+          }
+        }
+      } catch (err) {}
+    };
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(refreshMerchantCloudPill, 500);
   });
 })();
 </script>
