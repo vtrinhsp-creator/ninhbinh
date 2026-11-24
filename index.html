@@ -6216,8 +6216,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     const cfg = Object.assign({}, parsed, {
       rawCode: raw,
-      autoSync: document.getElementById('fbs-autoSync').checked,
-      realtime: document.getElementById('fbs-realtime').checked
+      autoSync: true,
+      realtime: true
     });
     localStorage.setItem(FB_CFG_KEY, JSON.stringify(cfg));
     const ok = await connectFirebase(cfg, false);
@@ -11198,12 +11198,13 @@ window.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
-<!-- ==================== MÔ-ĐUN 23: CHẨN ĐOÁN GHI FIREBASE & LƯU SẴN TÊN ĐĂNG NHẬP + TÊN GIAN HÀNG ==================== -->
+<!-- ==================== MÔ-ĐUN 23 (V28): LUÔN ĐỒNG BỘ FIREBASE, LƯU MẬT KHẨU & DUY TRÌ ĐĂNG NHẬP NHÀ HÀNG ==================== -->
 <script>
-(function initFirebaseDiagnosticsAndSavedLoginAddon() {
+(function initFirebaseAlwaysSyncAndPersistentMerchantLogin() {
   const SAVED_MC_KEY = 'nb_saved_merchant_login_v2';
   const SAVED_MC_LIST_KEY = 'nb_saved_merchant_list_v2';
   const SAVED_ADM_KEY = 'nb_saved_admin_login_v2';
+  const MC_SESSION_KEY = 'nb_merchant_active_session_v1';
 
   const FIRESTORE_RULES_SAMPLE = `rules_version = '2';
 service cloud.firestore {
@@ -11228,9 +11229,29 @@ service cloud.firestore {
   }
 
   // =========================================================================
-  // PHẦN 1: BỔ SUNG NÚT KIỂM TRA LƯU FIREBASE & HƯỚNG DẪN RULES 1-CHẠM
+  // PHẦN 1: CHẾ ĐỘ LUÔN ĐÃ ĐỒNG BỘ VỚI FIREBASE (AUTO-SYNC & REALTIME)
   // =========================================================================
+  function enforceAlwaysSyncFirebaseConfig() {
+    try {
+      const raw = localStorage.getItem('nb_firebase_sync_cfg_v1');
+      if (raw) {
+        const cfg = JSON.parse(raw);
+        if (cfg && cfg.apiKey && cfg.projectId && (cfg.autoSync !== true || cfg.realtime !== true)) {
+          cfg.autoSync = true;
+          cfg.realtime = true;
+          localStorage.setItem('nb_firebase_sync_cfg_v1', JSON.stringify(cfg));
+        }
+      }
+    } catch (e) {}
+  }
+
   function injectFirebaseDiagnosticsUI() {
+    // Khóa chế độ luôn bật tự động đồng bộ & thời gian thực trong modal Firebase
+    const autoChk = document.getElementById('fbs-autoSync');
+    const rtChk = document.getElementById('fbs-realtime');
+    if (autoChk) { autoChk.checked = true; autoChk.disabled = true; }
+    if (rtChk) { rtChk.checked = true; rtChk.disabled = true; }
+
     const fbModalBody = document.querySelector('#fb-sync-modal .modal-body');
     if (!fbModalBody || document.getElementById('fbs-diag-box')) return;
 
@@ -11240,11 +11261,11 @@ service cloud.firestore {
     diagBox.style.cssText = 'margin-top:10px; background:#f0fdf4; border-color:#86efac;';
     diagBox.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
-        <b style="color:#166534;">🧪 Kiểm tra quyền Lưu Firebase &amp; Sửa lỗi chặn quyền</b>
-        <button type="button" class="btn btn-jade btn-xs" onclick="testFirebaseWriteRead(true)">🧪 Test Lưu/Đọc ngay</button>
+        <b style="color:#166534;">☁️ Chế độ luôn đồng bộ tự động với Firebase đang BẬT</b>
+        <button type="button" class="btn btn-jade btn-xs" onclick="testFirebaseWriteRead(true)">🧪 Test Lưu/Đọc</button>
       </div>
       <div style="font-size:11.3px; color:#15803d;">
-        Nếu báo lỗi <b>Permission Denied</b> (do Rules hết hạn 30 ngày hoặc đang khóa), hãy dán đoạn Rules chuẩn dưới đây vào <b>Firebase Console → Firestore Database → Rules → Publish</b>:
+        Mọi bài đăng nhà hàng, đơn hàng và chỉnh sửa đều tự động đồng bộ tức thì lên Firebase. Nếu gặp lỗi <b>Permission Denied</b>, dán Rules chuẩn vào Firebase Console → Firestore → Rules → Publish:
       </div>
       <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:4px;">
         <button type="button" class="btn btn-soft-jade btn-xs" onclick="copyFirestoreRulesSample()">📋 Copy Firestore Rules chuẩn</button>
@@ -11264,17 +11285,26 @@ service cloud.firestore {
     copyText(FIRESTORE_RULES_SAMPLE, '✅ Đã copy Firestore Rules chuẩn! Dán vào Firebase Console → Firestore → Rules → Publish.');
   };
 
+  // Khi nhà hàng đăng bài mới hoặc sửa bài -> đồng bộ ngay lên Firebase tức thì
+  if (typeof window.saveRestaurantPost === 'function') {
+    const _prevSavePost28 = window.saveRestaurantPost;
+    window.saveRestaurantPost = function(e) {
+      _prevSavePost28(e);
+      if (typeof window.pushAllToFirebase === 'function') {
+        setTimeout(() => window.pushAllToFirebase(false), 120);
+      }
+    };
+  }
+
   // =========================================================================
-  // PHẦN 2: LƯU SẴN TÊN ĐĂNG NHẬP, MẬT KHẨU & TÊN GIAN HÀNG (CỔNG NHÀ HÀNG)
+  // PHẦN 2: LƯU MẬT KHẨU & DUY TRÌ ĐĂNG NHẬP LIÊN TỤC CHO NHÀ HÀNG (KHÔNG HIỆN TÊN NHÀ HÀNG TRÊN FORM ĐĂNG NHẬP)
   // =========================================================================
-  function saveMerchantCredentials(info) {
-    if (!info || !info.username) return;
+  function saveMerchantCredentials(username, password, partnerId) {
+    if (!username) return;
     const rec = {
-      username: String(info.username).trim(),
-      password: String(info.password || ''),
-      shopName: String(info.shopName || '').trim(),
-      partnerId: info.partnerId || '',
-      partnerType: info.partnerType || 'restaurant',
+      username: String(username).trim(),
+      password: String(password || ''),
+      partnerId: partnerId || '',
       savedAt: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN')
     };
     writeJSON(SAVED_MC_KEY, rec);
@@ -11283,8 +11313,45 @@ service cloud.firestore {
     if (!Array.isArray(list)) list = [];
     list = list.filter(x => String(x.username || '').toLowerCase() !== rec.username.toLowerCase());
     list.unshift(rec);
-    if (list.length > 8) list.length = 8;
+    if (list.length > 6) list.length = 6;
     writeJSON(SAVED_MC_LIST_KEY, list);
+  }
+
+  function saveMerchantActiveSession(partnerId, username) {
+    if (!partnerId) return;
+    writeJSON(MC_SESSION_KEY, {
+      restaurantId: partnerId,
+      username: String(username || '').trim(),
+      loggedInAt: Date.now()
+    });
+  }
+
+  function clearMerchantActiveSession() {
+    try { localStorage.removeItem(MC_SESSION_KEY); } catch (e) {}
+  }
+
+  function restoreMerchantActiveSession(silent = true) {
+    const sess = readJSON(MC_SESSION_KEY, null);
+    if (!sess || (!sess.restaurantId && !sess.username)) return false;
+
+    let partner = sess.restaurantId && typeof findPartnerById === 'function'
+      ? findPartnerById(sess.restaurantId)
+      : null;
+
+    if (!partner && sess.username && typeof getAllPartners === 'function') {
+      const uLower = String(sess.username).toLowerCase();
+      partner = getAllPartners().find(p => p.item?.account && String(p.item.account.username || '').toLowerCase() === uLower) || null;
+    }
+
+    if (partner && partner.item?.account && partner.item.account.active !== false) {
+      ui.merchantRestaurantId = partner.item.id;
+      if (ui.tab === 'merchant' && typeof renderMerchantPortal === 'function') {
+        renderMerchantPortal();
+      }
+      if (!silent) toast(`🔓 Đã tự động duy trì đăng nhập: ${partner.item.name}`, 'info');
+      return true;
+    }
+    return false;
   }
 
   window.applySavedMerchantAccount = function(username) {
@@ -11292,15 +11359,12 @@ service cloud.firestore {
     const found = (Array.isArray(list) ? list : []).find(x => String(x.username || '').toLowerCase() === String(username || '').toLowerCase())
       || readJSON(SAVED_MC_KEY, null);
     if (!found) return;
-    const shopEl = document.getElementById('mc-shop-name-inp');
     const userEl = document.getElementById('mc-user-inp');
     const passEl = document.getElementById('mc-pass-inp');
-    if (shopEl) shopEl.value = found.shopName || '';
     if (userEl) userEl.value = found.username || '';
     if (passEl) passEl.value = found.password || '';
     writeJSON(SAVED_MC_KEY, found);
-    renderSavedMerchantBox();
-    toast(`✅ Đã điền sẵn gian hàng: ${found.shopName || found.username}`, 'info');
+    toast(`✅ Đã điền sẵn tài khoản: ${found.username}`, 'info');
   };
 
   window.clearSavedMerchantLogin = function(username = null) {
@@ -11317,30 +11381,13 @@ service cloud.firestore {
       localStorage.removeItem(SAVED_MC_KEY);
       localStorage.removeItem(SAVED_MC_LIST_KEY);
     }
-    const shopEl = document.getElementById('mc-shop-name-inp');
     const userEl = document.getElementById('mc-user-inp');
     const passEl = document.getElementById('mc-pass-inp');
-    if (shopEl) shopEl.value = '';
     if (userEl) userEl.value = '';
     if (passEl) passEl.value = '';
     renderSavedMerchantBox();
-    toast('Đã xóa thông tin đăng nhập gian hàng đã lưu.', 'info');
+    toast('Đã xóa tài khoản & mật khẩu đã lưu.', 'info');
   };
-
-  function populateShopNameDatalist() {
-    let dl = document.getElementById('mc-shop-datalist');
-    if (!dl) {
-      dl = document.createElement('datalist');
-      dl.id = 'mc-shop-datalist';
-      document.body.appendChild(dl);
-    }
-    const allP = typeof getAllPartners === 'function' ? getAllPartners() : [];
-    const savedList = readJSON(SAVED_MC_LIST_KEY, []);
-    const names = new Set();
-    (Array.isArray(savedList) ? savedList : []).forEach(s => { if (s.shopName) names.add(s.shopName); });
-    allP.forEach(p => { if (p.item?.name) names.add(p.item.name); });
-    dl.innerHTML = Array.from(names).map(n => `<option value="${esc(n)}"></option>`).join('');
-  }
 
   function renderSavedMerchantBox() {
     const box = document.getElementById('mc-saved-accounts-bar');
@@ -11357,14 +11404,14 @@ service cloud.firestore {
     box.classList.remove('hidden');
     box.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
-        <span style="font-size:11.8px; font-weight:800; color:#065f46;">💾 Gian hàng &amp; Tên đăng nhập đã lưu sẵn:</span>
+        <span style="font-size:11.8px; font-weight:800; color:#065f46;">💾 Tài khoản đã lưu mật khẩu:</span>
         <button type="button" class="btn btn-soft btn-xs" style="color:var(--danger);" onclick="clearSavedMerchantLogin()">✕ Xóa tất cả</button>
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:5px;">
         ${arr.map(item => `
-          <div style="display:inline-flex; align-items:center; gap:4px; background:#fff; border:1px solid #6ee7b7; border-radius:999px; padding:3px 8px; font-size:11.5px;">
+          <div style="display:inline-flex; align-items:center; gap:4px; background:#fff; border:1px solid #6ee7b7; border-radius:999px; padding:3px 9px; font-size:11.8px;">
             <button type="button" style="font-weight:700; color:#065f46;" onclick="applySavedMerchantAccount('${esc(item.username)}')">
-              🏪 ${esc(item.shopName || item.username)} <span style="color:var(--muted); font-weight:600;">(${esc(item.username)})</span>
+              👤 ${esc(item.username)}
             </button>
             <button type="button" title="Bỏ lưu" style="color:var(--danger); font-weight:800; padding:0 2px;" onclick="clearSavedMerchantLogin('${esc(item.username)}')">×</button>
           </div>
@@ -11376,71 +11423,56 @@ service cloud.firestore {
   function injectMerchantSavedLoginUI() {
     const loginBox = document.getElementById('merchant-login-box');
     const userInp = document.getElementById('mc-user-inp');
+    const passInp = document.getElementById('mc-pass-inp');
     const loginBtn = loginBox?.querySelector('button[onclick*="loginMerchant"]');
-    if (!loginBox || !userInp || !loginBtn || document.getElementById('mc-shop-name-inp')) return;
+    if (!loginBox || !userInp || !passInp || !loginBtn || document.getElementById('mc-remember-chk')) return;
 
-    populateShopNameDatalist();
+    // Thuộc tính chuẩn giúp trình duyệt tự hỗ trợ lưu mật khẩu
+    userInp.setAttribute('autocomplete', 'username');
+    userInp.setAttribute('name', 'merchant_username');
+    userInp.placeholder = 'Nhập tên đăng nhập...';
+    passInp.setAttribute('autocomplete', 'current-password');
+    passInp.setAttribute('name', 'merchant_password');
 
-    // 1. Khung hiển thị danh sách gian hàng đã lưu sẵn
+    // Cập nhật nhãn gọn gàng, bỏ tên nhà hàng mẫu trên giao diện đăng nhập
+    const userLbl = userInp.closest('.form-group')?.querySelector('.form-label');
+    if (userLbl) userLbl.textContent = 'Tên đăng nhập';
+    const sampleInfoBox = loginBox.querySelector('.info-box');
+    if (sampleInfoBox && /Chính Thư|Vũ Bảo|Thủy Đình/i.test(sampleInfoBox.textContent || '')) {
+      sampleInfoBox.classList.add('hidden');
+    }
+
+    // Khung tài khoản đã lưu nhanh (chỉ hiện username, không hiện tên nhà hàng)
     const savedBar = document.createElement('div');
     savedBar.id = 'mc-saved-accounts-bar';
     savedBar.className = 'info-box hidden';
     savedBar.style.cssText = 'background:#ecfdf5; border-color:#6ee7b7; margin-bottom:10px; padding:8px 10px;';
-    const firstFormGroup = userInp.closest('.form-group');
-    loginBox.insertBefore(savedBar, firstFormGroup);
+    loginBox.insertBefore(savedBar, userInp.closest('.form-group'));
 
-    // 2. Ô Tên gian hàng / Nhà hàng (tự điền & tự lưu)
-    const shopGroup = document.createElement('div');
-    shopGroup.className = 'form-group';
-    shopGroup.innerHTML = `
-      <label class="form-label">🏪 Tên gian hàng / Nhà hàng (tự động lưu sẵn)</label>
-      <input type="text" id="mc-shop-name-inp" list="mc-shop-datalist" class="form-control" placeholder="VD: Nhà hàng Thịt Dê Chính Thư...">
-    `;
-    loginBox.insertBefore(shopGroup, firstFormGroup);
-
-    // Khi chọn/nhập tên gian hàng khớp với tài khoản đã lưu hoặc có trong db -> tự điền tên đăng nhập
-    const shopInp = document.getElementById('mc-shop-name-inp');
-    shopInp.addEventListener('change', () => {
-      const val = shopInp.value.trim().toLowerCase();
-      if (!val) return;
-      const list = readJSON(SAVED_MC_LIST_KEY, []);
-      const hitSaved = (Array.isArray(list) ? list : []).find(x => String(x.shopName || '').toLowerCase() === val);
-      if (hitSaved) {
-        userInp.value = hitSaved.username;
-        const passEl = document.getElementById('mc-pass-inp');
-        if (passEl && hitSaved.password) passEl.value = hitSaved.password;
-        return;
-      }
-      const allP = typeof getAllPartners === 'function' ? getAllPartners() : [];
-      const hitDb = allP.find(p => String(p.item?.name || '').toLowerCase() === val);
-      if (hitDb?.item?.account?.username) {
-        userInp.value = hitDb.item.account.username;
-      }
-    });
-
-    // 3. Checkbox Ghi nhớ đăng nhập & Tên gian hàng
+    // Checkbox Lưu mật khẩu & Duy trì đăng nhập
     const remWrap = document.createElement('div');
-    remWrap.style.cssText = 'margin:6px 0 10px; font-size:12.2px; font-weight:700; color:#334552;';
+    remWrap.style.cssText = 'margin:6px 0 10px; font-size:12.2px; font-weight:700; color:#334552; display:flex; flex-direction:column; gap:5px;';
     remWrap.innerHTML = `
       <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
-        <input type="checkbox" id="mc-remember-chk" checked> 💾 Lưu sẵn tên đăng nhập, tên gian hàng &amp; mật khẩu
+        <input type="checkbox" id="mc-remember-chk" checked> 💾 Lưu tên đăng nhập &amp; mật khẩu
       </label>
+      <div style="font-size:11.2px; color:var(--jade-dark); font-weight:600;">
+        🔓 Sau khi đăng nhập, hệ thống sẽ <b>luôn giữ đăng nhập</b> để bạn vào đăng bài kịp thời bất cứ lúc nào.
+      </div>
     `;
     loginBox.insertBefore(remWrap, loginBtn);
 
-    // 4. Tự điền sẵn thông tin đã lưu từ lần đăng nhập trước
+    // Điền sẵn tài khoản & mật khẩu đã lưu
     const saved = readJSON(SAVED_MC_KEY, null);
     if (saved) {
-      shopInp.value = saved.shopName || '';
       userInp.value = saved.username || '';
-      const passEl = document.getElementById('mc-pass-inp');
-      if (passEl && saved.password) passEl.value = saved.password;
+      if (saved.password) passInp.value = saved.password;
     }
     renderSavedMerchantBox();
   }
 
   // =========================================================================
-  // PHẦN 3: LƯU SẴN TÊN ĐĂNG NHẬP & MẬT KHẨU ADMIN (CỔNG QUẢN TRỊ)
+  // PHẦN 3: LƯU MẬT KHẨU ADMIN (CỔNG QUẢN TRỊ)
   // =========================================================================
   window.clearSavedAdminLogin = function() {
     localStorage.removeItem(SAVED_ADM_KEY);
@@ -11450,7 +11482,7 @@ service cloud.firestore {
     if (pEl) pEl.value = '';
     const bar = document.getElementById('adm-saved-login-bar');
     if (bar) bar.classList.add('hidden');
-    toast('Đã xóa thông tin đăng nhập Admin đã lưu.', 'info');
+    toast('Đã xóa mật khẩu Admin đã lưu.', 'info');
   };
 
   function injectAdminSavedLoginUI() {
@@ -11459,6 +11491,9 @@ service cloud.firestore {
     const pinInp = document.getElementById('admin-pin-input');
     const loginBtn = loginBox?.querySelector('button[onclick*="loginAdmin"]');
     if (!loginBox || !userInp || !pinInp || !loginBtn || document.getElementById('adm-remember-chk')) return;
+
+    userInp.setAttribute('autocomplete', 'username');
+    pinInp.setAttribute('autocomplete', 'current-password');
 
     const savedBar = document.createElement('div');
     savedBar.id = 'adm-saved-login-bar';
@@ -11470,7 +11505,7 @@ service cloud.firestore {
     remWrap.style.cssText = 'margin:6px 0 10px; font-size:12.2px; font-weight:700; color:#334552;';
     remWrap.innerHTML = `
       <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
-        <input type="checkbox" id="adm-remember-chk" checked> 💾 Lưu sẵn tên đăng nhập &amp; mật khẩu Admin
+        <input type="checkbox" id="adm-remember-chk" checked> 💾 Lưu tên đăng nhập &amp; mật khẩu Admin
       </label>
     `;
     loginBox.insertBefore(remWrap, loginBtn);
@@ -11481,52 +11516,45 @@ service cloud.firestore {
       if (saved.password) pinInp.value = saved.password;
       savedBar.classList.remove('hidden');
       savedBar.innerHTML = `
-        <span style="font-size:11.8px; color:#1d4ed8;">✅ Đã điền sẵn: <b>${esc(saved.fullName || saved.username)}</b> (<code>${esc(saved.username)}</code>)</span>
+        <span style="font-size:11.8px; color:#1d4ed8;">✅ Đã lưu sẵn mật khẩu cho tài khoản: <code><b>${esc(saved.username)}</b></code></span>
         <button type="button" class="btn btn-soft btn-xs" style="color:var(--danger);" onclick="clearSavedAdminLogin()">✕ Quên</button>
       `;
     }
   }
 
-  // Hook loginMerchant để tự động lưu Tên đăng nhập + Mật khẩu + Tên gian hàng ngay khi đăng nhập thành công
+  // Hook loginMerchant: Lưu mật khẩu + Lưu phiên đăng nhập vĩnh viễn cho đến khi bấm Đăng xuất
   if (typeof window.loginMerchant === 'function') {
-    const _prevLoginMc23 = window.loginMerchant;
+    const _prevLoginMc28 = window.loginMerchant;
     window.loginMerchant = function() {
       const uVal = String(document.getElementById('mc-user-inp')?.value || '').trim();
       const pVal = String(document.getElementById('mc-pass-inp')?.value || '').trim();
-      const shopTyped = String(document.getElementById('mc-shop-name-inp')?.value || '').trim();
       const remember = document.getElementById('mc-remember-chk')?.checked !== false;
 
-      _prevLoginMc23();
+      _prevLoginMc28();
 
       if (ui.merchantRestaurantId) {
         const partner = typeof findPartnerById === 'function' ? findPartnerById(ui.merchantRestaurantId) : null;
         const rs = partner?.item;
-        const finalShopName = rs?.name || shopTyped || uVal;
+        const finalUser = rs?.account?.username || uVal;
+        saveMerchantActiveSession(ui.merchantRestaurantId, finalUser);
         if (remember) {
-          saveMerchantCredentials({
-            username: rs?.account?.username || uVal,
-            password: pVal,
-            shopName: finalShopName,
-            partnerId: ui.merchantRestaurantId,
-            partnerType: partner?.type || 'restaurant'
-          });
+          saveMerchantCredentials(finalUser, pVal, ui.merchantRestaurantId);
         }
         renderSavedMerchantBox();
       }
     };
   }
 
-  // Khi đăng xuất Cổng Nhà Hàng -> vẫn điền lại sẵn thông tin đã lưu để lần sau bấm Đăng nhập 1 chạm
+  // Hook logoutMerchant: Chỉ xóa phiên đăng nhập tự động khi chủ động bấm Đăng xuất; vẫn giữ mật khẩu đã lưu để đăng nhập lại nhanh
   if (typeof window.logoutMerchant === 'function') {
-    const _prevLogoutMc23 = window.logoutMerchant;
+    const _prevLogoutMc28 = window.logoutMerchant;
     window.logoutMerchant = function() {
-      _prevLogoutMc23();
+      clearMerchantActiveSession();
+      _prevLogoutMc28();
       const saved = readJSON(SAVED_MC_KEY, null);
       if (saved) {
-        const sEl = document.getElementById('mc-shop-name-inp');
         const uEl = document.getElementById('mc-user-inp');
         const pEl = document.getElementById('mc-pass-inp');
-        if (sEl) sEl.value = saved.shopName || '';
         if (uEl) uEl.value = saved.username || '';
         if (pEl) pEl.value = saved.password || '';
       }
@@ -11534,31 +11562,54 @@ service cloud.firestore {
     };
   }
 
-  // Hook loginAdmin để tự động lưu Tên đăng nhập & Mật khẩu Admin
+  // Nếu nhà hàng đổi mật khẩu -> cập nhật luôn mật khẩu đã lưu
+  if (typeof window.saveMerchantNewPassword === 'function') {
+    const _prevSaveNewPw28 = window.saveMerchantNewPassword;
+    window.saveMerchantNewPassword = function() {
+      const np = String(document.getElementById('mc-new-pass-inp')?.value || '').trim();
+      const rs = typeof findPartnerById === 'function' ? findPartnerById(ui.merchantRestaurantId)?.item : null;
+      _prevSaveNewPw28();
+      if (rs && rs.account && np.length >= 4 && rs.account.password === np) {
+        saveMerchantCredentials(rs.account.username, np, rs.id);
+      }
+    };
+  }
+
+  // Đảm bảo khi chuyển sang tab Cổng Nhà Hàng luôn tự động khôi phục phiên đăng nhập nếu chưa có
+  if (typeof window.renderMerchantPortal === 'function') {
+    const _prevRenderMc28 = window.renderMerchantPortal;
+    window.renderMerchantPortal = function() {
+      if (!ui.merchantRestaurantId) {
+        restoreMerchantActiveSession(true);
+      }
+      _prevRenderMc28();
+    };
+  }
+
+  // Hook loginAdmin & logoutAdmin để lưu mật khẩu Admin
   if (typeof window.loginAdmin === 'function') {
-    const _prevLoginAdm23 = window.loginAdmin;
+    const _prevLoginAdm28 = window.loginAdmin;
     window.loginAdmin = function() {
       const uVal = String(document.getElementById('admin-user-input')?.value || 'admin').trim();
       const pVal = String(document.getElementById('admin-pin-input')?.value || '').trim();
       const remember = document.getElementById('adm-remember-chk')?.checked !== false;
 
-      _prevLoginAdm23();
+      _prevLoginAdm28();
 
       if (ui.adminLoggedIn && remember) {
         const curAdm = typeof getCurrentAdminAccount === 'function' ? getCurrentAdminAccount() : null;
         writeJSON(SAVED_ADM_KEY, {
           username: curAdm?.username || uVal,
-          password: pVal,
-          fullName: curAdm?.fullName || 'Quản trị viên'
+          password: pVal
         });
       }
     };
   }
 
   if (typeof window.logoutAdmin === 'function') {
-    const _prevLogoutAdm23 = window.logoutAdmin;
+    const _prevLogoutAdm28 = window.logoutAdmin;
     window.logoutAdmin = function() {
-      _prevLogoutAdm23();
+      _prevLogoutAdm28();
       const saved = readJSON(SAVED_ADM_KEY, null);
       if (saved) {
         const uEl = document.getElementById('admin-user-input');
@@ -11570,85 +11621,17 @@ service cloud.firestore {
   }
 
   window.addEventListener('DOMContentLoaded', () => {
+    enforceAlwaysSyncFirebaseConfig();
     setTimeout(() => {
       injectFirebaseDiagnosticsUI();
       injectMerchantSavedLoginUI();
       injectAdminSavedLoginUI();
-    }, 180);
-  });
-})();
-</script>
-
-<!-- ==================== HOÀN THIỆN V27: HIỂN THỊ TRẠNG THÁI CLOUD TRÊN CỔNG NHÀ HÀNG & ĐỒNG BỘ TÊN GIAN HÀNG ==================== -->
-<script>
-(function initFinalPolishV27() {
-  function refreshMerchantCloudPill() {
-    const metaEl = document.getElementById('mc-dash-meta');
-    if (!metaEl) return;
-    let pill = document.getElementById('mc-cloud-status-pill');
-    if (!pill) {
-      pill = document.createElement('span');
-      pill.id = 'mc-cloud-status-pill';
-      pill.style.cssText = 'display:inline-flex; align-items:center; gap:4px; margin-top:5px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:800; cursor:pointer;';
-      pill.onclick = () => {
-        if (typeof window.pushOrdersLiveToFirebase === 'function') {
-          window.pushOrdersLiveToFirebase(false);
-        } else if (typeof window.openFirebaseSyncModal === 'function') {
-          window.openFirebaseSyncModal();
-        }
-      };
-      metaEl.parentElement?.appendChild(pill);
-    }
-    const cfg = typeof window.getActiveFirebaseConfig === 'function' ? window.getActiveFirebaseConfig() : null;
-    if (cfg && cfg.apiKey && cfg.projectId) {
-      pill.style.background = 'rgba(16, 185, 129, 0.25)';
-      pill.style.border = '1px solid rgba(110, 231, 183, 0.7)';
-      pill.style.color = '#d1fae5';
-      pill.textContent = `☁️ Cloud OK (${cfg.projectId}) • Bấm đồng bộ đơn ngay`;
-    } else {
-      pill.style.background = 'rgba(251, 191, 36, 0.22)';
-      pill.style.border = '1px solid rgba(253, 230, 138, 0.65)';
-      pill.style.color = '#fef3c7';
-      pill.textContent = '⚪ Đang lưu cục bộ (Kết nối Firebase trong Admin để đồng bộ Điện thoại ↔ Máy tính)';
-    }
-  }
-
-  if (typeof window.renderMerchantPortal === 'function') {
-    const _prevRenderMc27 = window.renderMerchantPortal;
-    window.renderMerchantPortal = function() {
-      _prevRenderMc27();
-      refreshMerchantCloudPill();
-    };
-  }
-
-  if (typeof window.saveMerchantProfile === 'function') {
-    const _prevSaveProf27 = window.saveMerchantProfile;
-    window.saveMerchantProfile = function(e) {
-      _prevSaveProf27(e);
-      try {
-        const rs = typeof findPartnerById === 'function' ? findPartnerById(ui.merchantRestaurantId)?.item : null;
-        if (rs && rs.account?.username) {
-          const cur = JSON.parse(localStorage.getItem('nb_saved_merchant_login_v2') || 'null');
-          if (cur && String(cur.username || '').toLowerCase() === String(rs.account.username).toLowerCase()) {
-            cur.shopName = rs.name;
-            localStorage.setItem('nb_saved_merchant_login_v2', JSON.stringify(cur));
-          }
-          const list = JSON.parse(localStorage.getItem('nb_saved_merchant_list_v2') || '[]');
-          if (Array.isArray(list)) {
-            list.forEach(item => {
-              if (String(item.username || '').toLowerCase() === String(rs.account.username).toLowerCase()) {
-                item.shopName = rs.name;
-              }
-            });
-            localStorage.setItem('nb_saved_merchant_list_v2', JSON.stringify(list));
-          }
-        }
-      } catch (err) {}
-    };
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(refreshMerchantCloudPill, 500);
+      restoreMerchantActiveSession(true);
+    }, 150);
+    // Khôi phục lại lần nữa sau khi dữ liệu từ Vault/Firebase tải xong
+    setTimeout(() => {
+      if (!ui.merchantRestaurantId) restoreMerchantActiveSession(true);
+    }, 1200);
   });
 })();
 </script>
