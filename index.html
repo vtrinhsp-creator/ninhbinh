@@ -5943,7 +5943,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (Array.isArray(data.restaurantPosts)) db.restaurantPosts = data.restaurantPosts;
       if (Array.isArray(data.wards)) db.wards = data.wards;
       if (Array.isArray(data.reviews)) db.reviews = data.reviews;
-      if (Array.isArray(data.orders)) db.orders = data.orders;
+      if (Array.isArray(data.orders)) db.orders = typeof window.mergeCompatibleOrders === 'function' ? window.mergeCompatibleOrders(db.orders, data.orders) : data.orders;
       db.cart = localCart;
 
       let _mergedNewSnacks = 0;
@@ -6049,6 +6049,13 @@ window.addEventListener('DOMContentLoaded', () => {
       updateSyncUI('syncing', '⏳ Đang đẩy dữ liệu lên Firebase...');
       const col = cfg.collection || DEFAULT_COL;
       const docId = cfg.docId || DEFAULT_DOC;
+      if (typeof window.normalizeAllOrdersCompat === 'function') window.normalizeAllOrdersCompat();
+      try {
+        const curSnap = await fbDb.collection(col).doc(docId).get();
+        if (curSnap.exists && Array.isArray(curSnap.data()?.orders) && typeof window.mergeCompatibleOrders === 'function') {
+          db.orders = window.mergeCompatibleOrders(db.orders, curSnap.data().orders);
+        }
+      } catch (mergeErr) {}
       const payload = buildSyncPayload();
       await fbDb.collection(col).doc(docId).set(payload, { merge: true });
       lastSyncAt = payload._meta.updatedAtVN;
@@ -9683,6 +9690,46 @@ window.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // 3. SINH HÓA ĐƠN CHI TIẾT + MÃ VIETQR SỐ TIỀN & SỐ TK + XÁC NHẬN THANH TOÁN
   // =========================================================================
+  window.openExistingOrderInvoiceModal = function(orderId) {
+    if (typeof window.normalizeAllOrdersCompat === 'function') window.normalizeAllOrdersCompat();
+    const ord = (db.orders || []).find(o => o.id === orderId || o.code === orderId);
+    if (!ord) { toast('Không tìm thấy đơn hàng này.', 'error'); return; }
+    const partnerObj = typeof findPartnerById === 'function' ? findPartnerById(ord.partnerId) : null;
+    const rs = partnerObj?.item || { id: ord.partnerId, name: ord.partnerName || 'Cơ sở', ward: '', phone: ord.partnerPhone || '', bank: null };
+
+    qoExt.partnerType = ord.partnerType || partnerObj?.type || 'restaurant';
+    qoExt.partnerId = rs.id;
+    qoExt.partner = rs;
+    qoExt.items = Array.isArray(ord.items) ? JSON.parse(JSON.stringify(ord.items)) : [];
+    qoExt.lastOrderId = ord.id;
+
+    const rsPhone = sanitizePhone(rs.phone || ord.partnerPhone || '');
+    const targetZaloPhone = rsPhone || SUPPORT_HOTLINE_19;
+    const zaloUrl = `https://zalo.me/${targetZaloPhone}`;
+    const totalVND = Number(ord.finalAmount) || 0;
+    const totalText = totalVND > 0 ? fmtVND(totalVND) : (ord.totalText || 'Liên hệ báo giá');
+    const ticketText = typeof window.buildPaidInvoiceZaloMessage === 'function' && (ord.paymentStatus === 'Đã thanh toán' || ord.status === 'Hoàn tất')
+      ? window.buildPaidInvoiceZaloMessage(ord)
+      : `🧾 ĐƠN HÀNG #${ord.code}\n🏪 ${ord.partnerName || rs.name}\n👤 ${ord.customerName} (${formatPhoneDisplay(ord.customerPhone)})\n👥 ${ord.partySize || 1} khách • 📦 ${ord.method || ''}\n💰 Tổng tiền: ${totalText}\n🕒 Tạo lúc: ${ord.createdAt || ''}`;
+
+    document.getElementById('qo-title').textContent = `🧾 Hóa Đơn & Thanh Toán #${ord.code}`;
+    document.getElementById('qo-sub').textContent = `🏪 ${ord.partnerName || rs.name} • Đồng bộ dữ liệu cũ & mới`;
+    document.getElementById('qo-form').classList.add('hidden');
+    document.getElementById('qo-success-view').classList.remove('hidden');
+    document.getElementById('qo-new-btn').classList.add('hidden');
+    document.getElementById('qos-code-line').textContent = `🔖 Mã đơn: ${ord.code} • 👥 ${ord.partySize || 1} khách • 👤 ${ord.customerName || 'Khách'} • 📞 ${formatPhoneDisplay(ord.customerPhone)}`;
+    document.getElementById('qos-ticket-text').value = ticketText;
+    document.getElementById('qos-zalo-btn').href = zaloUrl;
+    document.getElementById('qos-zalo-btn').textContent = rsPhone
+      ? `💬 Mở Zalo Nhà Hàng (${formatPhoneDisplay(rsPhone)})`
+      : `💬 Gửi Zalo Điều Phối (${formatPhoneDisplay(SUPPORT_HOTLINE_19)})`;
+    document.getElementById('qos-tel-btn').href = `tel:${targetZaloPhone}`;
+    document.getElementById('qos-fallback-note').textContent = '💡 Đơn hàng này đã được liên thông giữa phiên bản cũ và phiên bản mới (hỗ trợ quét VietQR & xác nhận thanh toán).';
+
+    renderCustomerInvoiceQR(ord, rs);
+    document.getElementById('quick-order-modal').classList.add('open');
+  };
+
   function renderCustomerInvoiceQR(ord, rs) {
     const successBox = document.querySelector('#qo-success-view .qo-success-box');
     if (!successBox) return;
@@ -10472,6 +10519,348 @@ window.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('DOMContentLoaded', () => {
     obs20.observe(document.body, { childList: true, subtree: true });
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN 21: LIÊN THÔNG ĐẶT HÀNG 2 CHIỀU GIỮA PHIÊN BẢN CŨ & PHIÊN BẢN MỚI ==================== -->
+<div id="my-orders-bridge-modal" class="modal-bg" onclick="if(event.target===this)closeModal('my-orders-bridge-modal')">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:15.5px; font-weight:800;">🧾 Đơn Hàng Của Tôi &amp; Tra Cứu Đơn Phiên Bản Cũ</div>
+        <div style="font-size:11.5px; color:var(--muted);">Tự động liên thông đơn đặt từ phiên bản cũ, Messenger, Giỏ hàng &amp; Firebase</div>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('my-orders-bridge-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <input id="mob-search-inp" class="form-control" style="flex:1; min-width:200px;" placeholder="🔍 Nhập SĐT đặt hàng hoặc Mã đơn (VD: DH-819610)..." oninput="renderMyOrdersBridgeList()">
+        <button type="button" class="btn btn-jade btn-sm" onclick="syncLegacyAndCloudOrders(true)">🔄 Đồng bộ cũ &amp; mới</button>
+      </div>
+      <div id="mob-status-note" style="font-size:11.5px; color:var(--muted);"></div>
+      <div id="mob-list" style="display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto;"></div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('my-orders-bridge-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initLegacyOrderBridgeAddon() {
+  const STATUS_RANK = { 'Mới đặt': 1, 'Đã xác nhận': 2, 'Hoàn tất': 3, 'Đã hủy': 4 };
+  const PAY_RANK = { 'Chưa thanh toán': 1, 'Khách báo đã thanh toán': 2, 'Đã thanh toán': 3 };
+
+  function parseVNDFromText(txt) {
+    if (!txt) return 0;
+    const m = String(txt).match(/(\d{1,3}(?:[.,]\d{3})+)\s*đ/i) || String(txt).match(/(\d{4,})\s*đ/i);
+    if (m) return Number(m[1].replace(/[.,]/g, '')) || 0;
+    return 0;
+  }
+
+  function estimateFallbackUnitPrice(partner) {
+    const nums = String(partner?.priceRange || '').match(/\d+/g);
+    if (nums && nums.length) {
+      const a = Number(nums[0]) * (Number(nums[0]) < 1000 ? 1000 : 1);
+      const b = nums[1] ? Number(nums[1]) * (Number(nums[1]) < 1000 ? 1000 : 1) : a;
+      const avg = Math.round(((a + b) / 2) / 5000) * 5000;
+      if (avg >= 10000) return avg;
+    }
+    return partner?.category === 'snack' ? 35000 : 180000;
+  }
+
+  // Chuẩn hóa 1 đơn hàng để tương thích 100% cả phiên bản CŨ (priceNum, totalText, status) và MỚI (unitPrice, lineTotal, finalAmount, paymentStatus)
+  window.normalizeSingleOrderCompat = function(rawOrd) {
+    if (!rawOrd || typeof rawOrd !== 'object') return null;
+    const ord = Object.assign({}, rawOrd);
+
+    ord.id = ord.id || ('ord_' + (ord.code || Date.now().toString(36)));
+    ord.code = ord.code || ('DH-' + String(ord.id).slice(-6).toUpperCase());
+    ord.customerName = (ord.customerName || 'Khách hàng').trim();
+    ord.customerPhone = sanitizePhone(ord.customerPhone || '');
+    ord.partySize = Math.max(1, parseInt(ord.partySize || '1', 10) || 1);
+
+    const partnerObj = typeof findPartnerById === 'function' ? findPartnerById(ord.partnerId) : null;
+    const partner = partnerObj?.item || null;
+    if (!ord.partnerType) ord.partnerType = partnerObj?.type || 'restaurant';
+    if (!ord.partnerName && partner) ord.partnerName = partner.name;
+    if (!ord.partnerPhone && partner) ord.partnerPhone = sanitizePhone(partner.phone || '');
+
+    // Chuẩn hóa danh sách items (từ đơn bản cũ hoặc mới)
+    let items = Array.isArray(ord.items) ? ord.items.map(it => {
+      const qty = Math.max(1, Number(it.qty) || 1);
+      const up = Math.max(0, Number(it.unitPrice ?? it.priceNum ?? it.price) || 0);
+      return {
+        id: it.id || ('it_' + Math.random().toString(36).slice(2, 7)),
+        name: it.name || 'Món / Đặc sản',
+        unitPrice: up,
+        priceNum: up,
+        priceText: it.priceText || (up > 0 ? fmtVND(up) : 'Liên hệ báo giá'),
+        qty,
+        lineTotal: up * qty
+      };
+    }) : [];
+
+    // Nếu là đơn nhà hàng từ phiên bản cũ (items rỗng), tự tạo dòng kê khai khớp số khách để lên hóa đơn & VietQR
+    if (!items.length && ord.partnerType === 'restaurant') {
+      const parsedTotal = Number(ord.finalAmount) || parseVNDFromText(ord.totalText);
+      const unitP = parsedTotal > 0
+        ? Math.round(parsedTotal / ord.partySize)
+        : estimateFallbackUnitPrice(partner);
+      items = [{
+        id: 'legacy_dish_1',
+        name: `Suất ăn / Đặt bàn tại ${ord.partnerName || 'Nhà hàng'}`,
+        unitPrice: unitP,
+        priceNum: unitP,
+        priceText: fmtVND(unitP),
+        qty: ord.partySize,
+        lineTotal: unitP * ord.partySize
+      }];
+    }
+    ord.items = items;
+
+    const sumFromItems = items.reduce((s, it) => s + ((Number(it.unitPrice) || 0) * Math.max(1, Number(it.qty) || 1)), 0);
+    const curFinal = Number(ord.finalAmount) || 0;
+    const parsedFromTxt = parseVNDFromText(ord.totalText);
+    ord.finalAmount = curFinal > 0 ? curFinal : (sumFromItems > 0 ? sumFromItems : parsedFromTxt);
+    if (!ord.totalText || !/\d/.test(ord.totalText)) {
+      ord.totalText = ord.finalAmount > 0 ? fmtVND(ord.finalAmount) : 'Liên hệ báo giá';
+    } else if (ord.finalAmount > 0 && /khách\s*•/i.test(ord.totalText)) {
+      ord.totalText = fmtVND(ord.finalAmount);
+    }
+
+    // Đồng bộ 2 chiều trạng thái đơn (bản cũ: status='Hoàn tất') <-> trạng thái thanh toán (bản mới: paymentStatus='Đã thanh toán')
+    ord.status = ord.status || 'Mới đặt';
+    if (ord.status === 'Hoàn tất' || ord.paymentStatus === 'Đã thanh toán' || Boolean(ord.paidAt)) {
+      ord.paymentStatus = 'Đã thanh toán';
+      if (ord.status !== 'Đã hủy') ord.status = 'Hoàn tất';
+      if (!ord.paidAt) ord.paidAt = ord.createdAt || (typeof formatNowVN === 'function' ? formatNowVN() : '');
+    } else if (!ord.paymentStatus) {
+      ord.paymentStatus = 'Chưa thanh toán';
+    }
+
+    ord.createdAt = ord.createdAt || (typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN'));
+    return ord;
+  };
+
+  // Hợp nhất 2 danh sách đơn hàng (từ bản cũ & bản mới) theo id/code — KHÔNG BAO GIỜ ghi đè mất đơn
+  window.mergeCompatibleOrders = function(listA, listB) {
+    const byKey = new Map();
+    const ingest = (raw) => {
+      const n = window.normalizeSingleOrderCompat(raw);
+      if (!n) return;
+      const key = n.code || n.id;
+      const existing = byKey.get(key);
+      if (!existing) {
+        byKey.set(key, n);
+        return;
+      }
+      const stA = STATUS_RANK[existing.status] || 0;
+      const stB = STATUS_RANK[n.status] || 0;
+      const payA = PAY_RANK[existing.paymentStatus] || 0;
+      const payB = PAY_RANK[n.paymentStatus] || 0;
+
+      const merged = Object.assign({}, existing, n, {
+        id: existing.id || n.id,
+        code: existing.code || n.code,
+        status: stB >= stA ? n.status : existing.status,
+        paymentStatus: payB >= payA ? n.paymentStatus : existing.paymentStatus,
+        paidAt: n.paidAt || existing.paidAt || '',
+        customerPaidAt: n.customerPaidAt || existing.customerPaidAt || '',
+        paidInvoiceSentAt: n.paidInvoiceSentAt || existing.paidInvoiceSentAt || '',
+        finalAmount: Math.max(Number(existing.finalAmount) || 0, Number(n.finalAmount) || 0),
+        items: (Array.isArray(n.items) && n.items.length >= (existing.items || []).length) ? n.items : existing.items
+      });
+      byKey.set(key, window.normalizeSingleOrderCompat(merged));
+    };
+
+    (Array.isArray(listA) ? listA : []).forEach(ingest);
+    (Array.isArray(listB) ? listB : []).forEach(ingest);
+
+    return Array.from(byKey.values());
+  };
+
+  window.normalizeAllOrdersCompat = function() {
+    if (!Array.isArray(db.orders)) db.orders = [];
+    db.orders = window.mergeCompatibleOrders(db.orders, []);
+  };
+
+  // Quét toàn bộ các khóa localStorage của phiên bản cũ (nb_heritage_*, Vault, Auto-Snapshots) để kéo đơn về đồng bộ
+  function collectOrdersFromAllLegacyLocalKeys() {
+    let found = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (k.startsWith('nb_heritage_') || k.includes('orders')) {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(k));
+            if (Array.isArray(parsed?.orders) && parsed.orders.length) {
+              found = found.concat(parsed.orders);
+            } else if (Array.isArray(parsed) && parsed[0]?.data?.orders) {
+              parsed.forEach(sn => {
+                if (Array.isArray(sn?.data?.orders)) found = found.concat(sn.data.orders);
+              });
+            }
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+    return found;
+  }
+
+  window.syncLegacyAndCloudOrders = async function(showToast = false) {
+    const beforeCount = (db.orders || []).length;
+    const legacyOrders = collectOrdersFromAllLegacyLocalKeys();
+    db.orders = window.mergeCompatibleOrders(db.orders || [], legacyOrders);
+
+    if (typeof window.pullFromFirebase === 'function') {
+      try { await window.pullFromFirebase(false); } catch (e) {}
+    }
+
+    window.normalizeAllOrdersCompat();
+    if ((db.orders || []).length !== beforeCount || legacyOrders.length) {
+      saveDB();
+    }
+    if (document.getElementById('my-orders-bridge-modal')?.classList.contains('open')) {
+      renderMyOrdersBridgeList();
+    }
+    if (showToast) {
+      toast(`✅ Đã đồng bộ & liên thông ${(db.orders || []).length} đơn hàng từ phiên bản cũ và mới!`);
+    }
+  };
+
+  // =========================================================================
+  // LIÊN THÔNG NÚT ĐẶT HÀNG KIỂU CŨ (MESSENGER) SANG HỆ THỐNG ĐƠN & VIETQR MỚI
+  // =========================================================================
+  let lastMessengerContext = null;
+  if (typeof window.openMessengerOrder === 'function') {
+    const _prevOpenMsg21 = window.openMessengerOrder;
+    window.openMessengerOrder = function(shopName, fbInput, orderMessage) {
+      _prevOpenMsg21(shopName, fbInput, orderMessage);
+      // Tìm đối tác tương ứng để cho phép chuyển 1 chạm sang Hóa đơn Online + VietQR
+      const allP = typeof getAllPartners === 'function' ? getAllPartners() : [];
+      const match = allP.find(p => p.item.name === shopName || p.item.shop === shopName);
+      lastMessengerContext = match ? { type: match.type, id: match.item.id } : null;
+
+      const foot = document.querySelector('#fb-msg-modal .modal-foot');
+      if (foot) {
+        let bridgeBtn = document.getElementById('fbm-bridge-invoice-btn');
+        if (!bridgeBtn) {
+          bridgeBtn = document.createElement('button');
+          bridgeBtn.type = 'button';
+          bridgeBtn.id = 'fbm-bridge-invoice-btn';
+          bridgeBtn.className = 'btn btn-jade btn-sm';
+          bridgeBtn.textContent = '🧾 Lập Hóa Đơn & VietQR';
+          foot.insertBefore(bridgeBtn, foot.firstChild);
+        }
+        bridgeBtn.classList.toggle('hidden', !lastMessengerContext);
+        bridgeBtn.onclick = () => {
+          closeModal('fb-msg-modal');
+          if (lastMessengerContext && typeof window.openQuickOrderModal === 'function') {
+            window.openQuickOrderModal(lastMessengerContext.type, lastMessengerContext.id);
+          }
+        };
+      }
+    };
+  }
+
+  // =========================================================================
+  // MODAL "ĐƠN CỦA TÔI / TRA CỨU ĐƠN CŨ & MỚI" CHO KHÁCH HÀNG
+  // =========================================================================
+  window.openMyOrdersBridgeModal = function() {
+    syncLegacyAndCloudOrders(false);
+    const inp = document.getElementById('mob-search-inp');
+    if (inp && !inp.value) {
+      try {
+        const prof = JSON.parse(localStorage.getItem('nb_customer_order_profile_v1') || '{}');
+        if (prof?.phone) inp.value = prof.phone;
+      } catch (e) {}
+    }
+    renderMyOrdersBridgeList();
+    document.getElementById('my-orders-bridge-modal').classList.add('open');
+  };
+
+  window.renderMyOrdersBridgeList = function() {
+    const listEl = document.getElementById('mob-list');
+    const noteEl = document.getElementById('mob-status-note');
+    if (!listEl) return;
+
+    window.normalizeAllOrdersCompat();
+    const q = (document.getElementById('mob-search-inp')?.value || '').trim().toLowerCase();
+    const qDigits = q.replace(/\D/g, '');
+    const allOrders = db.orders || [];
+
+    const filtered = allOrders.filter(o => {
+      if (!q) return true;
+      const code = String(o.code || '').toLowerCase();
+      const phone = String(o.customerPhone || '');
+      const name = String(o.customerName || '').toLowerCase();
+      const partner = String(o.partnerName || '').toLowerCase();
+      return code.includes(q) || name.includes(q) || partner.includes(q) || (qDigits && phone.includes(qDigits));
+    });
+
+    if (noteEl) {
+      noteEl.textContent = q
+        ? `Tìm thấy ${filtered.length}/${allOrders.length} đơn hàng khớp từ khóa "${q}".`
+        : `Đang hiển thị toàn bộ ${allOrders.length} đơn hàng đã liên thông (từ bản cũ & bản mới).`;
+    }
+
+    if (!filtered.length) {
+      listEl.innerHTML = `<div style="text-align:center; padding:26px 12px; color:var(--muted); font-size:12.5px;">
+        Không tìm thấy đơn hàng nào khớp. Hãy bấm <b>🔄 Đồng bộ cũ &amp; mới</b> hoặc kiểm tra lại SĐT / Mã đơn.
+      </div>`;
+      return;
+    }
+
+    listEl.innerHTML = filtered.slice(0, 30).map(o => {
+      const isPaid = o.paymentStatus === 'Đã thanh toán' || o.status === 'Hoàn tất' || Boolean(o.paidAt);
+      const badgeCls = isPaid ? 'pay-paid' : (o.paymentStatus === 'Khách báo đã thanh toán' ? 'pay-reported' : 'pay-unpaid');
+      const badgeTxt = isPaid ? '✅ Đã thanh toán' : (o.paymentStatus === 'Khách báo đã thanh toán' ? '🟡 Chờ quán xác nhận' : '🔴 Chưa thanh toán');
+      return `
+        <div style="border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:#f8fafc; display:flex; flex-direction:column; gap:5px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+            <div>
+              <b style="color:var(--fb);">🔖 #${esc(o.code)}</b> • <b>${esc(o.partnerName)}</b>
+              <span class="pay-pill ${badgeCls}">${badgeTxt}</span>
+            </div>
+            <span style="font-size:11px; color:var(--muted);">🕒 ${esc(o.createdAt || '')}</span>
+          </div>
+          <div style="font-size:12px;">
+            👤 <b>${esc(o.customerName)}</b> (${esc(formatPhoneDisplay(o.customerPhone))}) • 👥 <b>${o.partySize || 1} khách</b> • 💰 <b style="color:#b45309;">${o.finalAmount > 0 ? fmtVND(o.finalAmount) : esc(o.totalText)}</b>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:2px;">
+            <button type="button" class="btn btn-fb btn-xs" onclick="closeModal('my-orders-bridge-modal'); openExistingOrderInvoiceModal('${o.id}')">🧾 Xem Hóa Đơn &amp; Mã VietQR</button>
+            ${!isPaid ? `<button type="button" class="btn btn-jade btn-xs" onclick="closeModal('my-orders-bridge-modal'); openExistingOrderInvoiceModal('${o.id}')">💳 Thanh toán / Xác nhận</button>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  };
+
+  // Gắn nút "🧾 Đơn của tôi" gọn gàng cạnh nút Giỏ hàng ở Header (và trong Drawer Giỏ hàng)
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      syncLegacyAndCloudOrders(false);
+
+      const cartBtn = document.querySelector('.cart-trigger');
+      if (cartBtn && !document.getElementById('hdr-my-orders-btn')) {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'display:inline-flex; align-items:center; gap:6px; flex-shrink:0;';
+        cartBtn.parentNode.insertBefore(wrap, cartBtn);
+
+        const ordBtn = document.createElement('button');
+        ordBtn.type = 'button';
+        ordBtn.id = 'hdr-my-orders-btn';
+        ordBtn.className = 'btn btn-soft-jade btn-sm';
+        ordBtn.title = 'Xem & thanh toán đơn hàng đã đặt (liên thông bản cũ & mới)';
+        ordBtn.innerHTML = '🧾 <span class="cart-lbl">Đơn của tôi</span>';
+        ordBtn.onclick = openMyOrdersBridgeModal;
+
+        wrap.appendChild(ordBtn);
+        wrap.appendChild(cartBtn);
+      }
+    }, 300);
   });
 })();
 </script>
