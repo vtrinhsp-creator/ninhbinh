@@ -1230,6 +1230,92 @@
     .ord-kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
+
+  /* =========================================================================
+     16. ANALYTICS REPORT DASHBOARD & MERCHANT PAYMENT QR
+     ========================================================================= */
+  .rpt-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .rpt-kpi {
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 11px 13px;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .rpt-kpi .rk-lbl { font-size: 11px; color: var(--muted); font-weight: 700; }
+  .rpt-kpi .rk-val { font-size: 19px; font-weight: 900; line-height: 1.2; }
+  .rpt-kpi .rk-sub { font-size: 11px; color: var(--muted); }
+  .rpt-bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 8px;
+  }
+  .rpt-bar-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+  }
+  .rpt-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1877f2, #0b6e63);
+    transition: width 0.3s ease;
+  }
+  .payqr-stage {
+    background: linear-gradient(160deg, #eff6ff 0%, #f0fdfa 100%);
+    border: 2px solid #93c5fd;
+    border-radius: 16px;
+    padding: 14px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .payqr-frame {
+    background: #fff;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 220px;
+    min-height: 220px;
+  }
+  .payqr-frame img {
+    max-width: 245px;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    display: block;
+  }
+  .payqr-amount-big {
+    font-size: 24px;
+    font-weight: 900;
+    color: #b45309;
+    letter-spacing: 0.3px;
+  }
+  .payqr-fullscreen .modal-box {
+    max-width: 460px !important;
+  }
+  @media (max-width: 820px) {
+    .rpt-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
 </style>
 </head>
 <body>
@@ -7268,6 +7354,7 @@ window.addEventListener('DOMContentLoaded', () => {
           <div style="display:flex; gap:5px; flex-wrap:wrap;">
             <a href="tel:${esc(o.customerPhone)}" class="btn btn-jade btn-xs">📲 Gọi khách</a>
             <a href="https://zalo.me/${esc(o.customerPhone)}" target="_blank" rel="noopener noreferrer" class="btn btn-quick-zalo btn-xs">💬 Zalo khách</a>
+            <button type="button" class="btn btn-gold btn-xs" onclick="openMerchantPayQRModal('${o.id}', '${o.partnerId}')">💳 Xuất QR thanh toán</button>
           </div>
           <select class="form-control" style="width:auto; min-height:30px; padding:4px 8px; font-size:11.5px;" onchange="updateOnlineOrderStatus('${o.id}', this.value)">
             ${['Mới đặt','Đã xác nhận','Hoàn tất','Đã hủy'].map(st => `<option value="${st}" ${(o.status||'Mới đặt')===st?'selected':''}>${st}</option>`).join('')}
@@ -7491,11 +7578,13 @@ window.addEventListener('DOMContentLoaded', () => {
   // PHẦN 1: THỐNG KÊ ĐƠN HÀNG THEO THỨ TỰ ƯU TIÊN PHÙ HỢP
   // =========================================================================
   function parseOrderEstimatedVND(order) {
-    if (Array.isArray(order.items) && order.items.length) {
+    if (order && Number(order.finalAmount) > 0) return Number(order.finalAmount);
+    if (Array.isArray(order?.items) && order.items.length) {
       return order.items.reduce((sum, it) => sum + ((Number(it.priceNum) || 0) * (Number(it.qty) || 1)), 0);
     }
     return 0;
   }
+  window.parseOrderEstimatedVND = parseOrderEstimatedVND;
 
   function getOrderPriorityMeta(o) {
     const st = o.status || 'Mới đặt';
@@ -7919,6 +8008,902 @@ window.addEventListener('DOMContentLoaded', () => {
       btn.textContent = '🔍 Rà soát FB / SĐT / ĐC';
       btn.onclick = openContactAuditModal;
       adminToolbar.insertBefore(btn, adminToolbar.firstChild);
+    }
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN 16: QUẢN TRỊ THỐNG KÊ & BÁO CÁO TỔNG HỢP MỌI MẶT ==================== -->
+<div id="report-analytics-modal" class="modal-bg" onclick="if(event.target===this)closeModal('report-analytics-modal')">
+  <div class="modal-box" style="max-width:1080px;">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:16px; font-weight:800;">📊 Quản Trị Thống Kê &amp; Báo Cáo Tổng Hợp Mọi Mặt</div>
+        <div style="font-size:11.5px; color:var(--muted);">Tổng hợp theo Tên cửa hàng, Số lượng đơn hàng, Tổng số tiền, Trạng thái, Phân khu, Đánh giá &amp; Bài đăng</div>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('report-analytics-modal')">✕</button>
+    </div>
+
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+      <!-- Thanh lọc báo cáo -->
+      <div class="info-box" style="background:#f8fbff; border-color:#bfdbfe;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <select id="rpt-time" class="form-control" style="width:165px;" onchange="renderAnalyticsReport()">
+            <option value="all">📅 Tất cả thời gian</option>
+            <option value="today">☀️ Hôm nay</option>
+            <option value="7d">📆 7 ngày gần đây</option>
+            <option value="30d">🗓️ 30 ngày gần đây</option>
+            <option value="month">📊 Tháng hiện tại</option>
+          </select>
+          <select id="rpt-type" class="form-control" style="width:160px;" onchange="renderAnalyticsReport()">
+            <option value="all">🍽️🎁 Tất cả cơ sở</option>
+            <option value="restaurant">🍽️ Chỉ Nhà hàng</option>
+            <option value="specialty">🎁 Chỉ Đặc sản</option>
+          </select>
+          <select id="rpt-region" class="form-control" style="width:205px;" onchange="renderAnalyticsReport()">
+            <option value="all">🗺️ Tất cả 3 phân khu</option>
+            <option value="hoalu">⛰️ Hoa Lư – Tràng An</option>
+            <option value="tamchuc">🌿 Tam Chúc – Sơn Nam</option>
+            <option value="thanhnam">🌊 Trần – Phủ Dầy – Biển</option>
+          </select>
+          <select id="rpt-sort" class="form-control" style="width:210px;" onchange="renderAnalyticsReport()">
+            <option value="revenue_desc">💰 Xếp theo Tổng số tiền ↓</option>
+            <option value="orders_desc">📦 Xếp theo Số lượng đơn ↓</option>
+            <option value="pending_desc">🔴 Xếp theo Đơn chờ xử lý ↓</option>
+            <option value="rating_desc">⭐ Xếp theo Đánh giá TB ↓</option>
+            <option value="name_asc">🔤 Xếp theo Tên cửa hàng A–Z</option>
+          </select>
+          <input id="rpt-search" class="form-control" style="flex:1; min-width:160px;" oninput="renderAnalyticsReport()" placeholder="🔍 Tìm tên cửa hàng, phường/xã...">
+        </div>
+      </div>
+
+      <!-- 6 KPI tổng quan -->
+      <div id="rpt-kpi-grid" class="rpt-kpi-grid"></div>
+
+      <!-- Biểu đồ tóm tắt 2 cột -->
+      <div class="two-col" id="rpt-charts-wrap"></div>
+
+      <!-- Bảng tổng hợp chi tiết mọi mặt theo từng cửa hàng -->
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
+          <div style="font-size:14px; font-weight:800;">📋 Bảng Tổng Hợp Chi Tiết Theo Từng Cửa Hàng (<span id="rpt-store-count">0</span> cửa hàng)</div>
+          <label style="font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:5px; cursor:pointer;">
+            <input type="checkbox" id="rpt-only-with-orders" onchange="renderAnalyticsReport()"> Chỉ hiện cửa hàng có phát sinh đơn hàng
+          </label>
+        </div>
+        <div class="table-wrap" style="max-height:360px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tên cửa hàng &amp; Địa bàn</th>
+                <th>Số lượng đơn</th>
+                <th>Phân loại trạng thái</th>
+                <th>💰 Tổng số tiền</th>
+                <th>⭐ Đánh giá</th>
+                <th>📰 Bài đăng</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="rpt-tbody"></tbody>
+            <tfoot id="rpt-tfoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-jade btn-sm" onclick="exportAnalyticsReportCSV()">📥 Xuất Báo Cáo CSV (Excel)</button>
+      <button type="button" class="btn btn-gold btn-sm" onclick="printAnalyticsReport()">🖨️ In / Lưu PDF Báo Cáo</button>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('report-analytics-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MÔ-ĐUN 17: CHỦ NHÀ HÀNG XUẤT MÃ QR THANH TOÁN THEO TỔNG SỐ TIỀN ==================== -->
+<div id="merchant-qr-pay-modal" class="modal-bg" onclick="if(event.target===this)closeModal('merchant-qr-pay-modal')">
+  <div class="modal-box" style="max-width:780px;">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:15.5px; font-weight:800;">💳 Xuất Mã QR Thanh Toán Theo Tổng Số Tiền Của Khách</div>
+        <div id="mqr-sub" style="font-size:11.5px; color:var(--muted);">Tạo mã VietQR chuẩn ngân hàng Việt Nam tự động điền đúng số tiền &amp; nội dung chuyển khoản</div>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('merchant-qr-pay-modal')">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="two-col">
+        <!-- Cột trái: Thông tin ngân hàng & số tiền khách trả -->
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="info-box" style="background:#f8fafc;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:4px;">
+              <b style="color:var(--fb);">🏦 1. Tài Khoản Ngân Hàng Nhận Tiền</b>
+              <button type="button" class="btn btn-soft-jade btn-xs" onclick="saveMerchantBankSettings()">💾 Lưu TK Ngân hàng</button>
+            </div>
+            <div class="form-group" style="margin-bottom:6px;">
+              <label class="form-label">Ngân hàng thụ hưởng *</label>
+              <select id="mqr-bank-bin" class="form-control" onchange="refreshPaymentQRPreview()"></select>
+            </div>
+            <div class="row-2">
+              <div class="form-group" style="margin-bottom:4px;">
+                <label class="form-label">Số tài khoản (STK) *</label>
+                <input id="mqr-acc-no" class="form-control" oninput="refreshPaymentQRPreview()" placeholder="VD: 0123456789">
+              </div>
+              <div class="form-group" style="margin-bottom:4px;">
+                <label class="form-label">Tên chủ tài khoản</label>
+                <input id="mqr-acc-name" class="form-control" oninput="refreshPaymentQRPreview()" placeholder="VD: NGUYEN VAN A">
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box" style="background:#fffbeb; border-color:#fcd34d;">
+            <b style="color:#92400e; margin-bottom:4px;">🧾 2. Thông Tin Thanh Toán Của Khách</b>
+            <div class="form-group" style="margin-bottom:6px;">
+              <label class="form-label">Chọn nhanh từ đơn hàng online (nếu có)</label>
+              <select id="mqr-order-select" class="form-control" onchange="onSelectOrderForQR()"></select>
+            </div>
+            <div class="row-2">
+              <div class="form-group" style="margin-bottom:6px;">
+                <label class="form-label">Tên khách / Số bàn</label>
+                <input id="mqr-cust-name" class="form-control" oninput="refreshPaymentQRPreview()" placeholder="VD: Anh Minh / Bàn 05">
+              </div>
+              <div class="form-group" style="margin-bottom:6px;">
+                <label class="form-label">SĐT khách (để gửi Zalo)</label>
+                <input id="mqr-cust-phone" class="form-control" placeholder="VD: 0912345678">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:6px;">
+              <label class="form-label">💰 Tổng số tiền khách cần thanh toán (VNĐ) *</label>
+              <input id="mqr-amount" type="number" min="0" step="1000" class="form-control" style="font-size:16px; font-weight:800; color:#b45309;" oninput="refreshPaymentQRPreview()" placeholder="VD: 850000">
+              <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;">
+                <button type="button" class="btn btn-xs btn-soft" onclick="addQuickPayAmount(50000)">+50k</button>
+                <button type="button" class="btn btn-xs btn-soft" onclick="addQuickPayAmount(100000)">+100k</button>
+                <button type="button" class="btn btn-xs btn-soft" onclick="addQuickPayAmount(200000)">+200k</button>
+                <button type="button" class="btn btn-xs btn-soft" onclick="addQuickPayAmount(500000)">+500k</button>
+                <button type="button" class="btn btn-xs btn-soft" style="color:var(--danger);" onclick="document.getElementById('mqr-amount').value=''; refreshPaymentQRPreview();">Xóa</button>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Nội dung chuyển khoản</label>
+              <input id="mqr-memo" class="form-control" oninput="refreshPaymentQRPreview()" placeholder="VD: TT don DH-123456">
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Mã QR hiển thị cho khách quét -->
+        <div class="payqr-stage">
+          <div id="mqr-shop-badge" class="tag tag-food" style="font-size:12px;">🍽️ Nhà hàng</div>
+          <div class="payqr-amount-big" id="mqr-amount-display">0đ</div>
+          <div id="mqr-memo-display" style="font-size:12px; color:var(--muted); font-weight:700;">Nhập STK &amp; tổng tiền để tạo mã QR</div>
+
+          <div class="payqr-frame" id="mqr-frame">
+            <img id="mqr-img" src="" alt="VietQR" class="hidden">
+            <canvas id="mqr-canvas" width="240" height="240" style="width:220px; height:220px; display:none;"></canvas>
+            <div id="mqr-placeholder" style="font-size:12px; color:var(--muted); padding:16px;">
+              📷 Nhập <b>Số tài khoản ngân hàng</b> và <b>Tổng số tiền</b> ở cột bên trái để tạo mã VietQR ngay lập tức.
+            </div>
+          </div>
+
+          <div id="mqr-bank-caption" style="font-size:11.5px; color:var(--text); font-weight:700;"></div>
+
+          <div style="display:flex; gap:6px; flex-wrap:wrap; width:100%; justify-content:center; margin-top:4px;">
+            <button type="button" class="btn btn-jade btn-sm" onclick="downloadPaymentQRReceipt()">⬇️ Tải Phiếu QR PNG</button>
+            <button type="button" class="btn btn-quick-zalo btn-sm" onclick="sendPaymentQRToCustomerZalo()">💬 Gửi Zalo Khách</button>
+            <button type="button" class="btn btn-food btn-sm" id="mqr-confirm-paid-btn" onclick="confirmOrderPaidAndRecord()">✅ Đã Thu Tiền &amp; Lưu Doanh Thu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('merchant-qr-pay-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initAnalyticsAndMerchantPayQRAddon() {
+  // Danh sách ngân hàng phổ biến tại Việt Nam (Mã BIN NAPAS 6 số + mã VietQR)
+  const VN_BANKS = [
+    { bin: '970422', code: 'MB', name: 'MB Bank (Quân Đội)' },
+    { bin: '970436', code: 'VCB', name: 'Vietcombank' },
+    { bin: '970405', code: 'VBA', name: 'Agribank' },
+    { bin: '970418', code: 'BIDV', name: 'BIDV' },
+    { bin: '970415', code: 'ICB', name: 'VietinBank' },
+    { bin: '970407', code: 'TCB', name: 'Techcombank' },
+    { bin: '970416', code: 'ACB', name: 'ACB (Á Châu)' },
+    { bin: '970432', code: 'VPB', name: 'VPBank' },
+    { bin: '970423', code: 'TPB', name: 'TPBank' },
+    { bin: '970403', code: 'STB', name: 'Sacombank' },
+    { bin: '970441', code: 'VIB', name: 'VIB' },
+    { bin: '970437', code: 'HDB', name: 'HDBank' },
+    { bin: '970443', code: 'SHB', name: 'SHB' },
+    { bin: '970448', code: 'OCB', name: 'OCB' },
+    { bin: '970426', code: 'MSB', name: 'MSB' },
+    { bin: '970449', code: 'LPB', name: 'LPBank' },
+    { bin: '970431', code: 'EIB', name: 'Eximbank' },
+    { bin: '970440', code: 'SEAB', name: 'SeABank' }
+  ];
+
+  let activePayPartnerId = null;
+  let activePayOrderId = null;
+  let lastAnalyticsData = null;
+
+  // =========================================================================
+  // PHẦN A: THỐNG KÊ & BÁO CÁO TỔNG HỢP MỌI MẶT
+  // =========================================================================
+  function parseVNDate(str) {
+    if (!str) return null;
+    const m = String(str).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+    if (!m) return null;
+    return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), Number(m[4] || 0), Number(m[5] || 0));
+  }
+
+  function matchTimeFilter(createdAtStr, filterVal) {
+    if (filterVal === 'all') return true;
+    const d = parseVNDate(createdAtStr);
+    if (!d) return true;
+    const now = new Date();
+    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (filterVal === 'today') return d >= startToday;
+    if (filterVal === '7d') return (now - d) <= 7 * 86400000;
+    if (filterVal === '30d') return (now - d) <= 30 * 86400000;
+    if (filterVal === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    return true;
+  }
+
+  function getOrderMoneyVND(o) {
+    if (typeof window.parseOrderEstimatedVND === 'function') return window.parseOrderEstimatedVND(o);
+    if (Number(o.finalAmount) > 0) return Number(o.finalAmount);
+    if (Array.isArray(o.items)) return o.items.reduce((s, it) => s + ((Number(it.priceNum) || 0) * (Number(it.qty) || 1)), 0);
+    return 0;
+  }
+
+  window.openAnalyticsReportModal = function() {
+    renderAnalyticsReport();
+    document.getElementById('report-analytics-modal').classList.add('open');
+  };
+
+  window.renderAnalyticsReport = function() {
+    const timeFlt = document.getElementById('rpt-time')?.value || 'all';
+    const typeFlt = document.getElementById('rpt-type')?.value || 'all';
+    const regFlt = document.getElementById('rpt-region')?.value || 'all';
+    const sortFlt = document.getElementById('rpt-sort')?.value || 'revenue_desc';
+    const onlyWithOrders = Boolean(document.getElementById('rpt-only-with-orders')?.checked);
+    const q = (document.getElementById('rpt-search')?.value || '').trim().toLowerCase();
+
+    const allPartners = getAllPartners().filter(p => {
+      if (typeFlt !== 'all' && p.type !== typeFlt) return false;
+      if (regFlt !== 'all' && p.item.region !== regFlt) return false;
+      if (q && !`${p.item.name} ${p.item.shop || ''} ${p.item.ward || ''} ${p.item.address || ''}`.toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    const filteredOrders = (db.orders || []).filter(o => matchTimeFilter(o.createdAt, timeFlt));
+    const allReviews = Array.isArray(db.reviews) ? db.reviews : [];
+    const allPosts = Array.isArray(db.restaurantPosts) ? db.restaurantPosts : [];
+
+    // Tổng hợp theo từng cửa hàng
+    const rows = allPartners.map(p => {
+      const it = p.item;
+      const myOrders = filteredOrders.filter(o => o.partnerId === it.id);
+      const pending = myOrders.filter(o => (o.status || 'Mới đặt') === 'Mới đặt').length;
+      const confirmed = myOrders.filter(o => o.status === 'Đã xác nhận').length;
+      const done = myOrders.filter(o => o.status === 'Hoàn tất').length;
+      const cancelled = myOrders.filter(o => o.status === 'Đã hủy').length;
+      const totalRevenue = myOrders.filter(o => o.status !== 'Đã hủy').reduce((s, o) => s + getOrderMoneyVND(o), 0);
+      const doneRevenue = myOrders.filter(o => o.status === 'Hoàn tất').reduce((s, o) => s + getOrderMoneyVND(o), 0);
+
+      const myRevs = allReviews.filter(r => r.targetId === it.id);
+      const avgStar = myRevs.length
+        ? myRevs.reduce((s, r) => s + ((Number(r.serviceStars) || 5) + (Number(r.qualityStars) || 5)) / 2, 0) / myRevs.length
+        : 0;
+      const myPosts = allPosts.filter(ps => ps.restaurantId === it.id && ps.visible !== false).length;
+
+      return {
+        id: it.id,
+        type: p.type,
+        icon: p.icon,
+        label: p.label,
+        name: it.name,
+        shop: it.shop || '',
+        ward: it.ward || '',
+        region: it.region || 'hoalu',
+        phone: sanitizePhone(it.phone),
+        fb: extractFbSlug(it.fb),
+        totalOrders: myOrders.length,
+        pending, confirmed, done, cancelled,
+        totalRevenue,
+        doneRevenue,
+        reviewCount: myRevs.length,
+        avgStar,
+        postCount: myPosts
+      };
+    }).filter(r => !onlyWithOrders || r.totalOrders > 0);
+
+    // Sắp xếp
+    rows.sort((a, b) => {
+      if (sortFlt === 'orders_desc') return b.totalOrders - a.totalOrders || b.totalRevenue - a.totalRevenue;
+      if (sortFlt === 'pending_desc') return b.pending - a.pending || b.totalOrders - a.totalOrders;
+      if (sortFlt === 'rating_desc') return b.avgStar - a.avgStar || b.reviewCount - a.reviewCount;
+      if (sortFlt === 'name_asc') return a.name.localeCompare(b.name, 'vi');
+      return b.totalRevenue - a.totalRevenue || b.totalOrders - a.totalOrders;
+    });
+
+    // Tính KPI tổng hợp
+    const sumStores = rows.length;
+    const activeStores = rows.filter(r => r.totalOrders > 0).length;
+    const sumOrders = rows.reduce((s, r) => s + r.totalOrders, 0);
+    const sumPending = rows.reduce((s, r) => s + r.pending, 0);
+    const sumConfirmed = rows.reduce((s, r) => s + r.confirmed, 0);
+    const sumDone = rows.reduce((s, r) => s + r.done, 0);
+    const sumCancel = rows.reduce((s, r) => s + r.cancelled, 0);
+    const sumRevenue = rows.reduce((s, r) => s + r.totalRevenue, 0);
+    const sumDoneRev = rows.reduce((s, r) => s + r.doneRevenue, 0);
+    const validOrders = Math.max(0, sumOrders - sumCancel);
+    const avgOrderVal = validOrders > 0 ? Math.round(sumRevenue / validOrders) : 0;
+    const doneRate = sumOrders > 0 ? Math.round((sumDone / sumOrders) * 100) : 0;
+    const totalReviews = rows.reduce((s, r) => s + r.reviewCount, 0);
+    const sumPosts = rows.reduce((s, r) => s + r.postCount, 0);
+
+    lastAnalyticsData = { rows, sumStores, activeStores, sumOrders, sumPending, sumConfirmed, sumDone, sumCancel, sumRevenue, sumDoneRev, avgOrderVal, doneRate, totalReviews, sumPosts };
+
+    // 1. Render 6 KPI
+    document.getElementById('rpt-kpi-grid').innerHTML = `
+      <div class="rpt-kpi" style="border-left:4px solid #1877f2;">
+        <div class="rk-lbl">🏪 Tổng số cửa hàng</div>
+        <div class="rk-val" style="color:var(--fb);">${sumStores}</div>
+        <div class="rk-sub">${activeStores} cửa hàng có phát sinh đơn</div>
+      </div>
+      <div class="rpt-kpi" style="border-left:4px solid #7c3aed;">
+        <div class="rk-lbl">📦 Tổng số lượng đơn hàng</div>
+        <div class="rk-val" style="color:var(--food-dark);">${sumOrders} đơn</div>
+        <div class="rk-sub">🔴 ${sumPending} chờ • 🔵 ${sumConfirmed} xác nhận • 🟢 ${sumDone} xong</div>
+      </div>
+      <div class="rpt-kpi" style="border-left:4px solid #059669;">
+        <div class="rk-lbl">💰 Tổng số tiền (Doanh thu)</div>
+        <div class="rk-val" style="color:#047857;">${fmtVND(sumRevenue)}</div>
+        <div class="rk-sub">Đã hoàn tất: <b>${fmtVND(sumDoneRev)}</b></div>
+      </div>
+      <div class="rpt-kpi" style="border-left:4px solid #d97706;">
+        <div class="rk-lbl">📈 Giá trị TB / đơn hàng</div>
+        <div class="rk-val" style="color:#b45309;">${fmtVND(avgOrderVal)}</div>
+        <div class="rk-sub">Tính trên ${validOrders} đơn hợp lệ</div>
+      </div>
+      <div class="rpt-kpi" style="border-left:4px solid #0d9488;">
+        <div class="rk-lbl">✅ Tỷ lệ hoàn tất đơn</div>
+        <div class="rk-val" style="color:var(--jade-dark);">${doneRate}%</div>
+        <div class="rk-sub">Đã hủy: ${sumCancel} đơn</div>
+      </div>
+      <div class="rpt-kpi" style="border-left:4px solid #ec4899;">
+        <div class="rk-lbl">⭐ Tương tác &amp; Nội dung</div>
+        <div class="rk-val" style="color:#be185d;">${totalReviews} đánh giá</div>
+        <div class="rk-sub">📰 ${sumPosts} bài đăng đang hiển thị</div>
+      </div>
+    `;
+
+    // 2. Render Biểu đồ trực quan 2 cột
+    const topRev = [...rows].filter(r => r.totalRevenue > 0 || r.totalOrders > 0).sort((a, b) => b.totalRevenue - a.totalRevenue || b.totalOrders - a.totalOrders).slice(0, 5);
+    const maxRev = Math.max(1, ...topRev.map(r => r.totalRevenue || r.totalOrders));
+
+    const regionAgg = ['hoalu', 'tamchuc', 'thanhnam'].map(rk => {
+      const rr = rows.filter(x => x.region === rk);
+      return {
+        key: rk,
+        name: REGIONS[rk]?.short || rk,
+        stores: rr.length,
+        orders: rr.reduce((s, x) => s + x.totalOrders, 0),
+        revenue: rr.reduce((s, x) => s + x.totalRevenue, 0)
+      };
+    });
+    const maxRegOrd = Math.max(1, ...regionAgg.map(x => x.orders));
+
+    document.getElementById('rpt-charts-wrap').innerHTML = `
+      <div class="info-box" style="background:#fff;">
+        <div style="font-size:13px; font-weight:800; margin-bottom:6px;">🏆 Top Cửa Hàng Theo Doanh Thu &amp; Số Đơn</div>
+        ${topRev.length ? topRev.map(r => {
+          const pct = Math.max(8, Math.round(((r.totalRevenue || r.totalOrders) / maxRev) * 100));
+          return `
+            <div class="rpt-bar-row">
+              <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span><b>${r.icon} ${esc(r.name)}</b> (${r.totalOrders} đơn)</span>
+                <b style="color:var(--jade-dark);">${fmtVND(r.totalRevenue)}</b>
+              </div>
+              <div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:${pct}%;"></div></div>
+            </div>`;
+        }).join('') : '<div style="font-size:12px; color:var(--muted); padding:10px 0;">Chưa có phát sinh đơn hàng trong khoảng thời gian đã chọn.</div>'}
+      </div>
+
+      <div class="info-box" style="background:#fff;">
+        <div style="font-size:13px; font-weight:800; margin-bottom:6px;">🗺️ Tổng Hợp Theo 3 Phân Khu Di Sản</div>
+        ${regionAgg.map(rg => {
+          const pct = rg.orders > 0 ? Math.max(8, Math.round((rg.orders / maxRegOrd) * 100)) : 4;
+          return `
+            <div class="rpt-bar-row">
+              <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span><b>${esc(rg.name)}</b> (${rg.stores} cơ sở)</span>
+                <span><b>${rg.orders} đơn</b> • <b style="color:var(--fb);">${fmtVND(rg.revenue)}</b></span>
+              </div>
+              <div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:${pct}%; background:linear-gradient(90deg,#f59e0b,#ec4899);"></div></div>
+            </div>`;
+        }).join('')}
+      </div>
+    `;
+
+    // 3. Render Bảng chi tiết từng cửa hàng
+    document.getElementById('rpt-store-count').textContent = rows.length;
+    document.getElementById('rpt-tbody').innerHTML = rows.map((r, i) => `
+      <tr>
+        <td><b>${i + 1}</b></td>
+        <td>
+          <b>${r.icon} ${esc(r.name)}</b>
+          <div style="font-size:11px; color:var(--muted);">📍 ${esc(r.ward)} • ${esc(REGIONS[r.region]?.short || '')}</div>
+        </td>
+        <td style="text-align:center;"><b style="font-size:13.5px; color:var(--food-dark);">${r.totalOrders}</b></td>
+        <td style="font-size:11px; white-space:nowrap;">
+          <span style="color:#dc2626; font-weight:700;">🔴${r.pending}</span> •
+          <span style="color:#1d4ed8; font-weight:700;">🔵${r.confirmed}</span> •
+          <span style="color:#059669; font-weight:700;">🟢${r.done}</span> •
+          <span style="color:#64748b;">⚪${r.cancelled}</span>
+        </td>
+        <td style="font-weight:800; color:#047857; white-space:nowrap;">${fmtVND(r.totalRevenue)}</td>
+        <td style="white-space:nowrap; font-size:11.5px;">${r.reviewCount > 0 ? `⭐ <b>${r.avgStar.toFixed(1)}</b> (${r.reviewCount})` : '<span style="color:var(--muted);">—</span>'}</td>
+        <td style="text-align:center;">${r.postCount}</td>
+        <td style="white-space:nowrap;">
+          <button type="button" class="btn btn-gold btn-xs" onclick="closeModal('report-analytics-modal'); openMerchantPayQRModal(null, '${r.id}')">💳 QR Thu tiền</button>
+        </td>
+      </tr>
+    `).join('') || '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--muted);">Không có cửa hàng phù hợp bộ lọc.</td></tr>';
+
+    document.getElementById('rpt-tfoot').innerHTML = `
+      <tr style="background:#eff6ff; font-weight:800; border-top:2px solid #93c5fd;">
+        <td colspan="2">TỔNG CỘNG (${sumStores} cửa hàng)</td>
+        <td style="text-align:center; color:var(--food-dark);">${sumOrders} đơn</td>
+        <td style="font-size:11px;">🔴${sumPending} • 🔵${sumConfirmed} • 🟢${sumDone} • ⚪${sumCancel}</td>
+        <td style="color:#047857; font-size:13.5px;">${fmtVND(sumRevenue)}</td>
+        <td>${totalReviews} ĐG</td>
+        <td style="text-align:center;">${sumPosts}</td>
+        <td></td>
+      </tr>
+    `;
+  };
+
+  window.exportAnalyticsReportCSV = function() {
+    if (!lastAnalyticsData || !lastAnalyticsData.rows.length) {
+      toast('Không có dữ liệu để xuất CSV.', 'info');
+      return;
+    }
+    const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const header = ['STT,TenCuaHang,Loai,PhanKhu,PhuongXa,SoLuongDon,MoiDat,DaXacNhan,HoanTat,DaHuy,TongSoTienVND,DanhGiaTB,SoDanhGia,SoBaiDang,SDT,Facebook'];
+    const lines = lastAnalyticsData.rows.map((r, i) => [
+      i + 1, q(r.name), q(r.label), q(REGIONS[r.region]?.short || r.region), q(r.ward),
+      r.totalOrders, r.pending, r.confirmed, r.done, r.cancelled, r.totalRevenue,
+      r.reviewCount ? r.avgStar.toFixed(1) : '', r.reviewCount, r.postCount, q(r.phone), q(r.fb)
+    ].join(','));
+    lines.push(['', q('TỔNG CỘNG'), '', '', '', lastAnalyticsData.sumOrders, lastAnalyticsData.sumPending, lastAnalyticsData.sumConfirmed, lastAnalyticsData.sumDone, lastAnalyticsData.sumCancel, lastAnalyticsData.sumRevenue, '', lastAnalyticsData.totalReviews, lastAnalyticsData.sumPosts, '', ''].join(','));
+
+    const blob = new Blob(['\uFEFF' + [...header, ...lines].join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Bao-Cao-Tong-Hop-NinhBinh-MienDiSan.csv';
+    a.click();
+    toast('📥 Đã xuất Báo cáo Tổng hợp CSV!');
+  };
+
+  window.printAnalyticsReport = function() {
+    if (!lastAnalyticsData) return;
+    const d = lastAnalyticsData;
+    const nowStr = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+    const win = window.open('', '_blank', 'width=960,height=720');
+    if (!win) { toast('Trình duyệt chặn cửa sổ in. Hãy cho phép popup.', 'error'); return; }
+    win.document.write(`<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>Báo Cáo Tổng Hợp — Ninh Bình Miền Di Sản</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:22px;color:#111;font-size:13px;}
+        h1{font-size:19px;margin:0 0 4px;} .sub{color:#555;margin-bottom:14px;font-size:12px;}
+        .kpis{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+        .kpi{border:1px solid #cbd5e1;border-radius:8px;padding:8px 12px;min-width:140px;}
+        table{width:100%;border-collapse:collapse;font-size:12px;}
+        th,td{border:1px solid #cbd5e1;padding:6px 8px;text-align:left;}
+        th{background:#f1f5f9;} tfoot td{background:#eff6ff;font-weight:bold;}
+      </style></head><body>
+      <h1>BÁO CÁO THỐNG KÊ TỔNG HỢP — NINH BÌNH MIỀN DI SẢN</h1>
+      <div class="sub">Ngày xuất báo cáo: ${esc(nowStr)} • Tổng số cơ sở: ${d.sumStores} • Cơ sở có đơn: ${d.activeStores}</div>
+      <div class="kpis">
+        <div class="kpi"><div>Tổng số đơn hàng</div><b>${d.sumOrders} đơn</b></div>
+        <div class="kpi"><div>Tổng số tiền</div><b>${fmtVND(d.sumRevenue)}</b></div>
+        <div class="kpi"><div>Doanh thu Hoàn tất</div><b>${fmtVND(d.sumDoneRev)}</b></div>
+        <div class="kpi"><div>Tỷ lệ hoàn tất</div><b>${d.doneRate}%</b></div>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Tên cửa hàng</th><th>Phường / Xã</th><th>Số đơn</th><th>Chờ / XN / Xong / Hủy</th><th>Tổng số tiền</th><th>Đánh giá</th></tr></thead>
+        <tbody>${d.rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.name)}</td><td>${esc(r.ward)}</td><td>${r.totalOrders}</td><td>${r.pending} / ${r.confirmed} / ${r.done} / ${r.cancelled}</td><td>${fmtVND(r.totalRevenue)}</td><td>${r.reviewCount?r.avgStar.toFixed(1)+'★ ('+r.reviewCount+')':'—'}</td></tr>`).join('')}</tbody>
+        <tfoot><tr><td colspan="3">TỔNG CỘNG</td><td>${d.sumOrders}</td><td>${d.sumPending} / ${d.sumConfirmed} / ${d.sumDone} / ${d.sumCancel}</td><td>${fmtVND(d.sumRevenue)}</td><td>${d.totalReviews} ĐG</td></tr></tfoot>
+      </table>
+      <script>window.onload=()=>window.print();<\/script>
+    </body></html>`);
+    win.document.close();
+  };
+
+  // =========================================================================
+  // PHẦN B: CHỦ NHÀ HÀNG XUẤT MÃ QR THANH TOÁN THEO TỔNG SỐ TIỀN CỦA KHÁCH
+  // =========================================================================
+  function stripVN(str) {
+    return String(str || '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+      .replace(/[^a-zA-Z0-9\s\-]/g, ' ')
+      .replace(/\s+/g, ' ').trim();
+  }
+
+  // Sinh chuỗi VietQR chuẩn EMVCo NAPAS 247 + CRC16-CCITT (dùng dự phòng Offline)
+  function tlv(id, val) {
+    const s = String(val || '');
+    return id + String(s.length).padStart(2, '0') + s;
+  }
+  function crc16ccitt(str) {
+    let crc = 0xFFFF;
+    for (let i = 0; i < str.length; i++) {
+      crc ^= str.charCodeAt(i) << 8;
+      for (let j = 0; j < 8; j++) {
+        crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+      }
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
+  }
+  function buildEmvVietQR(bin, accountNo, amount, memo) {
+    const cleanAcc = String(accountNo || '').replace(/\s+/g, '');
+    const bene = tlv('00', bin) + tlv('01', cleanAcc);
+    const merchantAcc = tlv('00', 'A000000727') + tlv('01', bene) + tlv('02', 'QRIBFTTA');
+    let payload = tlv('00', '01') + tlv('01', amount > 0 ? '12' : '11') + tlv('38', merchantAcc) + tlv('53', '704');
+    if (amount > 0) payload += tlv('54', String(Math.round(amount)));
+    payload += tlv('58', 'VN');
+    if (memo) payload += tlv('62', tlv('08', stripVN(memo).slice(0, 25)));
+    payload += '6304';
+    return payload + crc16ccitt(payload);
+  }
+
+  function populateBankSelect(selectedBin) {
+    const sel = document.getElementById('mqr-bank-bin');
+    if (!sel) return;
+    sel.innerHTML = VN_BANKS.map(b => `<option value="${b.bin}">${b.code} — ${b.name}</option>`).join('');
+    if (selectedBin && VN_BANKS.some(b => b.bin === selectedBin)) sel.value = selectedBin;
+  }
+
+  window.openMerchantPayQRModal = function(orderId = null, partnerId = null) {
+    const pid = partnerId || ui.merchantRestaurantId || (db.restaurants[0]?.id);
+    const partnerObj = findPartnerById(pid);
+    if (!partnerObj) { toast('Không xác định được cơ sở để xuất mã QR.', 'error'); return; }
+    const rs = partnerObj.item;
+
+    activePayPartnerId = rs.id;
+    activePayOrderId = orderId || null;
+
+    document.getElementById('mqr-shop-badge').textContent = `${partnerObj.icon} ${rs.name}`;
+    document.getElementById('mqr-sub').textContent = `Cơ sở: ${rs.name} • Xuất mã VietQR tự động điền đúng số tiền khách cần trả`;
+
+    // Nạp cấu hình ngân hàng đã lưu của cơ sở
+    const bk = rs.bank || {};
+    populateBankSelect(bk.bin || '970422');
+    document.getElementById('mqr-acc-no').value = bk.accountNo || '';
+    document.getElementById('mqr-acc-name').value = bk.accountName || stripVN(rs.name).toUpperCase().slice(0, 35);
+
+    // Nạp danh sách đơn hàng của cơ sở vào dropdown chọn nhanh
+    const myOrders = (db.orders || []).filter(o => o.partnerId === rs.id && o.status !== 'Đã hủy');
+    const ordSel = document.getElementById('mqr-order-select');
+    ordSel.innerHTML = `<option value="">➕ Tạo QR thu tiền trực tiếp tại quầy (Khách mới)</option>` +
+      myOrders.map(o => {
+        const amt = getOrderMoneyVND(o);
+        return `<option value="${o.id}">${esc(o.code)} — ${esc(o.customerName)} (${amt > 0 ? fmtVND(amt) : 'Chưa nhập tiền'})</option>`;
+      }).join('');
+
+    if (orderId && myOrders.some(o => o.id === orderId)) {
+      ordSel.value = orderId;
+      onSelectOrderForQR();
+    } else {
+      ordSel.value = '';
+      document.getElementById('mqr-cust-name').value = '';
+      document.getElementById('mqr-cust-phone').value = '';
+      document.getElementById('mqr-amount').value = '';
+      document.getElementById('mqr-memo').value = `TT ${stripVN(rs.name).slice(0, 18)}`;
+      refreshPaymentQRPreview();
+    }
+
+    document.getElementById('merchant-qr-pay-modal').classList.add('open');
+  };
+
+  window.onSelectOrderForQR = function() {
+    const ordId = document.getElementById('mqr-order-select')?.value || '';
+    activePayOrderId = ordId || null;
+    const rs = findPartnerById(activePayPartnerId)?.item;
+    if (!ordId) {
+      document.getElementById('mqr-cust-name').value = '';
+      document.getElementById('mqr-cust-phone').value = '';
+      document.getElementById('mqr-amount').value = '';
+      document.getElementById('mqr-memo').value = `TT ${stripVN(rs?.name || 'Nha hang').slice(0, 18)}`;
+    } else {
+      const ord = (db.orders || []).find(o => o.id === ordId);
+      if (ord) {
+        const amt = getOrderMoneyVND(ord);
+        document.getElementById('mqr-cust-name').value = ord.customerName || '';
+        document.getElementById('mqr-cust-phone').value = ord.customerPhone || '';
+        document.getElementById('mqr-amount').value = amt > 0 ? amt : '';
+        document.getElementById('mqr-memo').value = `TT ${ord.code} ${stripVN(ord.customerName || '').slice(0, 14)}`.trim();
+      }
+    }
+    refreshPaymentQRPreview();
+  };
+
+  window.addQuickPayAmount = function(delta) {
+    const inp = document.getElementById('mqr-amount');
+    if (!inp) return;
+    const cur = Math.max(0, Number(inp.value) || 0);
+    inp.value = cur + delta;
+    refreshPaymentQRPreview();
+  };
+
+  window.saveMerchantBankSettings = function() {
+    const rs = findPartnerById(activePayPartnerId)?.item;
+    if (!rs) return;
+    const bin = document.getElementById('mqr-bank-bin').value;
+    const bankObj = VN_BANKS.find(b => b.bin === bin) || VN_BANKS[0];
+    const accountNo = (document.getElementById('mqr-acc-no').value || '').trim().replace(/\s+/g, '');
+    const accountName = stripVN(document.getElementById('mqr-acc-name').value || '').toUpperCase();
+    if (!accountNo) {
+      toast('Vui lòng nhập Số tài khoản ngân hàng trước khi lưu.', 'error');
+      return;
+    }
+    rs.bank = { bin: bankObj.bin, code: bankObj.code, name: bankObj.name, accountNo, accountName };
+    saveDB();
+    if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
+    toast(`✅ Đã lưu tài khoản ${bankObj.code} (${accountNo}) cho ${rs.name}!`);
+    refreshPaymentQRPreview();
+  };
+
+  window.refreshPaymentQRPreview = function() {
+    const bin = document.getElementById('mqr-bank-bin')?.value || '970422';
+    const bankObj = VN_BANKS.find(b => b.bin === bin) || VN_BANKS[0];
+    const accNo = (document.getElementById('mqr-acc-no')?.value || '').trim().replace(/\s+/g, '');
+    const accName = stripVN(document.getElementById('mqr-acc-name')?.value || '').toUpperCase();
+    const amount = Math.max(0, Math.round(Number(document.getElementById('mqr-amount')?.value) || 0));
+    const memo = stripVN(document.getElementById('mqr-memo')?.value || 'Thanh toan').slice(0, 50);
+
+    document.getElementById('mqr-amount-display').textContent = amount > 0 ? fmtVND(amount) : 'Chưa nhập số tiền';
+    document.getElementById('mqr-memo-display').textContent = memo ? `Nội dung CK: ${memo}` : '';
+
+    const imgEl = document.getElementById('mqr-img');
+    const cvEl = document.getElementById('mqr-canvas');
+    const phEl = document.getElementById('mqr-placeholder');
+    const capEl = document.getElementById('mqr-bank-caption');
+
+    if (!accNo) {
+      imgEl.classList.add('hidden');
+      cvEl.style.display = 'none';
+      phEl.classList.remove('hidden');
+      capEl.textContent = '';
+      return;
+    }
+
+    phEl.classList.add('hidden');
+    capEl.textContent = `🏦 ${bankObj.name} • STK: ${accNo}${accName ? ' • ' + accName : ''}`;
+
+    // 1. Tạo ảnh VietQR chuẩn NAPAS (online sắc nét)
+    const vietqrUrl = `https://img.vietqr.io/image/${bankObj.bin}-${encodeURIComponent(accNo)}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accName)}`;
+
+    // 2. Đồng thời vẽ sẵn EMVCo VietQR thuần JS lên canvas dự phòng nếu mất mạng
+    try {
+      const emvStr = buildEmvVietQR(bankObj.bin, accNo, amount, memo);
+      if (typeof drawPureQR === 'function') drawPureQR(emvStr, cvEl);
+    } catch (e) {}
+
+    imgEl.onload = () => {
+      imgEl.classList.remove('hidden');
+      cvEl.style.display = 'none';
+    };
+    imgEl.onerror = () => {
+      imgEl.classList.add('hidden');
+      cvEl.style.display = 'block';
+    };
+    imgEl.src = vietqrUrl;
+  };
+
+  window.downloadPaymentQRReceipt = function() {
+    const rs = findPartnerById(activePayPartnerId)?.item;
+    const bin = document.getElementById('mqr-bank-bin')?.value || '970422';
+    const bankObj = VN_BANKS.find(b => b.bin === bin) || VN_BANKS[0];
+    const accNo = (document.getElementById('mqr-acc-no')?.value || '').trim().replace(/\s+/g, '');
+    const accName = stripVN(document.getElementById('mqr-acc-name')?.value || '').toUpperCase();
+    const custName = (document.getElementById('mqr-cust-name')?.value || '').trim();
+    const amount = Math.max(0, Math.round(Number(document.getElementById('mqr-amount')?.value) || 0));
+    const memo = stripVN(document.getElementById('mqr-memo')?.value || 'Thanh toan');
+
+    if (!accNo || amount <= 0) {
+      toast('Vui lòng nhập đầy đủ Số tài khoản và Tổng số tiền lớn hơn 0.', 'error');
+      return;
+    }
+
+    // Vẽ phiếu thu QR đẹp 640x820 thuần Canvas (luôn tải được kể cả khi bị CORS từ img)
+    const cv = document.createElement('canvas');
+    cv.width = 640; cv.height = 820;
+    const ctx = cv.getContext('2d');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 640, 820);
+
+    const g = ctx.createLinearGradient(0, 0, 640, 120);
+    g.addColorStop(0, '#1d4ed8'); g.addColorStop(1, '#0d9488');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 640, 118);
+
+    ctx.fillStyle = '#fde68a';
+    ctx.font = '800 18px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PHIẾU THANH TOÁN VIETQR — NINH BÌNH MIỀN DI SẢN', 320, 44);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 24px sans-serif';
+    ctx.fillText((rs?.name || 'NHÀ HÀNG ĐỐI TÁC').slice(0, 38), 320, 86);
+
+    ctx.fillStyle = '#b45309';
+    ctx.font = '900 40px sans-serif';
+    ctx.fillText(fmtVND(amount), 320, 178);
+
+    ctx.fillStyle = '#475569';
+    ctx.font = '700 18px sans-serif';
+    ctx.fillText(custName ? `Khách hàng: ${custName}` : 'Quét mã bằng ứng dụng Ngân hàng / Ví điện tử', 320, 212);
+
+    // Vẽ QR EMVCo chuẩn từ canvas dự phòng
+    const qrSrc = document.getElementById('mqr-canvas');
+    if (qrSrc) {
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(140, 236, 360, 360);
+      ctx.drawImage(qrSrc, 152, 248, 336, 336);
+    }
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '800 20px sans-serif';
+    ctx.fillText(`${bankObj.name}`, 320, 642);
+    ctx.font = '800 24px monospace';
+    ctx.fillStyle = '#1877f2';
+    ctx.fillText(`STK: ${accNo}`, 320, 680);
+    ctx.fillStyle = '#1e293b';
+    ctx.font = '700 18px sans-serif';
+    if (accName) ctx.fillText(`Chủ TK: ${accName}`, 320, 714);
+    ctx.fillStyle = '#0b6e63';
+    ctx.fillText(`Nội dung CK: ${memo}`, 320, 750);
+
+    const a = document.createElement('a');
+    a.download = `VietQR-${accNo}-${amount}.png`;
+    a.href = cv.toDataURL('image/png');
+    a.click();
+    toast('⬇️ Đã tải ảnh Phiếu QR thanh toán PNG!');
+  };
+
+  window.sendPaymentQRToCustomerZalo = function() {
+    const rs = findPartnerById(activePayPartnerId)?.item;
+    const bin = document.getElementById('mqr-bank-bin')?.value || '970422';
+    const bankObj = VN_BANKS.find(b => b.bin === bin) || VN_BANKS[0];
+    const accNo = (document.getElementById('mqr-acc-no')?.value || '').trim().replace(/\s+/g, '');
+    const accName = stripVN(document.getElementById('mqr-acc-name')?.value || '').toUpperCase();
+    const custName = (document.getElementById('mqr-cust-name')?.value || '').trim() || 'Quý khách';
+    const custPhone = sanitizePhone(document.getElementById('mqr-cust-phone')?.value || '');
+    const amount = Math.max(0, Math.round(Number(document.getElementById('mqr-amount')?.value) || 0));
+    const memo = stripVN(document.getElementById('mqr-memo')?.value || 'Thanh toan');
+
+    if (!accNo || amount <= 0) {
+      toast('Vui lòng nhập STK ngân hàng và Tổng số tiền trước khi gửi Zalo.', 'error');
+      return;
+    }
+
+    const qrLink = `https://img.vietqr.io/image/${bankObj.bin}-${encodeURIComponent(accNo)}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accName)}`;
+    const txt =
+      `💳 THÔNG TIN THANH TOÁN — ${rs?.name || ''}\n` +
+      `Chào ${custName}, tổng số tiền thanh toán của bạn là: ${fmtVND(amount)}\n` +
+      `🏦 Ngân hàng: ${bankObj.name}\n` +
+      `🔢 Số tài khoản: ${accNo}\n` +
+      (accName ? `👤 Chủ tài khoản: ${accName}\n` : '') +
+      `📝 Nội dung CK: ${memo}\n` +
+      `🔗 Link mã VietQR (bấm để quét nhanh): ${qrLink}`;
+
+    copyText(txt, '📋 Đã sao chép thông tin & link VietQR! Đang mở Zalo...');
+    if (custPhone) {
+      window.open(`https://zalo.me/${custPhone}`, '_blank', 'noopener,noreferrer');
+    } else {
+      toast('Chưa có SĐT khách — bạn hãy dán (Ctrl+V) nội dung vừa sao chép gửi cho khách trên Zalo nhé!', 'info');
+    }
+  };
+
+  window.confirmOrderPaidAndRecord = function() {
+    const partnerObj = findPartnerById(activePayPartnerId);
+    const rs = partnerObj?.item;
+    if (!rs) return;
+
+    const amount = Math.max(0, Math.round(Number(document.getElementById('mqr-amount')?.value) || 0));
+    if (amount <= 0) {
+      toast('Vui lòng nhập Tổng số tiền thực thu lớn hơn 0.', 'error');
+      return;
+    }
+
+    // Lưu kèm cấu hình ngân hàng nếu đã nhập
+    const accNo = (document.getElementById('mqr-acc-no')?.value || '').trim().replace(/\s+/g, '');
+    if (accNo) {
+      const bin = document.getElementById('mqr-bank-bin')?.value || '970422';
+      const bankObj = VN_BANKS.find(b => b.bin === bin) || VN_BANKS[0];
+      rs.bank = { bin: bankObj.bin, code: bankObj.code, name: bankObj.name, accountNo: accNo, accountName: stripVN(document.getElementById('mqr-acc-name')?.value || '').toUpperCase() };
+    }
+
+    if (!Array.isArray(db.orders)) db.orders = [];
+    const nowVN = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+
+    if (activePayOrderId) {
+      const ord = db.orders.find(o => o.id === activePayOrderId);
+      if (ord) {
+        ord.finalAmount = amount;
+        ord.totalText = fmtVND(amount);
+        ord.status = 'Hoàn tất';
+        ord.paidAt = nowVN;
+      }
+      toast(`✅ Đã ghi nhận thanh toán ${fmtVND(amount)} & Hoàn tất đơn!`);
+    } else {
+      const custName = (document.getElementById('mqr-cust-name')?.value || '').trim() || 'Khách thanh toán tại quầy';
+      const custPhone = sanitizePhone(document.getElementById('mqr-cust-phone')?.value || '');
+      const memo = (document.getElementById('mqr-memo')?.value || '').trim();
+      const code = 'QR-' + Math.floor(100000 + Math.random() * 900000);
+      db.orders.unshift({
+        id: 'ord_' + Date.now().toString(36),
+        code,
+        partnerType: partnerObj.type,
+        partnerId: rs.id,
+        partnerName: rs.name,
+        partnerPhone: sanitizePhone(rs.phone),
+        customerName: custName,
+        customerPhone: custPhone || '0000000000',
+        method: 'Thanh toán VietQR tại quầy',
+        partySize: 1,
+        desiredTime: 'Tại quầy',
+        note: memo,
+        items: [],
+        finalAmount: amount,
+        totalText: fmtVND(amount),
+        status: 'Hoàn tất',
+        paidAt: nowVN,
+        createdAt: nowVN
+      });
+      toast(`✅ Đã tạo hóa đơn ${code} (${fmtVND(amount)}) vào doanh thu cửa hàng!`);
+    }
+
+    saveDB();
+    if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
+    if (ui.merchantRestaurantId) renderMerchantPortal();
+    if (document.getElementById('admin-orders-modal')?.classList.contains('open') && typeof renderAdminOrdersPriorityView === 'function') {
+      renderAdminOrdersPriorityView();
+    }
+    closeModal('merchant-qr-pay-modal');
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    // 1. Chèn nút "📊 Báo cáo & Thống kê" vào thanh công cụ Quản trị Admin
+    const adminToolbar = document.querySelector('#admin-panel .panel-head > div:last-child');
+    if (adminToolbar && !document.getElementById('btn-admin-report')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'btn-admin-report';
+      btn.className = 'btn btn-fb btn-sm';
+      btn.textContent = '📊 Thống kê & Báo cáo';
+      btn.onclick = openAnalyticsReportModal;
+      adminToolbar.insertBefore(btn, adminToolbar.firstChild);
+    }
+
+    // 2. Chèn nút "💳 Xuất QR thu tiền" vào Banner Cổng Nhà Hàng
+    const bannerBtnWrap = document.querySelector('#merchant-dashboard .merchant-banner > div:last-child');
+    if (bannerBtnWrap && !document.getElementById('btn-merchant-pay-qr')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'btn-merchant-pay-qr';
+      btn.className = 'btn btn-gold btn-sm';
+      btn.textContent = '💳 Xuất QR thu tiền';
+      btn.onclick = () => openMerchantPayQRModal(null, ui.merchantRestaurantId);
+      bannerBtnWrap.insertBefore(btn, bannerBtnWrap.firstChild);
     }
   });
 })();
