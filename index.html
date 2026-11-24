@@ -5842,12 +5842,40 @@ window.addEventListener('DOMContentLoaded', () => {
   let lastSyncAt = '';
 
   function getSavedConfig() {
+    // 1. Ưu tiên đọc từ tham số URL ?fb=... (khi mở link chia sẻ trên điện thoại)
+    try {
+      const params = new URLSearchParams(window.location.search || '');
+      const fbParam = params.get('fb');
+      if (fbParam) {
+        const decoded = JSON.parse(decodeURIComponent(escape(atob(fbParam))));
+        if (decoded && decoded.apiKey && decoded.projectId) {
+          localStorage.setItem(FB_CFG_KEY, JSON.stringify(decoded));
+          return decoded;
+        }
+      }
+    } catch (e) {}
+
+    // 2. Đọc từ localStorage của thiết bị
     try {
       const raw = localStorage.getItem(FB_CFG_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.apiKey && parsed.projectId) return parsed;
+      }
     } catch (e) {}
+
+    // 3. Đọc từ cấu hình Firebase đã nhúng sẵn trong file HTML (khi xuất bản lên GitHub Pages)
+    try {
+      const embEl = document.getElementById('embedded-firebase-cfg');
+      if (embEl && embEl.textContent.trim()) {
+        const emb = JSON.parse(embEl.textContent.trim());
+        if (emb && emb.apiKey && emb.projectId) return emb;
+      }
+    } catch (e) {}
+
     return HARDCODED_FIREBASE_CONFIG ? Object.assign({}, HARDCODED_FIREBASE_CONFIG) : null;
   }
+  window.getActiveFirebaseConfig = getSavedConfig;
 
   function extractConfigFromCode(raw) {
     if (!raw) return null;
@@ -7011,6 +7039,29 @@ window.addEventListener('DOMContentLoaded', () => {
     } else {
       docHtml = docHtml.replace(/<\/body>/i, seedTag + '\n</body>');
     }
+
+    // Nhúng kèm cấu hình Firebase (nếu máy hiện tại đã kết nối) để mọi điện thoại/máy tính tự động đồng bộ
+    try {
+      const fbCfg = typeof window.getActiveFirebaseConfig === 'function' ? window.getActiveFirebaseConfig() : null;
+      if (fbCfg && fbCfg.apiKey && fbCfg.projectId) {
+        const cleanFb = {
+          apiKey: fbCfg.apiKey,
+          authDomain: fbCfg.authDomain || `${fbCfg.projectId}.firebaseapp.com`,
+          projectId: fbCfg.projectId,
+          appId: fbCfg.appId || '',
+          collection: fbCfg.collection || 'nb_heritage_hub',
+          docId: fbCfg.docId || 'main_db',
+          autoSync: true,
+          realtime: true
+        };
+        const fbTag = `<script id="embedded-firebase-cfg" type="application/json">${JSON.stringify(cleanFb)}<\/script>`;
+        if (docHtml.includes('id="embedded-firebase-cfg"')) {
+          docHtml = docHtml.replace(/<script id="embedded-firebase-cfg" type="application\/json">[\s\S]*?<\/script>/i, fbTag);
+        } else {
+          docHtml = docHtml.replace(/<\/body>/i, fbTag + '\n</body>');
+        }
+      }
+    } catch (e) {}
     const blob = new Blob([docHtml], { type: 'text/html;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -10861,6 +10912,186 @@ window.addEventListener('DOMContentLoaded', () => {
         wrap.appendChild(cartBtn);
       }
     }, 300);
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN 22: ĐỒNG BỘ ĐƠN HÀNG REALTIME ĐIỆN THOẠI <-> MÁY TÍNH (ORDERS_LIVE & NHÚNG FIREBASE) ==================== -->
+<script>
+(function initCrossDeviceOrdersRealtimeAddon() {
+  let ordersUnsub = null;
+  let ordersLiveDb = null;
+  const CLIENT_ID_22 = 'ordcli_' + Math.random().toString(36).slice(2, 9);
+
+  function getOrdersDocRef(cfg) {
+    if (!window.firebase || !window.firebase.firestore || !cfg?.projectId) return null;
+    const appName = 'nb_hub_sync_' + cfg.projectId;
+    const app = firebase.apps.find(a => a.name === appName);
+    if (!app) return null;
+    ordersLiveDb = firebase.firestore(app);
+    const col = cfg.collection || 'nb_heritage_hub';
+    return ordersLiveDb.collection(col).doc('orders_live');
+  }
+
+  // Đẩy riêng danh sách đơn hàng lên document siêu nhẹ orders_live (tránh lỗi 1MB, tốc độ tức thì trên 4G điện thoại)
+  window.pushOrdersLiveToFirebase = async function(silent = true) {
+    const cfg = typeof window.getActiveFirebaseConfig === 'function' ? window.getActiveFirebaseConfig() : null;
+    if (!cfg || !cfg.apiKey || !cfg.projectId) return false;
+    try {
+      let ref = getOrdersDocRef(cfg);
+      if (!ref && typeof window.pushAllToFirebase === 'function') {
+        await window.pushAllToFirebase(false);
+        ref = getOrdersDocRef(cfg);
+      }
+      if (!ref) return false;
+
+      if (typeof window.normalizeAllOrdersCompat === 'function') window.normalizeAllOrdersCompat();
+      // Đọc đơn mới nhất trên orders_live trước khi ghi để không bao giờ ghi đè mất đơn của thiết bị khác
+      try {
+        const snap = await ref.get();
+        if (snap.exists && Array.isArray(snap.data()?.orders) && typeof window.mergeCompatibleOrders === 'function') {
+          db.orders = window.mergeCompatibleOrders(db.orders || [], snap.data().orders);
+        }
+      } catch (e) {}
+
+      await ref.set({
+        orders: (db.orders || []).slice(0, 300),
+        updatedAt: Date.now(),
+        updatedAtVN: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN'),
+        clientId: CLIENT_ID_22
+      }, { merge: true });
+
+      if (!silent) toast('☁️ Đã đồng bộ đơn hàng tức thì lên Cloud!');
+      return true;
+    } catch (err) {
+      console.error('pushOrdersLiveToFirebase error:', err);
+      return false;
+    }
+  };
+
+  function startOrdersLiveListener() {
+    const cfg = typeof window.getActiveFirebaseConfig === 'function' ? window.getActiveFirebaseConfig() : null;
+    if (!cfg || !cfg.apiKey || !cfg.projectId) return;
+    const ref = getOrdersDocRef(cfg);
+    if (!ref) {
+      setTimeout(startOrdersLiveListener, 1200);
+      return;
+    }
+    if (ordersUnsub) { ordersUnsub(); ordersUnsub = null; }
+
+    ordersUnsub = ref.onSnapshot(
+      snap => {
+        if (!snap.exists) return;
+        const data = snap.data();
+        if (!Array.isArray(data?.orders)) return;
+        if (data.clientId === CLIENT_ID_22) return;
+
+        const prevIds = new Set((db.orders || []).map(o => o.code || o.id));
+        const merged = typeof window.mergeCompatibleOrders === 'function'
+          ? window.mergeCompatibleOrders(db.orders || [], data.orders)
+          : data.orders;
+
+        db.orders = merged;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); } catch (e) {}
+
+        // Thông báo ngay trên máy tính nếu vừa có đơn hàng mới từ điện thoại
+        const newOnes = merged.filter(o => !prevIds.has(o.code || o.id));
+        if (newOnes.length > 0) {
+          toast(`🔔 Có ${newOnes.length} đơn hàng online mới từ thiết bị khác (#${newOnes[0].code})!`, 'info');
+        }
+
+        if (ui.merchantRestaurantId && typeof renderMerchantPortal === 'function') renderMerchantPortal();
+        if (document.getElementById('admin-orders-modal')?.classList.contains('open') && typeof window.openAdminOrdersModal === 'function') {
+          window.openAdminOrdersModal();
+        }
+        if (typeof window.refreshOpenCustomerInvoiceIfAny === 'function') {
+          window.refreshOpenCustomerInvoiceIfAny(true);
+        }
+      },
+      err => console.warn('orders_live listener:', err)
+    );
+  }
+
+  // Tạo link chia sẻ kèm cấu hình Firebase để mở trên điện thoại là tự kết nối ngay
+  window.copyFirebaseShareLinkForMobile = function() {
+    const cfg = typeof window.getActiveFirebaseConfig === 'function' ? window.getActiveFirebaseConfig() : null;
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      toast('Vui lòng kết nối Firebase trên máy này trước.', 'error');
+      return;
+    }
+    const clean = {
+      apiKey: cfg.apiKey,
+      authDomain: cfg.authDomain || `${cfg.projectId}.firebaseapp.com`,
+      projectId: cfg.projectId,
+      appId: cfg.appId || '',
+      collection: cfg.collection || 'nb_heritage_hub',
+      docId: cfg.docId || 'main_db',
+      autoSync: true,
+      realtime: true
+    };
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(clean))));
+    const base = window.location.href.split('?')[0].split('#')[0];
+    const url = `${base}?fb=${encodeURIComponent(b64)}`;
+    copyText(url, '✅ Đã sao chép link kèm Firebase! Gửi link này mở trên điện thoại để tự động đồng bộ.');
+  };
+
+  // Bọc submitQuickOrderToZalo & customerReportOrderPaid & confirmPaymentSuccessOnOrder để đẩy ngay lên orders_live
+  if (typeof window.submitQuickOrderToZalo === 'function') {
+    const _prevSub22 = window.submitQuickOrderToZalo;
+    window.submitQuickOrderToZalo = function(e) {
+      _prevSub22(e);
+      const cfg = typeof window.getActiveFirebaseConfig === 'function' ? window.getActiveFirebaseConfig() : null;
+      if (cfg && cfg.apiKey && cfg.projectId) {
+        window.pushOrdersLiveToFirebase(true);
+      } else {
+        const noteEl = document.getElementById('qos-fallback-note');
+        if (noteEl) {
+          noteEl.innerHTML += `<div style="margin-top:6px; padding:7px 9px; border-radius:8px; background:#fef2f2; border:1px solid #fca5a5; color:#991b1b; font-weight:700;">
+            ⚠️ Thiết bị này chưa kết nối Firebase Cloud nên đơn mới lưu cục bộ trên máy này. Để máy tính nhận đơn tự động, hãy mở trang bằng <b>Link đã nhúng Firebase</b> hoặc xuất file HTML mới từ Admin sau khi kết nối Firebase.
+          </div>`;
+        }
+      }
+    };
+  }
+
+  if (typeof window.customerReportOrderPaid === 'function') {
+    const _prevRep22 = window.customerReportOrderPaid;
+    window.customerReportOrderPaid = function(orderId) {
+      _prevRep22(orderId);
+      window.pushOrdersLiveToFirebase(true);
+    };
+  }
+
+  if (typeof window.confirmPaymentSuccessOnOrder === 'function') {
+    const _prevCfm22 = window.confirmPaymentSuccessOnOrder;
+    window.confirmPaymentSuccessOnOrder = function(orderId) {
+      _prevCfm22(orderId);
+      window.pushOrdersLiveToFirebase(true);
+    };
+  }
+
+  // Chèn 2 nút tiện ích vào Modal Firebase Sync: "Xuất HTML kèm Firebase" & "Copy link mở trên điện thoại"
+  window.addEventListener('DOMContentLoaded', () => {
+    const fbModalBody = document.querySelector('#fb-sync-modal .modal-body');
+    if (fbModalBody && !document.getElementById('fbs-cross-device-box')) {
+      const box = document.createElement('div');
+      box.id = 'fbs-cross-device-box';
+      box.className = 'info-box';
+      box.style.cssText = 'margin-top:10px; background:#fffbeb; border-color:#fcd34d;';
+      box.innerHTML = `
+        <div style="font-weight:800; color:#92400e;">📱 Đồng bộ đơn hàng giữa Điện thoại &amp; Máy tính</div>
+        <div style="font-size:11.5px; color:#78350f;">
+          Để khách đặt hàng trên <b>điện thoại</b> mà <b>máy tính</b> nhận được ngay, hãy chọn 1 trong 2 cách sau (chỉ cần làm 1 lần):
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+          <button type="button" class="btn btn-gold btn-xs" style="flex:1;" onclick="exportHtmlWithCurrentData()">📦 Xuất HTML đã nhúng sẵn Firebase</button>
+          <button type="button" class="btn btn-soft-fb btn-xs" style="flex:1;" onclick="copyFirebaseShareLinkForMobile()">🔗 Copy link mở trên điện thoại</button>
+        </div>
+      `;
+      fbModalBody.appendChild(box);
+    }
+
+    setTimeout(startOrdersLiveListener, 1400);
   });
 })();
 </script>
