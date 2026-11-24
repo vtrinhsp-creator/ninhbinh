@@ -1316,6 +1316,88 @@
     .rpt-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
+
+  /* =========================================================================
+     17. ORDER INVOICE VIETQR, UNIT PRICE & PAYMENT CONFIRMATION
+     ========================================================================= */
+  .inv-box {
+    background: #ffffff;
+    border: 1.5px solid #93c5fd;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin: 10px 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .inv-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 8px 0;
+  }
+  .inv-table th {
+    background: #eff6ff;
+    color: #1e3a8a;
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid #bfdbfe;
+    font-weight: 800;
+  }
+  .inv-table td {
+    padding: 6px 8px;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+  .inv-qr-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    background: linear-gradient(135deg, #f0f9ff 0%, #f0fdfa 100%);
+    border: 1.5px solid #67e8f9;
+    border-radius: 13px;
+    padding: 11px 12px;
+    margin-top: 8px;
+  }
+  .inv-qr-img-box {
+    background: #fff;
+    padding: 7px;
+    border-radius: 11px;
+    border: 1px solid var(--border);
+    width: 175px;
+    min-height: 175px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .inv-qr-img-box img {
+    width: 160px;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+  }
+  .pay-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2.5px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .pay-unpaid { background: #fee2e2; color: #991b1b; }
+  .pay-reported { background: #fef3c7; color: #92400e; }
+  .pay-paid { background: #dcfce7; color: #166534; }
+  .qo-price-inp {
+    width: 96px;
+    padding: 4px 6px;
+    border-radius: 7px;
+    border: 1px solid #cbd5e1;
+    font-size: 12px;
+    font-weight: 700;
+    color: #b45309;
+    text-align: right;
+  }
+
 </style>
 </head>
 <body>
@@ -9086,6 +9168,788 @@ window.addEventListener('DOMContentLoaded', () => {
       }
       updateSnackChipCount();
     }, 220);
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN 19: ĐƠN GIÁ CỤ THỂ, TỔNG TIỀN, HÓA ĐƠN VIETQR, XÁC NHẬN THANH TOÁN & SỐ TK NHÀ HÀNG ==================== -->
+<script>
+(function initOrderPricingInvoiceQRAndBankAddon() {
+  const VN_BANKS_19 = [
+    { bin: '970422', code: 'MB', name: 'MB Bank (Quân Đội)' },
+    { bin: '970436', code: 'VCB', name: 'Vietcombank' },
+    { bin: '970405', code: 'VBA', name: 'Agribank' },
+    { bin: '970418', code: 'BIDV', name: 'BIDV' },
+    { bin: '970415', code: 'ICB', name: 'VietinBank' },
+    { bin: '970407', code: 'TCB', name: 'Techcombank' },
+    { bin: '970416', code: 'ACB', name: 'ACB (Á Châu)' },
+    { bin: '970432', code: 'VPB', name: 'VPBank' },
+    { bin: '970423', code: 'TPB', name: 'TPBank' },
+    { bin: '970403', code: 'STB', name: 'Sacombank' },
+    { bin: '970441', code: 'VIB', name: 'VIB' },
+    { bin: '970437', code: 'HDB', name: 'HDBank' },
+    { bin: '970443', code: 'SHB', name: 'SHB' },
+    { bin: '970448', code: 'OCB', name: 'OCB' },
+    { bin: '970426', code: 'MSB', name: 'MSB' },
+    { bin: '970449', code: 'LPB', name: 'LPBank' },
+    { bin: '970431', code: 'EIB', name: 'Eximbank' },
+    { bin: '970440', code: 'SEAB', name: 'SeABank' }
+  ];
+
+  const SUPPORT_HOTLINE_19 = '0918918826';
+  let qoExt = {
+    partnerType: 'restaurant',
+    partnerId: null,
+    partner: null,
+    items: [], // [{ id, name, unitPrice, qty }]
+    lastOrderId: null
+  };
+
+  function stripVN19(str) {
+    return String(str || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+      .replace(/[^a-zA-Z0-9\s\-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function bankOptionsHtml(selectedBin) {
+    return VN_BANKS_19.map(b => `<option value="${b.bin}" ${b.bin === selectedBin ? 'selected' : ''}>${b.code} — ${b.name}</option>`).join('');
+  }
+
+  // Ước tính đơn giá trung bình từ priceRange (VD: "180k - 300k/người" -> 220000; "15k - 40k" -> 30000)
+  function estimateUnitPriceFromRange(rangeStr, isSnack) {
+    const nums = String(rangeStr || '').match(/\d+/g);
+    if (nums && nums.length) {
+      const a = Number(nums[0]) * (Number(nums[0]) < 1000 ? 1000 : 1);
+      const b = nums[1] ? Number(nums[1]) * (Number(nums[1]) < 1000 ? 1000 : 1) : a;
+      const avg = Math.round(((a + b) / 2) / 5000) * 5000;
+      if (avg >= 10000) return avg;
+    }
+    return isSnack ? 35000 : 180000;
+  }
+
+  // Tạo chuỗi EMVCo VietQR dự phòng offline
+  function crc16ccitt19(str) {
+    let crc = 0xFFFF;
+    for (let i = 0; i < str.length; i++) {
+      crc ^= str.charCodeAt(i) << 8;
+      for (let j = 0; j < 8; j++) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
+  }
+  function tlv19(id, val) {
+    const s = String(val || '');
+    return id + String(s.length).padStart(2, '0') + s;
+  }
+  function buildEmvVietQR19(bin, accNo, amount, memo) {
+    const guid = tlv19('00', 'A000000727');
+    const bankAcc = tlv19('01', tlv19('00', bin) + tlv19('01', accNo));
+    const svc = tlv19('02', 'QRIBFTTA');
+    const mai = tlv19('38', guid + bankAcc + svc);
+    const amt = amount > 0 ? tlv19('54', String(Math.round(amount))) : '';
+    const add = memo ? tlv19('62', tlv19('08', stripVN19(memo).slice(0, 40))) : '';
+    const base = tlv19('00', '01') + tlv19('01', amount > 0 ? '12' : '11') + mai + tlv19('53', '704') + amt + tlv19('58', 'VN') + add + '6304';
+    return base + crc16ccitt19(base);
+  }
+
+  function buildVietQRUrl(bank, amount, memo) {
+    if (!bank || !bank.accountNo) return '';
+    const bin = bank.bin || '970422';
+    const accNo = String(bank.accountNo).replace(/\s+/g, '');
+    const accName = stripVN19(bank.accountName || '').toUpperCase();
+    const cleanMemo = stripVN19(memo || '').slice(0, 50);
+    return `https://img.vietqr.io/image/${bin}-${encodeURIComponent(accNo)}-compact2.png?amount=${Math.max(0, Math.round(amount || 0))}&addInfo=${encodeURIComponent(cleanMemo)}&accountName=${encodeURIComponent(accName)}`;
+  }
+
+  // =========================================================================
+  // 1. BỔ SUNG SỐ TÀI KHOẢN NGÂN HÀNG TRONG THÔNG TIN NHÀ HÀNG (CỔNG NHÀ HÀNG & ADMIN)
+  // =========================================================================
+  function mountBankSectionInMerchantProfile() {
+    const form = document.getElementById('mc-profile-form');
+    if (!form || document.getElementById('mcp-bank-box')) return;
+    const rightCol = form.querySelector('.two-col > div:last-child');
+    if (!rightCol) return;
+
+    const box = document.createElement('div');
+    box.id = 'mcp-bank-box';
+    box.className = 'info-box';
+    box.style.cssText = 'background:#fffbeb; border-color:#fcd34d;';
+    box.innerHTML = `
+      <div style="font-weight:800; color:#92400e; margin-bottom:4px;">4. Tài Khoản Ngân Hàng Nhận Thanh Toán (VietQR Hóa Đơn)</div>
+      <div class="form-group" style="margin-bottom:6px;">
+        <label class="form-label">Ngân hàng thụ hưởng</label>
+        <select id="mcp-bank-bin" class="form-control">${bankOptionsHtml('970422')}</select>
+      </div>
+      <div class="row-2">
+        <div class="form-group" style="margin-bottom:4px;">
+          <label class="form-label">Số tài khoản (STK)</label>
+          <input id="mcp-bank-acc" class="form-control" placeholder="VD: 0123456789">
+        </div>
+        <div class="form-group" style="margin-bottom:4px;">
+          <label class="form-label">Tên chủ tài khoản (Không dấu)</label>
+          <input id="mcp-bank-name" class="form-control" placeholder="VD: NGUYEN VAN A">
+        </div>
+      </div>
+      <div style="font-size:11px; color:#78350f;">💡 Số TK này tự động sinh mã <b>VietQR theo đúng tổng tiền</b> trên hóa đơn khi khách đặt hàng online.</div>
+    `;
+    rightCol.appendChild(box);
+  }
+
+  // Bọc renderMerchantPortal để điền dữ liệu ngân hàng vào form Cổng Nhà Hàng
+  if (typeof window.renderMerchantPortal === 'function') {
+    const _prevRenderMerchantPortal = window.renderMerchantPortal;
+    window.renderMerchantPortal = function() {
+      _prevRenderMerchantPortal();
+      mountBankSectionInMerchantProfile();
+      const rs = findPartnerById(ui.merchantRestaurantId)?.item;
+      if (!rs) return;
+      const b = rs.bank || {};
+      const sel = document.getElementById('mcp-bank-bin');
+      const acc = document.getElementById('mcp-bank-acc');
+      const nm = document.getElementById('mcp-bank-name');
+      if (sel) sel.value = b.bin || '970422';
+      if (acc) acc.value = b.accountNo || '';
+      if (nm) nm.value = b.accountName || '';
+    };
+  }
+
+  // Bọc saveMerchantProfile để lưu thêm rs.bank
+  if (typeof window.saveMerchantProfile === 'function') {
+    const _prevSaveMerchantProfile = window.saveMerchantProfile;
+    window.saveMerchantProfile = function(e) {
+      const rs = findPartnerById(ui.merchantRestaurantId)?.item;
+      if (rs) {
+        const bin = document.getElementById('mcp-bank-bin')?.value || '970422';
+        const accNo = (document.getElementById('mcp-bank-acc')?.value || '').trim().replace(/\s+/g, '');
+        const accName = stripVN19(document.getElementById('mcp-bank-name')?.value || '').toUpperCase();
+        const bankObj = VN_BANKS_19.find(x => x.bin === bin) || VN_BANKS_19[0];
+        if (accNo) {
+          rs.bank = { bin: bankObj.bin, code: bankObj.code, name: bankObj.name, accountNo: accNo, accountName: accName };
+        } else {
+          rs.bank = null;
+        }
+      }
+      _prevSaveMerchantProfile(e);
+    };
+  }
+
+  // Bọc openAdminForm & saveAdminForm để thêm trường Số TK ngân hàng cho Nhà hàng & Đặc sản
+  if (typeof window.openAdminForm === 'function') {
+    const _prevOpenAdminForm = window.openAdminForm;
+    window.openAdminForm = function(id = null) {
+      _prevOpenAdminForm(id);
+      if (ui.adminTab !== 'restaurants' && ui.adminTab !== 'specialties') return;
+      const form = document.getElementById('admin-form');
+      if (!form || document.getElementById('f-bank-box')) return;
+      const item = id ? (db[ui.adminTab] || []).find(x => x.id === id) : {};
+      const b = item?.bank || {};
+      const box = document.createElement('div');
+      box.id = 'f-bank-box';
+      box.className = 'info-box';
+      box.style.cssText = 'background:#fffbeb; border-color:#fcd34d; margin-top:8px;';
+      box.innerHTML = `
+        <div style="font-weight:800; color:#92400e; margin-bottom:4px;">🏦 Tài khoản ngân hàng nhận thanh toán (VietQR hóa đơn)</div>
+        <div class="form-group" style="margin-bottom:5px;">
+          <label class="form-label">Ngân hàng</label>
+          <select id="f-bank-bin" class="form-control">${bankOptionsHtml(b.bin || '970422')}</select>
+        </div>
+        <div class="row-2">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Số tài khoản (STK)</label>
+            <input id="f-bank-acc" class="form-control" value="${esc(b.accountNo || '')}" placeholder="VD: 0123456789">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Tên chủ tài khoản</label>
+            <input id="f-bank-name" class="form-control" value="${esc(b.accountName || '')}" placeholder="VD: NGUYEN VAN A">
+          </div>
+        </div>
+      `;
+      form.appendChild(box);
+    };
+  }
+
+  if (typeof window.saveAdminForm === 'function') {
+    const _prevSaveAdminForm = window.saveAdminForm;
+    window.saveAdminForm = function(e) {
+      const targetTab = ui.adminTab;
+      const editingIdBefore = ui.editingId;
+      const bin = document.getElementById('f-bank-bin')?.value || '970422';
+      const accNo = (document.getElementById('f-bank-acc')?.value || '').trim().replace(/\s+/g, '');
+      const accName = stripVN19(document.getElementById('f-bank-name')?.value || '').toUpperCase();
+      const bankObj = VN_BANKS_19.find(x => x.bin === bin) || VN_BANKS_19[0];
+
+      _prevSaveAdminForm(e);
+
+      if (targetTab === 'restaurants' || targetTab === 'specialties') {
+        const savedItem = editingIdBefore
+          ? (db[targetTab] || []).find(x => x.id === editingIdBefore)
+          : (db[targetTab] || [])[0];
+        if (savedItem) {
+          savedItem.bank = accNo
+            ? { bin: bankObj.bin, code: bankObj.code, name: bankObj.name, accountNo: accNo, accountName: accName }
+            : null;
+          saveDB();
+          if (typeof renderAdminTable === 'function') renderAdminTable();
+        }
+      }
+    };
+  }
+
+  // Hiển thị thông tin Số TK ngân hàng trên Chi tiết Bản đồ & Thẻ Nhà hàng (nếu đã cài đặt)
+  function injectBankInfoIntoMapDetail() {
+    const box = document.getElementById('map-detail');
+    if (!box || !ui.selected) return;
+    if (ui.selected.type !== 'restaurant' && ui.selected.type !== 'specialty') return;
+    const item = getItemByTypeId(ui.selected.type, ui.selected.id);
+    if (!item?.bank?.accountNo) return;
+    const infoBox = box.querySelector('.info-box');
+    if (!infoBox || infoBox.querySelector('.bank-info-row')) return;
+    const row = document.createElement('div');
+    row.className = 'bank-info-row';
+    row.innerHTML = `🏦 <b>TK thanh toán:</b> <b>${esc(item.bank.code)}</b> • <code><b>${esc(item.bank.accountNo)}</b></code>${item.bank.accountName ? ' (' + esc(item.bank.accountName) + ')' : ''}`;
+    infoBox.appendChild(row);
+  }
+
+  function injectBankInfoIntoMarketCards() {
+    const grid = document.getElementById('market-grid');
+    if (!grid) return;
+    grid.querySelectorAll('article.smart-card').forEach(card => {
+      if (card.querySelector('.bank-card-row')) return;
+      const mapBtn = card.querySelector('button[onclick*="onPinClick("]');
+      if (!mapBtn) return;
+      const m = (mapBtn.getAttribute('onclick') || '').match(/onPinClick\('(specialty|restaurant)','([^']+)'/);
+      if (!m) return;
+      const [, type, id] = m;
+      const item = getItemByTypeId(type, id);
+      if (!item?.bank?.accountNo) return;
+      const body = card.querySelector('.card-body');
+      if (!body) return;
+      const d = document.createElement('div');
+      d.className = 'bank-card-row';
+      d.style.cssText = 'font-size:11.5px; color:#0f766e; background:#f0fdfa; border:1px solid #99f6e4; border-radius:8px; padding:4px 8px; font-weight:700;';
+      d.innerHTML = `🏦 ${esc(item.bank.code)}: <code>${esc(item.bank.accountNo)}</code>${item.bank.accountName ? ' • ' + esc(item.bank.accountName) : ''}`;
+      const pEl = body.querySelector('p');
+      if (pEl) body.insertBefore(d, pEl);
+      else body.appendChild(d);
+    });
+  }
+
+  if (typeof window.renderMapDetail === 'function') {
+    const _prevRenderMapDetail = window.renderMapDetail;
+    window.renderMapDetail = function() {
+      _prevRenderMapDetail();
+      injectBankInfoIntoMapDetail();
+    };
+  }
+  if (typeof window.renderMarket === 'function') {
+    const _prevRenderMarket = window.renderMarket;
+    window.renderMarket = function() {
+      _prevRenderMarket();
+      injectBankInfoIntoMarketCards();
+    };
+  }
+
+  // =========================================================================
+  // 2. BỔ SUNG ĐƠN GIÁ CỤ THỂ & TỔNG TIỀN KHI KHÁCH ĐẶT HÀNG ONLINE
+  // =========================================================================
+  function getOrderItemsGrandTotal() {
+    return qoExt.items.reduce((sum, it) => sum + (Math.max(0, Number(it.unitPrice) || 0) * Math.max(1, Number(it.qty) || 1)), 0);
+  }
+
+  window.qoUpdateItemPrice = function(idx, val) {
+    if (!qoExt.items[idx]) return;
+    qoExt.items[idx].unitPrice = Math.max(0, Math.round(Number(val) || 0));
+    renderQoExtItems();
+  };
+
+  window.qoUpdateItemQty = function(idx, delta) {
+    if (!qoExt.items[idx]) return;
+    qoExt.items[idx].qty = Math.max(1, (Number(qoExt.items[idx].qty) || 1) + delta);
+    renderQoExtItems();
+  };
+
+  window.qoRemoveItem = function(idx) {
+    if (qoExt.items.length <= 1) {
+      toast('Đơn hàng cần ít nhất 1 món / suất.', 'info');
+      return;
+    }
+    qoExt.items.splice(idx, 1);
+    renderQoExtItems();
+  };
+
+  window.qoAddMenuDish = function(dishName, defaultPrice) {
+    const ex = qoExt.items.find(x => x.name === dishName);
+    if (ex) {
+      ex.qty += 1;
+    } else {
+      qoExt.items.push({ id: 'm_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: dishName, unitPrice: defaultPrice, qty: 1 });
+    }
+    renderQoExtItems();
+  };
+
+  window.qoAddCustomDish = function() {
+    const nameInp = document.getElementById('qo-custom-dish-name');
+    const priceInp = document.getElementById('qo-custom-dish-price');
+    const nm = (nameInp?.value || '').trim();
+    const pr = Math.max(0, Math.round(Number(priceInp?.value) || 0));
+    if (!nm) { toast('Nhập tên món cần thêm.', 'error'); return; }
+    qoExt.items.push({ id: 'c_' + Date.now().toString(36), name: nm, unitPrice: pr, qty: 1 });
+    if (nameInp) nameInp.value = '';
+    if (priceInp) priceInp.value = '';
+    renderQoExtItems();
+  };
+
+  function renderQoExtItems() {
+    const listEl = document.getElementById('qo-items-list');
+    const totalEl = document.getElementById('qo-total-val');
+    if (!listEl || !totalEl) return;
+
+    const rs = qoExt.partner;
+    const isSnack = rs?.category === 'snack';
+    const defPrice = estimateUnitPriceFromRange(rs?.priceRange, isSnack);
+
+    // Gợi ý món nhanh từ signature của nhà hàng
+    const quickDishes = (qoExt.partnerType === 'restaurant' && rs?.signature)
+      ? rs.signature.split(/[,&]/).map(s => s.trim()).filter(Boolean).slice(0, 6)
+      : [];
+
+    const rowsHtml = qoExt.items.map((it, idx) => {
+      const lineTotal = (Number(it.unitPrice) || 0) * (Number(it.qty) || 1);
+      return `
+        <div class="qo-item-row" style="flex-wrap:wrap;">
+          <div style="min-width:140px; flex:1;">
+            <div style="font-weight:800; font-size:12.5px;">${esc(it.name)}</div>
+            <div style="font-size:11px; color:var(--muted); display:flex; align-items:center; gap:4px; margin-top:2px;">
+              <span>Đơn giá:</span>
+              <input type="number" min="0" step="1000" class="qo-price-inp" value="${Number(it.unitPrice) || 0}" onchange="qoUpdateItemPrice(${idx}, this.value)" title="Đơn giá (VNĐ)">
+              <span>đ</span>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:5px;">
+            <button type="button" class="btn btn-soft btn-xs" onclick="qoUpdateItemQty(${idx},-1)">−</button>
+            <b style="min-width:18px; text-align:center;">${it.qty}</b>
+            <button type="button" class="btn btn-soft btn-xs" onclick="qoUpdateItemQty(${idx},1)">+</button>
+          </div>
+          <div style="min-width:86px; text-align:right; font-weight:800; color:var(--fb); font-size:12.5px;">
+            ${fmtVND(lineTotal)}
+          </div>
+          ${qoExt.items.length > 1 ? `<button type="button" class="btn btn-soft btn-xs" style="color:var(--danger); padding:3px 6px;" onclick="qoRemoveItem(${idx})" title="Xóa món">✕</button>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    const menuChipsHtml = quickDishes.length ? `
+      <div style="margin-top:7px;">
+        <div style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:4px;">➕ Chọn thêm món đặc trưng (${fmtVND(defPrice)}/suất tham khảo):</div>
+        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+          ${quickDishes.map(d => `<button type="button" class="btn btn-xs btn-soft-food" onclick="qoAddMenuDish(${JSON.stringify(d).replace(/"/g,'&quot;')}, ${defPrice})">+ ${esc(d)}</button>`).join('')}
+        </div>
+      </div>` : '';
+
+    const customAddHtml = `
+      <div style="display:flex; gap:5px; margin-top:7px; flex-wrap:wrap;">
+        <input id="qo-custom-dish-name" class="form-control" style="flex:1; min-width:130px; min-height:32px; padding:4px 8px; font-size:12px;" placeholder="Thêm món khác...">
+        <input id="qo-custom-dish-price" type="number" min="0" step="1000" class="form-control" style="width:105px; min-height:32px; padding:4px 8px; font-size:12px;" placeholder="Đơn giá (đ)">
+        <button type="button" class="btn btn-soft-jade btn-xs" onclick="qoAddCustomDish()">+ Thêm</button>
+      </div>`;
+
+    listEl.innerHTML = rowsHtml + menuChipsHtml + customAddHtml;
+
+    const grandTotal = getOrderItemsGrandTotal();
+    totalEl.textContent = grandTotal > 0 ? fmtVND(grandTotal) : 'Liên hệ báo giá';
+  }
+
+  // Ghi đè openQuickOrderModal để khởi tạo sẵn đơn giá cụ thể cho cả Đặc sản và Nhà hàng/Quán ăn vặt
+  if (typeof window.openQuickOrderModal === 'function') {
+    const _origOpenQO = window.openQuickOrderModal;
+    window.openQuickOrderModal = function(type, id, extra = {}) {
+      _origOpenQO(type, id, extra);
+
+      const partnerObj = typeof findPartnerById === 'function' ? findPartnerById(id) : null;
+      const item = partnerObj?.item || getItemByTypeId(type, id);
+      if (!item) return;
+      const actualType = partnerObj?.type || type;
+
+      qoExt = {
+        partnerType: actualType,
+        partnerId: item.id,
+        partner: item,
+        items: [],
+        lastOrderId: null
+      };
+
+      if (Array.isArray(extra.cartItems) && extra.cartItems.length) {
+        qoExt.items = extra.cartItems.map(ci => {
+          const { pNum } = getSpecialtyPriceInfo(ci.s);
+          return { id: ci.s.id, name: ci.s.name, unitPrice: pNum || 50000, qty: ci.qty || 1 };
+        });
+      } else if (actualType === 'specialty') {
+        const { pNum } = getSpecialtyPriceInfo(item);
+        qoExt.items = [{ id: item.id, name: item.name, unitPrice: pNum || 50000, qty: 1 }];
+      } else {
+        const isSnack = item.category === 'snack';
+        const defPrice = estimateUnitPriceFromRange(item.priceRange, isSnack);
+        const firstDish = extra.postTitle
+          ? extra.postTitle
+          : ((item.signature || '').split(/[,&]/)[0]?.trim() || `Suất ăn tại ${item.name}`);
+        const initQty = isSnack ? 2 : Math.max(1, parseInt(document.getElementById('qo-party-size')?.value || '2', 10));
+        qoExt.items = [{ id: 'dish_1', name: firstDish, unitPrice: defPrice, qty: initQty }];
+      }
+
+      // Ẩn khung hóa đơn cũ nếu có
+      const oldInv = document.getElementById('qos-invoice-qr-container');
+      if (oldInv) oldInv.innerHTML = '';
+
+      renderQoExtItems();
+    };
+  }
+
+  // =========================================================================
+  // 3. SINH HÓA ĐƠN CHI TIẾT + MÃ VIETQR SỐ TIỀN & SỐ TK + XÁC NHẬN THANH TOÁN
+  // =========================================================================
+  function renderCustomerInvoiceQR(ord, rs) {
+    const successBox = document.querySelector('#qo-success-view .qo-success-box');
+    if (!successBox) return;
+
+    let invWrap = document.getElementById('qos-invoice-qr-container');
+    if (!invWrap) {
+      invWrap = document.createElement('div');
+      invWrap.id = 'qos-invoice-qr-container';
+      const codeLine = document.getElementById('qos-code-line');
+      if (codeLine && codeLine.nextSibling) successBox.insertBefore(invWrap, codeLine.nextSibling);
+      else successBox.appendChild(invWrap);
+    }
+
+    const totalVND = Number(ord.finalAmount) || 0;
+    const bank = rs?.bank && rs.bank.accountNo ? rs.bank : null;
+    const payMemo = `TT ${ord.code} ${stripVN19(ord.customerName || '').slice(0, 14)}`.trim();
+    const payStatus = ord.paymentStatus || 'Chưa thanh toán';
+    const payBadge = payStatus === 'Đã thanh toán'
+      ? `<span class="pay-pill pay-paid">✅ Đã xác nhận thanh toán (${esc(ord.paidAt || '')})</span>`
+      : (payStatus === 'Khách báo đã thanh toán'
+        ? `<span class="pay-pill pay-reported">🟡 Bạn đã báo thanh toán (${esc(ord.customerPaidAt || '')}) — Chờ quán xác nhận</span>`
+        : `<span class="pay-pill pay-unpaid">🔴 Chưa thanh toán</span>`);
+
+    const rows = (ord.items || []).map((it, idx) => {
+      const up = Number(it.unitPrice ?? it.priceNum) || 0;
+      const q = Number(it.qty) || 1;
+      return `<tr>
+        <td>${idx + 1}. <b>${esc(it.name)}</b></td>
+        <td style="text-align:right;">${fmtVND(up)}</td>
+        <td style="text-align:center;">${q}</td>
+        <td style="text-align:right; font-weight:800; color:var(--fb);">${fmtVND(up * q)}</td>
+      </tr>`;
+    }).join('');
+
+    const qrSection = bank && totalVND > 0 ? `
+      <div class="inv-qr-wrap">
+        <div class="inv-qr-img-box">
+          <img id="qos-vietqr-img" src="${buildVietQRUrl(bank, totalVND, payMemo)}" alt="VietQR Thanh Toán">
+          <canvas id="qos-vietqr-canvas" width="160" height="160" style="display:none; width:160px; height:160px;"></canvas>
+        </div>
+        <div style="flex:1; min-width:190px; font-size:12px; display:flex; flex-direction:column; gap:4px;">
+          <div style="font-weight:800; color:var(--jade-dark); font-size:13px;">💳 Quét Mã VietQR Để Thanh Toán</div>
+          <div>🏦 Ngân hàng: <b>${esc(bank.name || bank.code)}</b></div>
+          <div>🔢 Số TK: <code style="font-size:13px; font-weight:900; color:var(--fb);">${esc(bank.accountNo)}</code></div>
+          ${bank.accountName ? `<div>👤 Chủ TK: <b>${esc(bank.accountName)}</b></div>` : ''}
+          <div>💰 Số tiền: <b style="color:#b45309; font-size:14.5px;">${fmtVND(totalVND)}</b></div>
+          <div>📝 Nội dung CK: <code><b>${esc(payMemo)}</b></code></div>
+          <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:4px;">
+            <button type="button" class="btn btn-soft-fb btn-xs" onclick="copyText('${esc(bank.accountNo)}','Đã sao chép Số TK: ${esc(bank.accountNo)}')">📋 Copy STK</button>
+            <button type="button" class="btn btn-soft-jade btn-xs" onclick="copyText('${esc(payMemo)}','Đã sao chép nội dung CK!')">📋 Copy Nội dung</button>
+          </div>
+        </div>
+      </div>
+    ` : `
+      <div class="info-box" style="margin-top:8px; background:#fffbeb; border-color:#fcd34d; font-size:11.8px;">
+        ℹ️ <b>${esc(rs?.name || 'Cơ sở')}</b> chưa cập nhật số tài khoản ngân hàng. Bạn có thể thanh toán trực tiếp khi nhận hàng / tại quán hoặc hỏi STK qua Zalo nhà hàng.
+      </div>
+    `;
+
+    const confirmBtnHtml = payStatus === 'Đã thanh toán'
+      ? ''
+      : (payStatus === 'Khách báo đã thanh toán'
+        ? `<div style="margin-top:8px; font-size:12px; color:#065f46; font-weight:700;">✅ Bạn đã gửi xác nhận chuyển khoản trên đơn <b>${esc(ord.code)}</b>. Nhà hàng sẽ đối soát và hoàn tất đơn ngay!</div>`
+        : `<button type="button" class="btn btn-jade btn-sm" style="width:100%; margin-top:9px;" onclick="customerReportOrderPaid('${ord.id}')">✅ Tôi Đã Thanh Toán Thành Công (Xác Nhận Trên Đơn)</button>`);
+
+    invWrap.innerHTML = `
+      <div class="inv-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+          <b style="font-size:13.5px; color:var(--text);">🧾 HÓA ĐƠN THANH TOÁN #${esc(ord.code)}</b>
+          ${payBadge}
+        </div>
+        <table class="inv-table">
+          <thead><tr><th>Món / Đặc sản</th><th style="text-align:right;">Đơn giá</th><th style="text-align:center;">SL</th><th style="text-align:right;">Thành tiền</th></tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="text-align:right; font-weight:800; padding-top:8px;">TỔNG SỐ TIỀN THANH TOÁN:</td>
+              <td style="text-align:right; font-weight:900; font-size:15px; color:#b45309; padding-top:8px;">${fmtVND(totalVND)}</td>
+            </tr>
+          </tfoot>
+        </table>
+        ${qrSection}
+        ${confirmBtnHtml}
+      </div>
+    `;
+
+    // Gắn fallback offline canvas cho ảnh VietQR
+    if (bank && totalVND > 0) {
+      const img = document.getElementById('qos-vietqr-img');
+      const cv = document.getElementById('qos-vietqr-canvas');
+      if (cv && typeof drawPureQR === 'function') {
+        try { drawPureQR(buildEmvVietQR19(bank.bin, bank.accountNo, totalVND, payMemo), cv); } catch (e) {}
+      }
+      if (img && cv) {
+        img.onerror = () => { img.style.display = 'none'; cv.style.display = 'block'; };
+      }
+    }
+  }
+
+  // Khách xác nhận đã thanh toán thành công trên đơn
+  window.customerReportOrderPaid = function(orderId) {
+    const ord = (db.orders || []).find(o => o.id === orderId);
+    if (!ord) return;
+    const nowVN = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+    ord.paymentStatus = 'Khách báo đã thanh toán';
+    ord.customerPaidAt = nowVN;
+    if (typeof logAdminActivity === 'function') {
+      logAdminActivity(`Khách: ${ord.customerName}`, `Báo đã thanh toán đơn ${ord.code} (${fmtVND(ord.finalAmount || 0)})`);
+    }
+    saveDB();
+    if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
+
+    const rs = findPartnerById(ord.partnerId)?.item;
+    renderCustomerInvoiceQR(ord, rs);
+
+    const msg = `✅ XÁC NHẬN ĐÃ CHUYỂN KHOẢN\n🔖 Mã đơn: ${ord.code}\n💰 Số tiền: ${fmtVND(ord.finalAmount || 0)}\n👤 Khách: ${ord.customerName} (${ord.customerPhone})\n🕒 Lúc: ${nowVN}\n👉 Nhà hàng kiểm tra và xác nhận giúp mình nhé!`;
+    copyText(msg, `✅ Đã ghi nhận thanh toán trên đơn ${ord.code} & sao chép tin nhắn xác nhận!`);
+    if (typeof renderMerchantOrdersPanel === 'function' && ui.merchantRestaurantId) renderMerchantOrdersPanel();
+  };
+
+  // Nhà hàng / Admin xác nhận đã nhận tiền thanh toán thành công trên đơn
+  window.confirmPaymentSuccessOnOrder = function(orderId) {
+    const ord = (db.orders || []).find(o => o.id === orderId);
+    if (!ord) return;
+    const nowVN = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+    ord.paymentStatus = 'Đã thanh toán';
+    ord.paidAt = nowVN;
+    if (!ord.status || ord.status === 'Mới đặt' || ord.status === 'Đã xác nhận') {
+      ord.status = 'Hoàn tất';
+    }
+    if (typeof logAdminActivity === 'function') {
+      logAdminActivity(ui.adminLoggedIn ? 'Admin' : 'Nhà hàng', `Xác nhận ĐÃ THANH TOÁN đơn ${ord.code} (${fmtVND(ord.finalAmount || 0)})`);
+    }
+    saveDB();
+    if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
+
+    if (ui.merchantRestaurantId && typeof renderMerchantPortal === 'function') renderMerchantPortal();
+    if (document.getElementById('admin-orders-modal')?.classList.contains('open') && typeof window.openAdminOrdersModal === 'function') {
+      window.openAdminOrdersModal();
+    }
+    if (document.getElementById('report-analytics-modal')?.classList.contains('open') && typeof window.renderAnalyticsReport === 'function') {
+      window.renderAnalyticsReport();
+    }
+    toast(`✅ Đã xác nhận thanh toán thành công cho đơn ${ord.code}!`);
+  };
+
+  // Ghi đè submitQuickOrderToZalo để lưu đơn giá cụ thể, tổng tiền, gắn VietQR hóa đơn & nút xác nhận thanh toán
+  window.submitQuickOrderToZalo = function(e) {
+    e.preventDefault();
+    const custName = (document.getElementById('qo-cust-name').value || '').trim();
+    const rawCustPhone = (document.getElementById('qo-cust-phone').value || '').trim();
+    const custPhone = sanitizePhone(rawCustPhone);
+    const method = document.getElementById('qo-method').value;
+    const partySize = Math.max(1, parseInt(document.getElementById('qo-party-size').value || '1', 10));
+    const desiredTime = (document.getElementById('qo-time').value || '').trim();
+    const note = (document.getElementById('qo-note').value || '').trim();
+
+    if (!custName) { toast('Vui lòng nhập họ tên người đặt.', 'error'); return; }
+    if (!custPhone || custPhone.length < 10 || custPhone.length > 11 || !custPhone.startsWith('0')) {
+      toast('Vui lòng nhập đúng Số điện thoại người đặt (10–11 số, bắt đầu bằng 0).', 'error');
+      document.getElementById('qo-cust-phone').focus();
+      return;
+    }
+    if (method === 'Giao hàng tận nơi' && !note) {
+      toast('Vui lòng nhập địa chỉ giao hàng chi tiết.', 'error');
+      document.getElementById('qo-note').focus();
+      return;
+    }
+
+    try { localStorage.setItem('nb_customer_order_profile_v1', JSON.stringify({ name: custName, phone: custPhone, note })); } catch (err) {}
+
+    const rs = qoExt.partner;
+    const orderCode = 'DH-' + Math.floor(100000 + Math.random() * 900000);
+    const nowVN = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+    const grandTotal = getOrderItemsGrandTotal();
+    const totalText = grandTotal > 0 ? fmtVND(grandTotal) : 'Liên hệ báo giá';
+    const bank = rs?.bank && rs.bank.accountNo ? rs.bank : null;
+    const payMemo = `TT ${orderCode} ${stripVN19(custName).slice(0, 14)}`.trim();
+
+    const normalizedItems = qoExt.items.map(it => ({
+      id: it.id,
+      name: it.name,
+      unitPrice: Math.max(0, Number(it.unitPrice) || 0),
+      priceNum: Math.max(0, Number(it.unitPrice) || 0),
+      qty: Math.max(1, Number(it.qty) || 1),
+      lineTotal: Math.max(0, Number(it.unitPrice) || 0) * Math.max(1, Number(it.qty) || 1)
+    }));
+
+    const itemLines = normalizedItems.map((it, i) =>
+      `  ${i + 1}. ${it.name} | Đơn giá: ${fmtVND(it.unitPrice)} × ${it.qty} = ${fmtVND(it.lineTotal)}`
+    ).join('\n');
+
+    const targetLabel = qoExt.partnerType === 'restaurant' ? rs.name : `${rs.shop || rs.name}`;
+    const bankLines = bank
+      ? `🏦 Thanh toán CK: ${bank.name || bank.code} — STK: ${bank.accountNo}${bank.accountName ? ' (' + bank.accountName + ')' : ''}\n📝 Nội dung CK: ${payMemo}\n`
+      : '';
+
+    const ticketText =
+      `🧾 HÓA ĐƠN ĐẶT HÀNG ONLINE — NINH BÌNH MIỀN DI SẢN\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🔖 Mã đơn: ${orderCode}\n` +
+      `🏪 Cơ sở: ${targetLabel} (${rs.ward || ''})\n` +
+      `📦 Hình thức: ${method} (${partySize} khách/suất)\n` +
+      `📋 Chi tiết đơn giá:\n${itemLines}\n` +
+      `💰 TỔNG SỐ TIỀN: ${totalText}\n` +
+      bankLines +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 Người đặt: ${custName}\n` +
+      `📞 SĐT người đặt: ${formatPhoneDisplay(custPhone)} (${custPhone})\n` +
+      `⏰ Thời gian: ${desiredTime}\n` +
+      (note ? `📍 Địa chỉ / Ghi chú: ${note}\n` : '') +
+      `🕒 Tạo lúc: ${nowVN}\n` +
+      `👉 Nhà hàng vui lòng xác nhận đơn giúp mình qua Zalo hoặc gọi SĐT trên nhé!`;
+
+    if (!Array.isArray(db.orders)) db.orders = [];
+    const newOrder = {
+      id: 'ord_' + Date.now().toString(36),
+      code: orderCode,
+      partnerType: qoExt.partnerType,
+      partnerId: rs.id,
+      partnerName: targetLabel,
+      partnerPhone: sanitizePhone(rs.phone),
+      customerName: custName,
+      customerPhone: custPhone,
+      method,
+      partySize,
+      desiredTime,
+      note,
+      items: normalizedItems,
+      finalAmount: grandTotal,
+      totalText,
+      paymentStatus: 'Chưa thanh toán',
+      paidAt: '',
+      customerPaidAt: '',
+      status: 'Mới đặt',
+      createdAt: nowVN
+    };
+    db.orders.unshift(newOrder);
+    qoExt.lastOrderId = newOrder.id;
+
+    if (typeof logAdminActivity === 'function') {
+      logAdminActivity(`Khách: ${custName} (${custPhone})`, `Đặt hàng online ${orderCode} (${totalText}) tới ${targetLabel}`);
+    }
+    saveDB();
+    if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
+    if (typeof window.confirmCustomerOrder === 'function') window.confirmCustomerOrder(qoExt.partnerType, rs.id, true);
+
+    const rsPhone = sanitizePhone(rs.phone);
+    const targetZaloPhone = rsPhone || SUPPORT_HOTLINE_19;
+    const zaloUrl = `https://zalo.me/${targetZaloPhone}`;
+
+    copyText(ticketText, `✅ Đã tạo hóa đơn ${orderCode} (${totalText}) & sao chép phiếu!`);
+
+    document.getElementById('qo-form').classList.add('hidden');
+    document.getElementById('qo-success-view').classList.remove('hidden');
+    document.getElementById('qo-new-btn').classList.remove('hidden');
+    document.getElementById('qos-code-line').textContent = `🔖 Mã đơn: ${orderCode} • 👤 ${custName} • 📞 ${formatPhoneDisplay(custPhone)}`;
+    document.getElementById('qos-ticket-text').value = ticketText;
+    document.getElementById('qos-zalo-btn').href = zaloUrl;
+    document.getElementById('qos-zalo-btn').textContent = rsPhone
+      ? `💬 Mở Zalo Nhà Hàng (${formatPhoneDisplay(rsPhone)})`
+      : `💬 Gửi Zalo Điều Phối (${formatPhoneDisplay(SUPPORT_HOTLINE_19)})`;
+    document.getElementById('qos-tel-btn').href = `tel:${targetZaloPhone}`;
+    document.getElementById('qos-fallback-note').textContent = bank
+      ? `💡 Quét mã VietQR phía trên để chuyển khoản đúng ${totalText}, sau đó bấm "Tôi Đã Thanh Toán Thành Công" và mở Zalo gửi phiếu đơn cho nhà hàng.`
+      : `💡 Bấm "Mở Zalo" rồi Dán phiếu đơn đã sao chép để gửi trực tiếp cho nhà hàng.`;
+
+    renderCustomerInvoiceQR(newOrder, rs);
+
+    if (ui.merchantRestaurantId === rs.id && typeof renderMerchantPortal === 'function') renderMerchantPortal();
+  };
+
+  // =========================================================================
+  // 4. BỔ SUNG TRẠNG THÁI THANH TOÁN & NÚT "✅ XÁC NHẬN ĐÃ THANH TOÁN" TRÊN ĐƠN HÀNG (ADMIN & NHÀ HÀNG)
+  // =========================================================================
+  function enhanceOrderCardsWithPaymentConfirm(container) {
+    if (!container) return;
+    container.querySelectorAll('select[onchange*="updateOnlineOrderStatus("]').forEach(sel => {
+      const m = (sel.getAttribute('onchange') || '').match(/updateOnlineOrderStatus\('([^']+)'/);
+      if (!m) return;
+      const ordId = m[1];
+      const ord = (db.orders || []).find(o => o.id === ordId);
+      if (!ord) return;
+      const card = sel.closest('div[style*="border:1px solid"]');
+      if (!card || card.dataset.payEnhanced === '1') return;
+      card.dataset.payEnhanced = '1';
+
+      // Gắn badge trạng thái thanh toán vào dòng tiêu đề thẻ đơn
+      const headRow = card.querySelector('div:first-child > div:first-child');
+      if (headRow) {
+        const ps = ord.paymentStatus || (ord.status === 'Hoàn tất' ? 'Đã thanh toán' : 'Chưa thanh toán');
+        const pill = document.createElement('span');
+        pill.className = 'pay-pill ' + (ps === 'Đã thanh toán' ? 'pay-paid' : (ps === 'Khách báo đã thanh toán' ? 'pay-reported' : 'pay-unpaid'));
+        pill.style.marginLeft = '4px';
+        pill.textContent = ps === 'Đã thanh toán'
+          ? `💳 Đã TT${ord.paidAt ? ' (' + ord.paidAt + ')' : ''}`
+          : (ps === 'Khách báo đã thanh toán' ? '🟡 Khách báo đã CK' : '🔴 Chưa TT');
+        headRow.appendChild(pill);
+      }
+
+      // Hiển thị chi tiết đơn giá các món nếu có
+      if (Array.isArray(ord.items) && ord.items.length) {
+        const detailDiv = document.createElement('div');
+        detailDiv.style.cssText = 'font-size:11.5px; color:#334155; background:#fff; border:1px dashed #cbd5e1; border-radius:8px; padding:5px 8px;';
+        detailDiv.innerHTML = ord.items.map(it => {
+          const up = Number(it.unitPrice ?? it.priceNum) || 0;
+          const q = Number(it.qty) || 1;
+          return `<div>• <b>${esc(it.name)}</b>: ${fmtVND(up)} × ${q} = <b style="color:var(--fb);">${fmtVND(up * q)}</b></div>`;
+        }).join('');
+        const actionRow = sel.parentElement;
+        if (actionRow) card.insertBefore(detailDiv, actionRow);
+      }
+
+      // Gắn nút "✅ Xác nhận đã thanh toán" nếu đơn chưa xác nhận thanh toán
+      const btnWrap = sel.parentElement?.querySelector('div:first-child');
+      if (btnWrap && (ord.paymentStatus || '') !== 'Đã thanh toán') {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-jade btn-xs';
+        btn.textContent = '✅ Xác nhận đã thanh toán';
+        btn.onclick = () => confirmPaymentSuccessOnOrder(ord.id);
+        btnWrap.appendChild(btn);
+      }
+    });
+  }
+
+  // Tự động nâng cấp thẻ đơn hàng khi mở Modal Admin Orders hoặc Cổng Nhà Hàng
+  const observer = new MutationObserver(() => {
+    const admBody = document.getElementById('admin-orders-body');
+    if (admBody) enhanceOrderCardsWithPaymentConfirm(admBody);
+    const mcPanel = document.getElementById('mc-online-orders-panel');
+    if (mcPanel) enhanceOrderCardsWithPaymentConfirm(mcPanel);
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    observer.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => {
+      mountBankSectionInMerchantProfile();
+      injectBankInfoIntoMapDetail();
+    }, 260);
   });
 })();
 </script>
