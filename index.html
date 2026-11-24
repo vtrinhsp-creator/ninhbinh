@@ -4730,7 +4730,7 @@ function renderAdminTable() {
     const cleanSite = normalizeWebsiteUrl(item.website);
     const priceLabel = ui.adminTab === 'specialties' ? getSpecialtyPriceInfo(item).pText : (item.priceRange || item.ticket || '');
     const postCount = ui.adminTab === 'restaurants' ? db.restaurantPosts.filter(p => p.restaurantId === item.id).length : 0;
-    const acc = ui.adminTab === 'restaurants' ? item.account : null;
+    const acc = (ui.adminTab === 'restaurants' || ui.adminTab === 'specialties') ? item.account : null;
     return `<tr>
     <td>
       <b>${esc(item.name)}</b>
@@ -4741,6 +4741,10 @@ function renderAdminTable() {
           ${acc
             ? `<span class="tag ${acc.active!==false?'tag-jade':'tag-red'}">🔑 TK: ${esc(acc.username)} (${acc.active!==false?'Mở':'Khóa'})</span>`
             : `<span class="tag tag-slate">Chưa cấp TK</span>`}
+        </div>` : ''}
+      ${ui.adminTab === 'specialties' && acc ? `
+        <div style="margin-top:4px; display:flex; gap:4px; flex-wrap:wrap;">
+          <span class="tag ${acc.active!==false?'tag-jade':'tag-red'}">🔑 TK: ${esc(acc.username)} (${acc.active!==false?'Mở':'Khóa'})</span>
         </div>` : ''}
     </td>
     <td><b>${esc(item.ward)}</b><div style="font-size:10.5px; font-family:monospace; color:var(--jade-dark);">${Number(item.lat).toFixed(4)}, ${Number(item.lng).toFixed(4)}</div></td>
@@ -4992,7 +4996,30 @@ function openAdminForm(id = null) {
         <div class="form-group"><label class="form-label">Kinh độ (Lng)</label><input id="f-lng" type="number" step="0.0001" class="form-control" value="${item.lng||105.9750}"></div>
       </div>
       <div style="margin-bottom:10px;"><button type="button" class="btn btn-soft-jade btn-xs" onclick="syncCoordsFromWard()">📍 Đồng bộ tọa độ theo Phường/Xã</button></div>
-      <div class="form-group"><label class="form-label">Mô tả hương vị</label><textarea id="f-desc" class="form-control" rows="2">${esc(item.desc||'')}</textarea></div>`;
+      <div class="form-group"><label class="form-label">Mô tả hương vị</label><textarea id="f-desc" class="form-control" rows="2">${esc(item.desc||'')}</textarea></div>
+      <div class="info-box" style="background:#f8f5ff; border-color:#ddd6fe; margin-top:6px;">
+        <div style="font-weight:800; color:var(--food-dark); margin-bottom:4px;">🔑 Tài khoản đăng nhập cơ sở đặc sản (Tùy chọn)</div>
+        <div class="row-2">
+          <div class="form-group" style="margin-bottom:4px;">
+            <label class="form-label">Tên đăng nhập (Username)</label>
+            <input id="f-acc-user" class="form-control" value="${esc(item.account?.username||'')}" placeholder="VD: nemchuayenmac (không dấu)">
+          </div>
+          <div class="form-group" style="margin-bottom:4px;">
+            <label class="form-label">Mật khẩu</label>
+            <div class="pw-wrap">
+              <input id="f-acc-pass" type="password" class="form-control" value="${esc(item.account?.password||'')}" placeholder="Tối thiểu 4 ký tự...">
+              <button type="button" class="pw-toggle-btn" title="Hiện mật khẩu" onclick="const i=this.previousElementSibling; const h=i.type==='password'; i.type=h?'text':'password'; this.textContent=h?'🙈':'👁️';">👁️</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Trạng thái tài khoản</label>
+          <select id="f-acc-active" class="form-control">
+            <option value="true" ${item.account?.active!==false?'selected':''}>✅ Đang kích hoạt</option>
+            <option value="false" ${item.account?.active===false?'selected':''}>⛔ Tạm khóa</option>
+          </select>
+        </div>
+      </div>`;
   } else {
     form.innerHTML = `
       <div class="form-group"><label class="form-label">Tên Nhà hàng *</label><input id="f-name" class="form-control" required value="${esc(item.name||'')}"></div>
@@ -5015,7 +5042,30 @@ function openAdminForm(id = null) {
         <div class="form-group"><label class="form-label">Kinh độ (Lng)</label><input id="f-lng" type="number" step="0.0001" class="form-control" value="${item.lng||105.9750}"></div>
       </div>
       <div style="margin-bottom:10px;"><button type="button" class="btn btn-soft-jade btn-xs" onclick="syncCoordsFromWard()">📍 Đồng bộ tọa độ theo Phường/Xã</button></div>
-      <div class="form-group"><label class="form-label">Giới thiệu</label><textarea id="f-desc" class="form-control" rows="2">${esc(item.desc||'')}</textarea></div>`;
+      <div class="form-group"><label class="form-label">Giới thiệu</label><textarea id="f-desc" class="form-control" rows="2">${esc(item.desc||'')}</textarea></div>
+      <div class="info-box" style="background:#f8f5ff; border-color:#ddd6fe; margin-top:6px;">
+        <div style="font-weight:800; color:var(--food-dark); margin-bottom:4px;">🔑 Tài khoản đăng nhập Cổng Nhà Hàng (Tùy chọn)</div>
+        <div class="row-2">
+          <div class="form-group" style="margin-bottom:4px;">
+            <label class="form-label">Tên đăng nhập (Username)</label>
+            <input id="f-acc-user" class="form-control" value="${esc(item.account?.username||'')}" placeholder="VD: chinhthu (viết liền không dấu)">
+          </div>
+          <div class="form-group" style="margin-bottom:4px;">
+            <label class="form-label">Mật khẩu</label>
+            <div class="pw-wrap">
+              <input id="f-acc-pass" type="password" class="form-control" value="${esc(item.account?.password||'')}" placeholder="Tối thiểu 4 ký tự...">
+              <button type="button" class="pw-toggle-btn" title="Hiện mật khẩu" onclick="const i=this.previousElementSibling; const h=i.type==='password'; i.type=h?'text':'password'; this.textContent=h?'🙈':'👁️';">👁️</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Trạng thái tài khoản</label>
+          <select id="f-acc-active" class="form-control">
+            <option value="true" ${item.account?.active!==false?'selected':''}>✅ Đang kích hoạt</option>
+            <option value="false" ${item.account?.active===false?'selected':''}>⛔ Tạm khóa</option>
+          </select>
+        </div>
+      </div>`;
   }
   document.getElementById('admin-modal').classList.add('open');
 }
@@ -5030,14 +5080,36 @@ function saveAdminForm(e) {
 
   let obj = { id: ui.editingId || `${ui.adminTab.slice(0,2)}_${Date.now().toString(36)}`, name: val('f-name'), region: val('f-region'), lat: num('f-lat', 20.2539), lng: num('f-lng', 105.9750) };
 
+  let parsedAccount = undefined;
+  if (ui.adminTab === 'specialties' || ui.adminTab === 'restaurants') {
+    const accUser = val('f-acc-user').toLowerCase().replace(/\s+/g, '');
+    const accPass = val('f-acc-pass');
+    const accActive = document.getElementById('f-acc-active')?.value !== 'false';
+    if (accUser || accPass) {
+      if (accUser.length < 3 || accPass.length < 4) {
+        toast('Tên đăng nhập tối thiểu 3 ký tự, mật khẩu tối thiểu 4 ký tự.', 'error');
+        return;
+      }
+      const dupRs = (db.restaurants || []).find(r => r.id !== ui.editingId && r.account && String(r.account.username || '').toLowerCase() === accUser);
+      const dupSp = (db.specialties || []).find(s => s.id !== ui.editingId && s.account && String(s.account.username || '').toLowerCase() === accUser);
+      if (dupRs || dupSp) {
+        toast(`Tên đăng nhập "${accUser}" đã được sử dụng cho cơ sở khác!`, 'error');
+        return;
+      }
+      parsedAccount = { username: accUser, password: accPass, active: accActive };
+    } else {
+      parsedAccount = null;
+    }
+  }
+
   if (ui.adminTab === 'landmarks') {
     Object.assign(obj, { ward: val('f-ward'), theme: val('f-theme'), ticket: val('f-ticket'), hours: val('f-hours'), phone: cleanPhone, website: cleanSite, desc: val('f-desc'), visible: true });
   } else if (ui.adminTab === 'specialties') {
     const pNum = Math.max(0, num('f-priceNum', 0));
     const pText = val('f-priceText') || (pNum > 0 ? fmtVND(pNum) : 'Liên hệ báo giá');
-    Object.assign(obj, { sku: 'NB-' + Math.floor(100 + Math.random()*900), shop: val('f-shop'), ward: val('f-ward'), priceNum: pNum, priceText: pText, unit: '', emoji: val('f-emoji') || '🎁', grad: 'linear-gradient(135deg,#0b6e63,#1877f2)', fb: cleanFb, phone: cleanPhone, website: cleanSite, desc: val('f-desc'), visible: true });
+    Object.assign(obj, { sku: 'NB-' + Math.floor(100 + Math.random()*900), shop: val('f-shop'), ward: val('f-ward'), priceNum: pNum, priceText: pText, unit: '', emoji: val('f-emoji') || '🎁', grad: 'linear-gradient(135deg,#0b6e63,#1877f2)', fb: cleanFb, phone: cleanPhone, website: cleanSite, desc: val('f-desc'), account: parsedAccount, visible: true });
   } else if (ui.adminTab === 'restaurants') {
-    Object.assign(obj, { ward: val('f-ward'), address: val('f-address'), priceRange: val('f-priceRange'), signature: val('f-signature'), fb: cleanFb, phone: cleanPhone, website: cleanSite, desc: val('f-desc'), visible: true });
+    Object.assign(obj, { ward: val('f-ward'), address: val('f-address'), priceRange: val('f-priceRange'), signature: val('f-signature'), fb: cleanFb, phone: cleanPhone, website: cleanSite, desc: val('f-desc'), account: parsedAccount, visible: true });
   }
 
   if (ui.editingId) {
