@@ -10144,5 +10144,336 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 })();
 </script>
+
+<!-- ==================== MÔ-ĐUN 20: TỰ LƯU THÔNG TIN KHÁCH HÀNG & TỰ ĐỘNG GỬI HÓA ĐƠN ĐÃ THANH TOÁN QUA ZALO KHÁCH ==================== -->
+<div id="paid-invoice-zalo-modal" class="modal-bg" onclick="if(event.target===this)closeModal('paid-invoice-zalo-modal')">
+  <div class="modal-box" style="max-width:540px;">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:15.5px; font-weight:800; color:var(--jade-dark);">🧾 Chuyển Hóa Đơn Đã Thanh Toán Qua Zalo Khách</div>
+        <div id="piz-sub" style="font-size:11.5px; color:var(--muted);">Đã tự động sao chép hóa đơn &amp; mở Zalo khách hàng</div>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('paid-invoice-zalo-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:10px;">
+      <div class="info-box" style="background:#ecfdf5; border-color:#6ee7b7;">
+        <div style="font-weight:800; color:#065f46;" id="piz-head-line">✅ Đã xác nhận thanh toán thành công!</div>
+        <div style="font-size:11.8px; color:#047857;" id="piz-hint-line">
+          Hệ thống đã tự động <b>sao chép hóa đơn đã thanh toán</b> và mở cửa sổ <b>Zalo của khách</b>. Bạn chỉ cần <b>Dán (Ctrl+V / Chạm giữ → Dán)</b> vào khung chat Zalo rồi bấm Gửi.
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">📋 Nội dung Hóa đơn đã thanh toán (gửi qua Zalo khách):</label>
+        <textarea id="piz-text" class="form-control" rows="11" style="font-size:12.2px; line-height:1.5; background:#fff;"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-soft-jade btn-sm" onclick="copyText(document.getElementById('piz-text').value,'Đã sao chép Hóa đơn đã thanh toán!')">📋 Copy Hóa Đơn</button>
+      <a id="piz-tel-btn" href="#" class="btn btn-outline btn-sm">📲 Gọi Khách</a>
+      <a id="piz-zalo-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-quick-zalo btn-sm">💬 Mở Zalo Khách Gửi Ngay</a>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('paid-invoice-zalo-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initCustomerAutoSaveAndPaidInvoiceZaloAddon() {
+  const CUST_PROFILE_KEY_20 = 'nb_customer_order_profile_v1';
+
+  // =========================================================================
+  // PHẦN 1: TỰ ĐỘNG LƯU & KHÔI PHỤC THÔNG TIN KHÁCH HÀNG SAU LẦN ĐẶT ĐẦU TIÊN
+  // =========================================================================
+  function readSavedCustomer20() {
+    try {
+      const raw = localStorage.getItem(CUST_PROFILE_KEY_20);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeSavedCustomer20(data) {
+    try {
+      const prev = readSavedCustomer20() || {};
+      const payload = {
+        name: (data.name || '').trim(),
+        phone: sanitizePhone(data.phone || ''),
+        note: (data.note || '').trim(),
+        address: (data.address || data.note || '').trim(),
+        method: data.method || prev.method || '',
+        orderCount: (Number(prev.orderCount) || 0) + (data.incrementCount ? 1 : 0),
+        savedAt: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN')
+      };
+      if (payload.name || payload.phone) {
+        localStorage.setItem(CUST_PROFILE_KEY_20, JSON.stringify(payload));
+      }
+    } catch (e) {}
+  }
+
+  window.clearSavedCustomerProfile20 = function() {
+    try { localStorage.removeItem(CUST_PROFILE_KEY_20); } catch (e) {}
+    const nEl = document.getElementById('qo-cust-name');
+    const pEl = document.getElementById('qo-cust-phone');
+    const aEl = document.getElementById('qo-note');
+    if (nEl) nEl.value = '';
+    if (pEl) pEl.value = '';
+    if (aEl) aEl.value = '';
+    const bar = document.getElementById('qo-saved-cust-bar');
+    if (bar) bar.remove();
+    toast('Đã xóa thông tin khách hàng đã lưu trên trình duyệt.', 'info');
+  };
+
+  function renderSavedCustomerBannerInForm() {
+    const form = document.getElementById('qo-form');
+    if (!form) return;
+    const oldBar = document.getElementById('qo-saved-cust-bar');
+    if (oldBar) oldBar.remove();
+
+    const prof = readSavedCustomer20();
+    if (!prof || (!prof.name && !prof.phone)) return;
+
+    const bar = document.createElement('div');
+    bar.id = 'qo-saved-cust-bar';
+    bar.className = 'info-box';
+    bar.style.cssText = 'background:#ecfdf5; border-color:#6ee7b7; margin-bottom:10px; padding:8px 10px; flex-direction:row; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px;';
+    bar.innerHTML = `
+      <div style="font-size:11.8px; color:#065f46;">
+        ✅ <b>Đã tự điền thông tin của bạn:</b> ${esc(prof.name || '')}${prof.phone ? ' • ' + esc(formatPhoneDisplay(prof.phone)) : ''}${prof.orderCount ? ` (Đã đặt ${prof.orderCount} lần)` : ''}
+      </div>
+      <button type="button" class="btn btn-soft btn-xs" style="color:var(--danger);" onclick="clearSavedCustomerProfile20()">✕ Đặt cho người khác</button>
+    `;
+    const summaryBox = form.querySelector('.qo-summary-box');
+    if (summaryBox && summaryBox.nextSibling) form.insertBefore(bar, summaryBox.nextSibling);
+    else form.insertBefore(bar, form.firstChild);
+  }
+
+  // Bọc openQuickOrderModal để tự động khôi phục đầy đủ Họ tên, SĐT, Địa chỉ/Ghi chú đã lưu từ lần đặt đầu tiên
+  if (typeof window.openQuickOrderModal === 'function') {
+    const _prevOpenQO20 = window.openQuickOrderModal;
+    window.openQuickOrderModal = function(type, id, extra = {}) {
+      _prevOpenQO20(type, id, extra);
+      const prof = readSavedCustomer20();
+      if (prof) {
+        const nEl = document.getElementById('qo-cust-name');
+        const pEl = document.getElementById('qo-cust-phone');
+        const aEl = document.getElementById('qo-note');
+        if (nEl && prof.name) nEl.value = prof.name;
+        if (pEl && prof.phone) pEl.value = prof.phone;
+        if (aEl && !extra.postTitle && (prof.address || prof.note)) {
+          aEl.value = prof.address || prof.note;
+        }
+      }
+      renderSavedCustomerBannerInForm();
+    };
+  }
+
+  // Bọc submitQuickOrderToZalo để luôn lưu thông tin khách hàng (kể cả số lần đặt & địa chỉ) sau lần đặt đầu tiên
+  if (typeof window.submitQuickOrderToZalo === 'function') {
+    const _prevSubmitQO20 = window.submitQuickOrderToZalo;
+    window.submitQuickOrderToZalo = function(e) {
+      const nameVal = (document.getElementById('qo-cust-name')?.value || '').trim();
+      const phoneVal = sanitizePhone(document.getElementById('qo-cust-phone')?.value || '');
+      const noteVal = (document.getElementById('qo-note')?.value || '').trim();
+      const methodVal = document.getElementById('qo-method')?.value || '';
+      const beforeCount = (db.orders || []).length;
+
+      _prevSubmitQO20(e);
+
+      // Nếu tạo đơn thành công (số lượng đơn tăng lên) -> lưu hồ sơ khách hàng
+      if ((db.orders || []).length > beforeCount && nameVal && phoneVal) {
+        writeSavedCustomer20({
+          name: nameVal,
+          phone: phoneVal,
+          note: noteVal,
+          address: noteVal,
+          method: methodVal,
+          incrementCount: true
+        });
+      }
+    };
+  }
+
+  // Tự động điền tên khách hàng đã lưu vào form Đánh giá (nếu mở modal đánh giá)
+  if (typeof window.openReviewModal === 'function') {
+    const _prevOpenRv20 = window.openReviewModal;
+    window.openReviewModal = function(type, id) {
+      _prevOpenRv20(type, id);
+      const prof = readSavedCustomer20();
+      const authInp = document.getElementById('rv-author');
+      if (prof?.name && authInp && !authInp.value) {
+        authInp.value = prof.name;
+      }
+    };
+  }
+
+  // =========================================================================
+  // PHẦN 2: TỰ ĐỘNG CHUYỂN HÓA ĐƠN ĐÃ THANH TOÁN QUA ZALO KHÁCH KHI QUÁN XÁC NHẬN
+  // =========================================================================
+  window.buildPaidInvoiceZaloMessage = function(ord) {
+    if (!ord) return '';
+    const rs = typeof findPartnerById === 'function' ? findPartnerById(ord.partnerId)?.item : null;
+    const shopName = ord.partnerName || rs?.name || 'Nhà hàng';
+    const shopAddr = rs ? `${rs.address ? rs.address + ', ' : ''}${rs.ward || ''}` : '';
+    const shopPhone = sanitizePhone(ord.partnerPhone || rs?.phone || '');
+    const paidAt = ord.paidAt || (typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN'));
+
+    const items = Array.isArray(ord.items) ? ord.items : [];
+    const totalVND = Number(ord.finalAmount) > 0
+      ? Number(ord.finalAmount)
+      : items.reduce((s, it) => s + ((Number(it.unitPrice ?? it.priceNum) || 0) * Math.max(1, Number(it.qty) || 1)), 0);
+    const totalText = totalVND > 0 ? fmtVND(totalVND) : (ord.totalText || 'Đã thanh toán');
+    const totalQty = items.reduce((s, it) => s + Math.max(1, Number(it.qty) || 1), 0);
+    const partySize = Math.max(1, Number(ord.partySize) || totalQty || 1);
+
+    const itemLines = items.length
+      ? items.map((it, idx) => {
+          const up = Number(it.unitPrice ?? it.priceNum) || 0;
+          const q = Math.max(1, Number(it.qty) || 1);
+          return `  ${idx + 1}. ${it.name} | ${fmtVND(up)} × ${q} = ${fmtVND(up * q)}`;
+        }).join('\n')
+      : `  • ${ord.method || 'Dịch vụ tại quán'} (${partySize} khách)`;
+
+    return (
+      `🧾 HÓA ĐƠN ĐIỆN TỬ — ĐÃ THANH TOÁN THÀNH CÔNG ✅\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🏪 ${shopName}\n` +
+      (shopAddr ? `📍 Địa chỉ: ${shopAddr}\n` : '') +
+      (shopPhone ? `📞 Hotline: ${formatPhoneDisplay(shopPhone)}\n` : '') +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🔖 Mã hóa đơn: #${ord.code}\n` +
+      `👤 Khách hàng: ${ord.customerName || 'Quý khách'}\n` +
+      (sanitizePhone(ord.customerPhone) && sanitizePhone(ord.customerPhone) !== '0000000000'
+        ? `📞 SĐT khách: ${formatPhoneDisplay(ord.customerPhone)}\n` : '') +
+      `📦 Hình thức: ${ord.method || 'Đặt hàng online'} (${partySize} khách${totalQty ? ' / ' + totalQty + ' suất' : ''})\n` +
+      `📋 Chi tiết hóa đơn:\n${itemLines}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `💰 TỔNG SỐ TIỀN ĐÃ THANH TOÁN: ${totalText}\n` +
+      `✅ TRẠNG THÁI: ĐÃ THANH TOÁN THÀNH CÔNG\n` +
+      `🕒 Thời gian xác nhận: ${paidAt}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🙏 ${shopName} xin chân thành cảm ơn Quý khách đã tin tưởng ủng hộ Ninh Bình – Miền Di Sản!`
+    );
+  };
+
+  window.dispatchPaidInvoiceToCustomerZalo = function(orderId, autoOpenZalo = true) {
+    const ord = (db.orders || []).find(o => o.id === orderId);
+    if (!ord) return;
+
+    const custPhone = sanitizePhone(ord.customerPhone || '');
+    const hasValidPhone = Boolean(custPhone && custPhone.length >= 9 && custPhone !== '0000000000');
+    const invoiceText = window.buildPaidInvoiceZaloMessage(ord);
+    const zaloUrl = hasValidPhone ? `https://zalo.me/${custPhone}` : '#';
+
+    // Đánh dấu thời gian đã chuyển hóa đơn qua Zalo khách
+    ord.paidInvoiceSentAt = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+    saveDB();
+
+    // Tự động sao chép hóa đơn vào clipboard
+    copyText(invoiceText, hasValidPhone
+      ? `✅ Đã sao chép Hóa đơn đã thanh toán #${ord.code} & đang mở Zalo khách!`
+      : `✅ Đã sao chép Hóa đơn đã thanh toán #${ord.code}!`);
+
+    // Tự động mở Zalo khách hàng
+    if (autoOpenZalo && hasValidPhone) {
+      window.open(zaloUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    // Hiển thị modal xác nhận & cho phép mở lại Zalo / sao chép lại dễ dàng
+    document.getElementById('piz-head-line').textContent = `✅ Đã xác nhận thanh toán đơn #${ord.code} (${ord.totalText || fmtVND(ord.finalAmount || 0)})`;
+    document.getElementById('piz-sub').textContent = hasValidPhone
+      ? `👤 ${ord.customerName || 'Khách hàng'} • 💬 Zalo: ${formatPhoneDisplay(custPhone)}`
+      : `👤 ${ord.customerName || 'Khách hàng'} • (Đơn tại quầy chưa có SĐT khách)`;
+    document.getElementById('piz-text').value = invoiceText;
+
+    const zaloBtn = document.getElementById('piz-zalo-btn');
+    const telBtn = document.getElementById('piz-tel-btn');
+    if (hasValidPhone) {
+      zaloBtn.href = zaloUrl;
+      zaloBtn.textContent = `💬 Mở Zalo Khách (${formatPhoneDisplay(custPhone)})`;
+      zaloBtn.classList.remove('hidden');
+      telBtn.href = `tel:${custPhone}`;
+      telBtn.classList.remove('hidden');
+      document.getElementById('piz-hint-line').innerHTML = `Hệ thống đã tự động <b>sao chép hóa đơn đã thanh toán</b> và mở cửa sổ <b>Zalo của khách (${esc(formatPhoneDisplay(custPhone))})</b>. Bạn chỉ cần <b>Dán (Ctrl+V / Chạm giữ → Dán)</b> vào khung chat Zalo rồi bấm Gửi.`;
+    } else {
+      zaloBtn.classList.add('hidden');
+      telBtn.classList.add('hidden');
+      document.getElementById('piz-hint-line').innerHTML = `Đơn này chưa có SĐT khách hàng. Bạn đã có thể <b>sao chép hóa đơn đã thanh toán</b> bên dưới để gửi cho khách.`;
+    }
+
+    document.getElementById('paid-invoice-zalo-modal').classList.add('open');
+  };
+
+  // Hook 1: Khi bấm nút "✅ Xác nhận đã thanh toán" trên thẻ đơn hàng
+  if (typeof window.confirmPaymentSuccessOnOrder === 'function') {
+    const _prevConfirmPay20 = window.confirmPaymentSuccessOnOrder;
+    window.confirmPaymentSuccessOnOrder = function(orderId) {
+      _prevConfirmPay20(orderId);
+      setTimeout(() => window.dispatchPaidInvoiceToCustomerZalo(orderId, true), 120);
+    };
+  }
+
+  // Hook 2: Khi bấm nút "✅ Đã Thu Tiền & Lưu Doanh Thu" trong modal VietQR
+  if (typeof window.confirmOrderPaidAndRecord === 'function') {
+    const _prevConfirmQR20 = window.confirmOrderPaidAndRecord;
+    window.confirmOrderPaidAndRecord = function() {
+      const selectedOrdId = document.getElementById('mqr-order-select')?.value || '';
+      const beforeFirstId = (db.orders || [])[0]?.id || '';
+      _prevConfirmQR20();
+      const targetId = selectedOrdId || ((db.orders || [])[0]?.id !== beforeFirstId ? (db.orders || [])[0]?.id : '');
+      if (targetId) {
+        setTimeout(() => window.dispatchPaidInvoiceToCustomerZalo(targetId, true), 150);
+      }
+    };
+  }
+
+  // Hook 3: Khi đổi dropdown trạng thái đơn sang "Hoàn tất"
+  if (typeof window.updateOnlineOrderStatus === 'function') {
+    const _prevUpdStatus20 = window.updateOnlineOrderStatus;
+    window.updateOnlineOrderStatus = function(orderId, newStatus) {
+      const ordBefore = (db.orders || []).find(o => o.id === orderId);
+      const wasPaid = ordBefore && (ordBefore.paymentStatus === 'Đã thanh toán' || ordBefore.status === 'Hoàn tất');
+      _prevUpdStatus20(orderId, newStatus);
+      if (newStatus === 'Hoàn tất' && !wasPaid) {
+        setTimeout(() => window.dispatchPaidInvoiceToCustomerZalo(orderId, true), 120);
+      }
+    };
+  }
+
+  // Gắn thêm nút "🧾 Gửi HĐ đã TT (Zalo)" trên các thẻ đơn hàng ĐÃ THANH TOÁN để quán gửi lại bất cứ lúc nào
+  function attachResendPaidInvoiceButtons(container) {
+    if (!container) return;
+    container.querySelectorAll('select[onchange*="updateOnlineOrderStatus("]').forEach(sel => {
+      const m = (sel.getAttribute('onchange') || '').match(/updateOnlineOrderStatus\('([^']+)'/);
+      if (!m) return;
+      const ordId = m[1];
+      const ord = (db.orders || []).find(o => o.id === ordId);
+      if (!ord) return;
+      const isPaid = ord.paymentStatus === 'Đã thanh toán' || ord.status === 'Hoàn tất' || Boolean(ord.paidAt);
+      if (!isPaid) return;
+
+      const btnWrap = sel.parentElement?.querySelector('div:first-child');
+      if (!btnWrap || btnWrap.querySelector('.piz-resend-btn')) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-soft-jade btn-xs piz-resend-btn';
+      btn.textContent = '🧾 Gửi HĐ đã TT (Zalo)';
+      btn.onclick = () => window.dispatchPaidInvoiceToCustomerZalo(ord.id, true);
+      btnWrap.appendChild(btn);
+    });
+  }
+
+  const obs20 = new MutationObserver(() => {
+    const admBody = document.getElementById('admin-orders-body');
+    if (admBody) attachResendPaidInvoiceButtons(admBody);
+    const mcPanel = document.getElementById('mc-online-orders-panel');
+    if (mcPanel) attachResendPaidInvoiceButtons(mcPanel);
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    obs20.observe(document.body, { childList: true, subtree: true });
+  });
+})();
+</script>
 </body>
 </html>
