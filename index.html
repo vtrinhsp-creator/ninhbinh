@@ -9453,21 +9453,67 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
-  // 2. BỔ SUNG ĐƠN GIÁ CỤ THỂ & TỔNG TIỀN KHI KHÁCH ĐẶT HÀNG ONLINE
+  // 2. BỔ SUNG ĐƠN GIÁ CỤ THỂ, ĐỒNG BỘ 2 CHIỀU SỐ KHÁCH <-> SỐ LƯỢNG & TỔNG TIỀN
   // =========================================================================
   function getOrderItemsGrandTotal() {
     return qoExt.items.reduce((sum, it) => sum + (Math.max(0, Number(it.unitPrice) || 0) * Math.max(1, Number(it.qty) || 1)), 0);
   }
 
+  function getOrderItemsTotalQty() {
+    return qoExt.items.reduce((sum, it) => sum + Math.max(1, Number(it.qty) || 1), 0);
+  }
+
+  function updateGrandTotalDisplayOnly() {
+    const totalEl = document.getElementById('qo-total-val');
+    if (!totalEl) return;
+    const grandTotal = getOrderItemsGrandTotal();
+    const totalQty = getOrderItemsTotalQty();
+    const partyInp = document.getElementById('qo-party-size');
+    const partySize = Math.max(1, parseInt(partyInp?.value || String(totalQty || 1), 10) || 1);
+    if (grandTotal > 0) {
+      totalEl.textContent = `${fmtVND(grandTotal)} (${totalQty} suất / ${partySize} khách)`;
+    } else {
+      totalEl.textContent = 'Liên hệ báo giá';
+    }
+  }
+
+  // Ghi đè recalcQuickOrderTotal() để khi khách sửa ô "👥 Số khách / Số lượng" (qo-party-size)
+  // thì đồng bộ ngay vào số lượng món & tính lại tổng tiền (KHÔNG bị hàm cũ ghi đè mất số tiền!)
+  window.recalcQuickOrderTotal = function() {
+    const partyInp = document.getElementById('qo-party-size');
+    const rawVal = (partyInp?.value || '').trim();
+    const parsed = parseInt(rawVal, 10);
+    if (Number.isFinite(parsed) && parsed >= 1) {
+      if (qoExt.items.length === 1) {
+        qoExt.items[0].qty = parsed;
+        const qtySpan = document.getElementById('qo-item-qty-0');
+        if (qtySpan) qtySpan.textContent = String(parsed);
+        const lineEl = document.getElementById('qo-line-total-0');
+        if (lineEl) lineEl.textContent = fmtVND((Number(qoExt.items[0].unitPrice) || 0) * parsed);
+      }
+    }
+    updateGrandTotalDisplayOnly();
+  };
+
+  // Cập nhật đơn giá tức thì khi gõ (không re-render toàn bộ DOM để không mất focus)
   window.qoUpdateItemPrice = function(idx, val) {
     if (!qoExt.items[idx]) return;
-    qoExt.items[idx].unitPrice = Math.max(0, Math.round(Number(val) || 0));
-    renderQoExtItems();
+    const cleanPrice = Math.max(0, Math.round(Number(val) || 0));
+    qoExt.items[idx].unitPrice = cleanPrice;
+    const lineEl = document.getElementById(`qo-line-total-${idx}`);
+    if (lineEl) lineEl.textContent = fmtVND(cleanPrice * Math.max(1, Number(qoExt.items[idx].qty) || 1));
+    updateGrandTotalDisplayOnly();
   };
 
   window.qoUpdateItemQty = function(idx, delta) {
     if (!qoExt.items[idx]) return;
-    qoExt.items[idx].qty = Math.max(1, (Number(qoExt.items[idx].qty) || 1) + delta);
+    const nextQty = Math.max(1, (Number(qoExt.items[idx].qty) || 1) + delta);
+    qoExt.items[idx].qty = nextQty;
+    // Đồng bộ ngược sang ô "👥 Số khách / Số lượng" khi đơn chỉ có 1 dòng món
+    if (qoExt.items.length === 1) {
+      const partyInp = document.getElementById('qo-party-size');
+      if (partyInp) partyInp.value = String(nextQty);
+    }
     renderQoExtItems();
   };
 
@@ -9477,6 +9523,10 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
     qoExt.items.splice(idx, 1);
+    if (qoExt.items.length === 1) {
+      const partyInp = document.getElementById('qo-party-size');
+      if (partyInp) partyInp.value = String(qoExt.items[0].qty);
+    }
     renderQoExtItems();
   };
 
@@ -9484,6 +9534,10 @@ window.addEventListener('DOMContentLoaded', () => {
     const ex = qoExt.items.find(x => x.name === dishName);
     if (ex) {
       ex.qty += 1;
+      if (qoExt.items.length === 1) {
+        const partyInp = document.getElementById('qo-party-size');
+        if (partyInp) partyInp.value = String(ex.qty);
+      }
     } else {
       qoExt.items.push({ id: 'm_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: dishName, unitPrice: defaultPrice, qty: 1 });
     }
@@ -9504,36 +9558,36 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function renderQoExtItems() {
     const listEl = document.getElementById('qo-items-list');
-    const totalEl = document.getElementById('qo-total-val');
-    if (!listEl || !totalEl) return;
+    if (!listEl) return;
 
     const rs = qoExt.partner;
     const isSnack = rs?.category === 'snack';
     const defPrice = estimateUnitPriceFromRange(rs?.priceRange, isSnack);
 
-    // Gợi ý món nhanh từ signature của nhà hàng
     const quickDishes = (qoExt.partnerType === 'restaurant' && rs?.signature)
       ? rs.signature.split(/[,&]/).map(s => s.trim()).filter(Boolean).slice(0, 6)
       : [];
 
     const rowsHtml = qoExt.items.map((it, idx) => {
-      const lineTotal = (Number(it.unitPrice) || 0) * (Number(it.qty) || 1);
+      const qty = Math.max(1, Number(it.qty) || 1);
+      const up = Math.max(0, Number(it.unitPrice) || 0);
+      const lineTotal = up * qty;
       return `
         <div class="qo-item-row" style="flex-wrap:wrap;">
           <div style="min-width:140px; flex:1;">
             <div style="font-weight:800; font-size:12.5px;">${esc(it.name)}</div>
             <div style="font-size:11px; color:var(--muted); display:flex; align-items:center; gap:4px; margin-top:2px;">
               <span>Đơn giá:</span>
-              <input type="number" min="0" step="1000" class="qo-price-inp" value="${Number(it.unitPrice) || 0}" onchange="qoUpdateItemPrice(${idx}, this.value)" title="Đơn giá (VNĐ)">
+              <input type="number" min="0" step="1000" class="qo-price-inp" data-idx="${idx}" value="${up}" oninput="qoUpdateItemPrice(${idx}, this.value)" onchange="qoUpdateItemPrice(${idx}, this.value)" title="Đơn giá (VNĐ)">
               <span>đ</span>
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:5px;">
             <button type="button" class="btn btn-soft btn-xs" onclick="qoUpdateItemQty(${idx},-1)">−</button>
-            <b style="min-width:18px; text-align:center;">${it.qty}</b>
+            <b id="qo-item-qty-${idx}" style="min-width:18px; text-align:center;">${qty}</b>
             <button type="button" class="btn btn-soft btn-xs" onclick="qoUpdateItemQty(${idx},1)">+</button>
           </div>
-          <div style="min-width:86px; text-align:right; font-weight:800; color:var(--fb); font-size:12.5px;">
+          <div id="qo-line-total-${idx}" style="min-width:86px; text-align:right; font-weight:800; color:var(--fb); font-size:12.5px;">
             ${fmtVND(lineTotal)}
           </div>
           ${qoExt.items.length > 1 ? `<button type="button" class="btn btn-soft btn-xs" style="color:var(--danger); padding:3px 6px;" onclick="qoRemoveItem(${idx})" title="Xóa món">✕</button>` : ''}
@@ -9557,12 +9611,10 @@ window.addEventListener('DOMContentLoaded', () => {
       </div>`;
 
     listEl.innerHTML = rowsHtml + menuChipsHtml + customAddHtml;
-
-    const grandTotal = getOrderItemsGrandTotal();
-    totalEl.textContent = grandTotal > 0 ? fmtVND(grandTotal) : 'Liên hệ báo giá';
+    updateGrandTotalDisplayOnly();
   }
 
-  // Ghi đè openQuickOrderModal để khởi tạo sẵn đơn giá cụ thể cho cả Đặc sản và Nhà hàng/Quán ăn vặt
+  // Ghi đè openQuickOrderModal để khởi tạo sẵn đơn giá & đồng bộ tuyệt đối số khách <-> số lượng
   if (typeof window.openQuickOrderModal === 'function') {
     const _origOpenQO = window.openQuickOrderModal;
     window.openQuickOrderModal = function(type, id, extra = {}) {
@@ -9581,28 +9633,42 @@ window.addEventListener('DOMContentLoaded', () => {
         lastOrderId: null
       };
 
+      const partyInp = document.getElementById('qo-party-size');
+
       if (Array.isArray(extra.cartItems) && extra.cartItems.length) {
         qoExt.items = extra.cartItems.map(ci => {
           const { pNum } = getSpecialtyPriceInfo(ci.s);
-          return { id: ci.s.id, name: ci.s.name, unitPrice: pNum || 50000, qty: ci.qty || 1 };
+          return { id: ci.s.id, name: ci.s.name, unitPrice: pNum || 50000, qty: Math.max(1, Number(ci.qty) || 1) };
         });
+        const sumQty = qoExt.items.reduce((s, x) => s + x.qty, 0);
+        if (partyInp) partyInp.value = String(Math.max(1, sumQty));
       } else if (actualType === 'specialty') {
         const { pNum } = getSpecialtyPriceInfo(item);
-        qoExt.items = [{ id: item.id, name: item.name, unitPrice: pNum || 50000, qty: 1 }];
+        const initQty = 1;
+        qoExt.items = [{ id: item.id, name: item.name, unitPrice: pNum || 50000, qty: initQty }];
+        if (partyInp) partyInp.value = String(initQty);
       } else {
         const isSnack = item.category === 'snack';
         const defPrice = estimateUnitPriceFromRange(item.priceRange, isSnack);
         const firstDish = extra.postTitle
           ? extra.postTitle
           : ((item.signature || '').split(/[,&]/)[0]?.trim() || `Suất ăn tại ${item.name}`);
-        const initQty = isSnack ? 2 : Math.max(1, parseInt(document.getElementById('qo-party-size')?.value || '2', 10));
+        const initQty = 2;
         qoExt.items = [{ id: 'dish_1', name: firstDish, unitPrice: defPrice, qty: initQty }];
+        if (partyInp) partyInp.value = String(initQty);
       }
 
-      // Ẩn khung hóa đơn cũ nếu có
       const oldInv = document.getElementById('qos-invoice-qr-container');
       if (oldInv) oldInv.innerHTML = '';
 
+      renderQoExtItems();
+    };
+  }
+
+  if (typeof window.resetQuickOrderView === 'function') {
+    const _prevResetQO = window.resetQuickOrderView;
+    window.resetQuickOrderView = function() {
+      _prevResetQO();
       renderQoExtItems();
     };
   }
@@ -9624,6 +9690,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     const totalVND = Number(ord.finalAmount) || 0;
+    const totalQty = (ord.items || []).reduce((s, it) => s + Math.max(1, Number(it.qty) || 1), 0);
+    const partySize = Math.max(1, Number(ord.partySize) || totalQty || 1);
     const bank = rs?.bank && rs.bank.accountNo ? rs.bank : null;
     const payMemo = `TT ${ord.code} ${stripVN19(ord.customerName || '').slice(0, 14)}`.trim();
     const payStatus = ord.paymentStatus || 'Chưa thanh toán';
@@ -9635,11 +9703,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const rows = (ord.items || []).map((it, idx) => {
       const up = Number(it.unitPrice ?? it.priceNum) || 0;
-      const q = Number(it.qty) || 1;
+      const q = Math.max(1, Number(it.qty) || 1);
       return `<tr>
         <td>${idx + 1}. <b>${esc(it.name)}</b></td>
         <td style="text-align:right;">${fmtVND(up)}</td>
-        <td style="text-align:center;">${q}</td>
+        <td style="text-align:center;"><b>${q}</b></td>
         <td style="text-align:right; font-weight:800; color:var(--fb);">${fmtVND(up * q)}</td>
       </tr>`;
     }).join('');
@@ -9681,12 +9749,15 @@ window.addEventListener('DOMContentLoaded', () => {
           <b style="font-size:13.5px; color:var(--text);">🧾 HÓA ĐƠN THANH TOÁN #${esc(ord.code)}</b>
           ${payBadge}
         </div>
+        <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">
+          👥 Số khách/suất: <b style="color:var(--text);">${partySize} khách</b> (${totalQty} suất/món) • 📦 <b>${esc(ord.method || '')}</b> • ⏰ ${esc(ord.desiredTime || '')}
+        </div>
         <table class="inv-table">
           <thead><tr><th>Món / Đặc sản</th><th style="text-align:right;">Đơn giá</th><th style="text-align:center;">SL</th><th style="text-align:right;">Thành tiền</th></tr></thead>
           <tbody>${rows}</tbody>
           <tfoot>
             <tr>
-              <td colspan="3" style="text-align:right; font-weight:800; padding-top:8px;">TỔNG SỐ TIỀN THANH TOÁN:</td>
+              <td colspan="3" style="text-align:right; font-weight:800; padding-top:8px;">TỔNG SỐ TIỀN (${totalQty} suất / ${partySize} khách):</td>
               <td style="text-align:right; font-weight:900; font-size:15px; color:#b45309; padding-top:8px;">${fmtVND(totalVND)}</td>
             </tr>
           </tfoot>
@@ -9696,7 +9767,6 @@ window.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
 
-    // Gắn fallback offline canvas cho ảnh VietQR
     if (bank && totalVND > 0) {
       const img = document.getElementById('qos-vietqr-img');
       const cv = document.getElementById('qos-vietqr-canvas');
@@ -9756,16 +9826,30 @@ window.addEventListener('DOMContentLoaded', () => {
     toast(`✅ Đã xác nhận thanh toán thành công cho đơn ${ord.code}!`);
   };
 
-  // Ghi đè submitQuickOrderToZalo để lưu đơn giá cụ thể, tổng tiền, gắn VietQR hóa đơn & nút xác nhận thanh toán
+  // Ghi đè submitQuickOrderToZalo: đọc lại trực tiếp DOM (đơn giá + số khách) trước khi tính hóa đơn
   window.submitQuickOrderToZalo = function(e) {
     e.preventDefault();
+
+    // 1. Đọc lại trực tiếp các ô đơn giá để đảm bảo không bao giờ bị lệch state
+    document.querySelectorAll('#qo-items-list input.qo-price-inp').forEach(inp => {
+      const idx = parseInt(inp.dataset.idx, 10);
+      if (Number.isFinite(idx) && qoExt.items[idx]) {
+        qoExt.items[idx].unitPrice = Math.max(0, Math.round(Number(inp.value) || 0));
+      }
+    });
+
     const custName = (document.getElementById('qo-cust-name').value || '').trim();
     const rawCustPhone = (document.getElementById('qo-cust-phone').value || '').trim();
     const custPhone = sanitizePhone(rawCustPhone);
     const method = document.getElementById('qo-method').value;
-    const partySize = Math.max(1, parseInt(document.getElementById('qo-party-size').value || '1', 10));
+    const partySize = Math.max(1, parseInt(document.getElementById('qo-party-size').value || '1', 10) || 1);
     const desiredTime = (document.getElementById('qo-time').value || '').trim();
     const note = (document.getElementById('qo-note').value || '').trim();
+
+    // 2. Đồng bộ chắc chắn lần cuối giữa số khách và số lượng khi đơn có 1 món/suất
+    if (qoExt.items.length === 1) {
+      qoExt.items[0].qty = partySize;
+    }
 
     if (!custName) { toast('Vui lòng nhập họ tên người đặt.', 'error'); return; }
     if (!custPhone || custPhone.length < 10 || custPhone.length > 11 || !custPhone.startsWith('0')) {
@@ -9785,18 +9869,23 @@ window.addEventListener('DOMContentLoaded', () => {
     const orderCode = 'DH-' + Math.floor(100000 + Math.random() * 900000);
     const nowVN = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
     const grandTotal = getOrderItemsGrandTotal();
+    const totalQty = getOrderItemsTotalQty();
     const totalText = grandTotal > 0 ? fmtVND(grandTotal) : 'Liên hệ báo giá';
     const bank = rs?.bank && rs.bank.accountNo ? rs.bank : null;
     const payMemo = `TT ${orderCode} ${stripVN19(custName).slice(0, 14)}`.trim();
 
-    const normalizedItems = qoExt.items.map(it => ({
-      id: it.id,
-      name: it.name,
-      unitPrice: Math.max(0, Number(it.unitPrice) || 0),
-      priceNum: Math.max(0, Number(it.unitPrice) || 0),
-      qty: Math.max(1, Number(it.qty) || 1),
-      lineTotal: Math.max(0, Number(it.unitPrice) || 0) * Math.max(1, Number(it.qty) || 1)
-    }));
+    const normalizedItems = qoExt.items.map(it => {
+      const up = Math.max(0, Number(it.unitPrice) || 0);
+      const q = Math.max(1, Number(it.qty) || 1);
+      return {
+        id: it.id,
+        name: it.name,
+        unitPrice: up,
+        priceNum: up,
+        qty: q,
+        lineTotal: up * q
+      };
+    });
 
     const itemLines = normalizedItems.map((it, i) =>
       `  ${i + 1}. ${it.name} | Đơn giá: ${fmtVND(it.unitPrice)} × ${it.qty} = ${fmtVND(it.lineTotal)}`
@@ -9812,7 +9901,7 @@ window.addEventListener('DOMContentLoaded', () => {
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `🔖 Mã đơn: ${orderCode}\n` +
       `🏪 Cơ sở: ${targetLabel} (${rs.ward || ''})\n` +
-      `📦 Hình thức: ${method} (${partySize} khách/suất)\n` +
+      `📦 Hình thức: ${method} (${partySize} khách / ${totalQty} suất)\n` +
       `📋 Chi tiết đơn giá:\n${itemLines}\n` +
       `💰 TỔNG SỐ TIỀN: ${totalText}\n` +
       bankLines +
@@ -9851,7 +9940,7 @@ window.addEventListener('DOMContentLoaded', () => {
     qoExt.lastOrderId = newOrder.id;
 
     if (typeof logAdminActivity === 'function') {
-      logAdminActivity(`Khách: ${custName} (${custPhone})`, `Đặt hàng online ${orderCode} (${totalText}) tới ${targetLabel}`);
+      logAdminActivity(`Khách: ${custName} (${custPhone})`, `Đặt hàng online ${orderCode} (${partySize} khách — ${totalText}) tới ${targetLabel}`);
     }
     saveDB();
     if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
@@ -9861,12 +9950,12 @@ window.addEventListener('DOMContentLoaded', () => {
     const targetZaloPhone = rsPhone || SUPPORT_HOTLINE_19;
     const zaloUrl = `https://zalo.me/${targetZaloPhone}`;
 
-    copyText(ticketText, `✅ Đã tạo hóa đơn ${orderCode} (${totalText}) & sao chép phiếu!`);
+    copyText(ticketText, `✅ Đã tạo hóa đơn ${orderCode} (${partySize} khách • ${totalText}) & sao chép phiếu!`);
 
     document.getElementById('qo-form').classList.add('hidden');
     document.getElementById('qo-success-view').classList.remove('hidden');
     document.getElementById('qo-new-btn').classList.remove('hidden');
-    document.getElementById('qos-code-line').textContent = `🔖 Mã đơn: ${orderCode} • 👤 ${custName} • 📞 ${formatPhoneDisplay(custPhone)}`;
+    document.getElementById('qos-code-line').textContent = `🔖 Mã đơn: ${orderCode} • 👥 ${partySize} khách • 👤 ${custName} • 📞 ${formatPhoneDisplay(custPhone)}`;
     document.getElementById('qos-ticket-text').value = ticketText;
     document.getElementById('qos-zalo-btn').href = zaloUrl;
     document.getElementById('qos-zalo-btn').textContent = rsPhone
