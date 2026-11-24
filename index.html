@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Ninh Bình – Miền Di Sản | FB-Connect Hub</title>
+<title>Ninh Bình – Miền Di Sản</title>
 <style>
   /* =========================================================================
      1. DESIGN TOKENS — TÔNG XANH FACEBOOK + NGỌC BÍCH TRÀNG AN + VÀNG CỐ ĐÔ
@@ -944,6 +944,161 @@
     }
   }
 
+
+  /* =========================================================================
+     11. SITE INFO & CONTACT FOOTER (MR TRỊNH - 0918.918.826)
+     ========================================================================= */
+  .site-contact-footer {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 55%, #0b6e63 100%);
+    color: #e2e8f0;
+    border-top: 3px solid #f59e0b;
+    padding: 22px 16px calc(22px + env(safe-area-inset-bottom, 0px));
+  }
+  .scf-inner {
+    max-width: 1360px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 18px;
+    align-items: center;
+  }
+  .scf-brand {
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .scf-brand span { color: #fde68a; }
+  .scf-desc {
+    font-size: 12.5px;
+    color: #cbd5e1;
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+  .scf-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .scf-pill {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #f1f5f9;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .scf-contact-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(253, 230, 138, 0.35);
+    border-radius: 14px;
+    padding: 14px 16px;
+    backdrop-filter: blur(6px);
+  }
+  .scf-contact-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    color: #fde68a;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .scf-contact-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 2px;
+  }
+  .scf-phone {
+    display: inline-block;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 0.6px;
+    color: #4ade80;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    margin-bottom: 8px;
+  }
+  .scf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  @media (max-width: 820px) {
+    .scf-inner {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .site-contact-footer {
+      padding: 18px 14px calc(20px + env(safe-area-inset-bottom, 0px));
+    }
+    .scf-phone { font-size: 19px; }
+  }
+
+
+  /* =========================================================================
+     12. VERIFIED REVIEW SYSTEM — ĐÁNH GIÁ CHẤT LƯỢNG PHỤC VỤ & ĐẶC SẢN
+     ========================================================================= */
+  .rv-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+    padding: 2.5px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .rv-badge:hover { transform: translateY(-1px); background: #fde68a; }
+  .rv-verified-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #dcfce7;
+    color: #166534;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+  }
+  .star-picker {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .star-btn {
+    font-size: 24px;
+    line-height: 1;
+    color: #cbd5e1;
+    padding: 2px;
+    transition: transform 0.12s ease, color 0.12s ease;
+  }
+  .star-btn.on { color: #f59e0b; }
+  .star-btn:hover { transform: scale(1.16); }
+  .rv-item-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .rv-gate-box {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef2f2 100%);
+    border: 1.5px dashed #f59e0b;
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+
 </style>
 </head>
 <body>
@@ -954,7 +1109,7 @@
     <div class="brand" onclick="switchTab('map')">
       <div class="brand-logo" id="hdr-logo">⛰️</div>
       <div class="brand-text">
-        <h1 id="hdr-title">Ninh Bình – <span>Miền Di Sản</span> | FB-Connect Hub</h1>
+        <h1 id="hdr-title">Ninh Bình – <span>Miền Di Sản</span></h1>
         <p id="hdr-sub">Đất Cố Đô Ngàn Năm – Tinh Hoa Miền Di Sản • 129 Phường, Xã</p>
       </div>
     </div>
@@ -1513,8 +1668,41 @@
 </main>
 
 <footer class="app-footer" id="app-footer-txt">
-  <strong>Ninh Bình – Miền Di Sản | FB-Connect Hub</strong> • Đất Cố Đô Ngàn Năm – Tinh Hoa Miền Di Sản • 129 Phường, Xã • Hoạt động 100% độc lập không phụ thuộc CDN ngoài.
+  <strong>Ninh Bình – Miền Di Sản</strong> • Đất Cố Đô Ngàn Năm – Tinh Hoa Miền Di Sản • 129 Phường, Xã.
 </footer>
+
+<!-- ==================== THÔNG TIN TRANG WEB & LIÊN HỆ MR TRỊNH ==================== -->
+<section class="site-contact-footer" aria-label="Thông tin trang web và liên hệ">
+  <div class="scf-inner">
+    <div>
+      <div class="scf-brand">⛰️ Ninh Bình – <span>Miền Di Sản</span></div>
+      <p class="scf-desc">
+        Cổng bản đồ số toàn diện kết nối <strong>du lịch di sản, đặc sản địa phương và hệ thống nhà hàng tiêu biểu</strong> trên khắp <strong>129 Phường, Xã</strong>. Tích hợp tra cứu danh thắng, vẽ cung đường tham quan liên vùng, định vị GPS tìm quán ăn gần nhất, cập nhật thực đơn &amp; khung giờ phục vụ mới mỗi ngày — giúp du khách dễ dàng xem chỉ đường, gọi điện, nhắn Zalo hoặc đặt bàn, gom đơn đặc sản trực tiếp chỉ với một chạm, <strong>nhanh nhất và tiện lợi nhất</strong>.
+      </p>
+      <div class="scf-tags">
+        <span class="scf-pill">🗺️ 47 Danh thắng</span>
+        <span class="scf-pill">🎁 24 Đặc sản</span>
+        <span class="scf-pill">🍽️ 12 Nhà hàng</span>
+        <span class="scf-pill">📍 129 Phường / Xã</span>
+      </div>
+    </div>
+
+    <div class="scf-contact-card">
+      <div class="scf-contact-title">📞 Liên Hệ Hợp Tác &amp; Hỗ Trợ Kỹ Thuật</div>
+      <div class="scf-contact-name">Phụ trách hệ thống: Mr Trịnh</div>
+      <a href="tel:0918918826" class="scf-phone">0918.918.826</a>
+      <div style="font-size:11.5px; color:#cbd5e1; margin-bottom:10px;">
+        Hỗ trợ đăng ký gian hàng, cấp tài khoản nhà hàng, cập nhật vị trí GPS và quảng bá đặc sản địa phương.
+      </div>
+      <div class="scf-actions">
+        <a href="tel:0918918826" class="btn btn-jade btn-sm">📲 Gọi ngay</a>
+        <a href="https://zalo.me/0918918826" target="_blank" rel="noopener noreferrer" class="btn btn-zalo btn-sm">💬 Nhắn Zalo</a>
+        <button type="button" class="btn btn-soft-gold btn-sm" onclick="copyText('0918918826','Đã sao chép SĐT Mr Trịnh: 0918.918.826')">📋 Copy SĐT</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <!-- ==================== DRAWER GIỎ HÀNG GOM ĐƠN MESSENGER ==================== -->
 <div id="cart-ov" class="overlay" onclick="closeCart()"></div>
@@ -2214,10 +2402,10 @@ function handlePhoneCall(shopName, rawPhone, subInfo = '') {
 }
 
 const DEFAULT_SITE_TITLES = {
-  pageTitle: 'Ninh Bình – Miền Di Sản | FB-Connect Hub',
+  pageTitle: 'Ninh Bình – Miền Di Sản',
   brandLogo: '⛰️',
   brandMain: 'Ninh Bình – Miền Di Sản',
-  brandTag: 'FB-Connect Hub',
+  brandTag: '',
   brandSub: 'Đất Cố Đô Ngàn Năm – Tinh Hoa Miền Di Sản • 129 Phường, Xã',
   navMap: '🗺️ Bản Đồ Di Sản',
   navMarket: '🎁 Đặc Sản & 🍽️ Nhà Hàng',
@@ -2234,7 +2422,7 @@ const DEFAULT_SITE_TITLES = {
   marketNote: '💬 Dữ liệu đã rà soát xác thực SĐT, giá tham khảo, Facebook, Website & tọa độ 129 Phường/Xã',
   rsFeedTitle: '📰 Bảng Tin, Thực Đơn & Ưu Đãi Mới Từ Các Nhà Hàng',
   fbSecTitle: '🚀 Đồng Bộ Facebook, Xưởng Poster Canvas (900×900) & Mã QR Ngoại Tuyến',
-  footerText: 'Ninh Bình – Miền Di Sản | FB-Connect Hub • Đất Cố Đô Ngàn Năm – Tinh Hoa Miền Di Sản • 129 Phường, Xã • Hoạt động 100% độc lập không phụ thuộc CDN ngoài.',
+  footerText: 'Đất Cố Đô Ngàn Năm – Tinh Hoa Miền Di Sản • 129 Phường, Xã.',
   regionHoaluName: 'Vùng Di Sản Cố Đô Hoa Lư – Tràng An',
   regionHoaluShort: 'Cố Đô Hoa Lư – Tràng An',
   regionTamchucName: 'Vùng Tâm Linh Tam Chúc – Văn Hiến Sơn Nam',
@@ -2336,6 +2524,9 @@ let ui = {
 
 function applySiteTitles() {
   const t = Object.assign({}, DEFAULT_SITE_TITLES, db.siteTitles || {});
+  if (/fb[- ]?connect\s*hub/i.test(t.brandTag || '')) t.brandTag = '';
+  if (/fb[- ]?connect\s*hub/i.test(t.pageTitle || '')) t.pageTitle = t.pageTitle.replace(/\s*[|•-]\s*fb[- ]?connect\s*hub/ig, '').trim();
+  if (/fb[- ]?connect\s*hub/i.test(t.footerText || '')) t.footerText = DEFAULT_SITE_TITLES.footerText;
   db.siteTitles = t;
   document.title = t.pageTitle;
   const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
@@ -3201,7 +3392,7 @@ function renderFBHub() {
            (cleanPhone ? `📞 Điện thoại: ${formatPhoneDisplay(cleanPhone)}\n` : '') +
            (mUrl ? `💬 Chốt đơn Messenger: ${mUrl}\n` : '') +
            (cleanSite ? `🌐 Website: ${cleanSite}\n` : '') +
-           `🗺️ Chỉ đường Maps: ${mapsLink}\n#NinhBinhMienDiSan #DacSanNinhBinh #FBConnectHub`;
+           `🗺️ Chỉ đường Maps: ${mapsLink}\n#NinhBinhMienDiSan #DacSanNinhBinh`;
   } else if (type === 'rs') {
     const mUrl = slug ? buildMessengerUrl(item.fb, `Chào ${item.name}, mình muốn đặt bàn!`) : '';
     qrLink = mUrl || cleanSite || mapsLink;
@@ -3263,7 +3454,7 @@ function drawPosterCanvas(type, item) {
 
   rRect(ctx, 135, 92, 630, 48, 24); ctx.fillStyle = '#1877f2'; ctx.fill();
   ctx.fillStyle = '#fde68a'; ctx.font = '800 18.5px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('⛰️ NINH BÌNH – MIỀN DI SẢN • FB-CONNECT HUB', W/2, 123);
+  ctx.fillText('⛰️ NINH BÌNH – MIỀN DI SẢN', W/2, 123);
 
   ctx.textAlign = 'left';
   ctx.fillStyle = '#0b6e63'; ctx.font = '700 22px sans-serif';
@@ -5258,6 +5449,7 @@ window.addEventListener('DOMContentLoaded', () => {
       restaurants: db.restaurants || [],
       restaurantPosts: db.restaurantPosts || [],
       wards: db.wards || [],
+      reviews: db.reviews || [],
       _meta: {
         updatedAt: Date.now(),
         updatedAtVN: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN'),
@@ -5280,6 +5472,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (Array.isArray(data.restaurants)) db.restaurants = data.restaurants;
       if (Array.isArray(data.restaurantPosts)) db.restaurantPosts = data.restaurantPosts;
       if (Array.isArray(data.wards)) db.wards = data.wards;
+      if (Array.isArray(data.reviews)) db.reviews = data.reviews;
       db.cart = localCart;
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
@@ -5485,6 +5678,414 @@ window.addEventListener('DOMContentLoaded', () => {
     if (cfg && cfg.apiKey && cfg.projectId) {
       connectFirebase(cfg, true);
     }
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN BỔ SUNG: ĐÁNH GIÁ CHẤT LƯỢNG PHỤC VỤ & ĐẶC SẢN (ĐÃ XÁC NHẬN ĐẶT HÀNG) ==================== -->
+<div id="rv-modal" class="modal-bg" onclick="if(event.target===this)closeModal('rv-modal')">
+  <div class="modal-box" style="max-width:540px;">
+    <div class="modal-head">
+      <div>
+        <div id="rvm-title" style="font-size:15px; font-weight:800;">⭐ Đánh Giá Chất Lượng</div>
+        <div id="rvm-sub" style="font-size:11.5px; color:var(--muted);"></div>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('rv-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+      <!-- Tóm tắt điểm sao -->
+      <div id="rvm-summary" class="info-box" style="background:#fffbeb; border-color:#fcd34d;"></div>
+
+      <!-- Cổng xác nhận đặt hàng / Form đánh giá -->
+      <div id="rvm-gate-area"></div>
+
+      <!-- Danh sách đánh giá của du khách -->
+      <div>
+        <div style="font-size:13px; font-weight:800; margin-bottom:7px;">💬 Nhận xét từ du khách đã đặt hàng (<span id="rvm-count">0</span>)</div>
+        <div id="rvm-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('rv-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initAutoCountAndVerifiedReviewsAddon() {
+  const ORDER_VERIFY_KEY = 'nb_verified_orders_v1';
+  let currentReviewTarget = { type: null, id: null };
+  let draftServiceStars = 5;
+  let draftQualityStars = 5;
+
+  function ensureReviewsArray() {
+    if (!Array.isArray(db.reviews)) db.reviews = [];
+    return db.reviews;
+  }
+
+  function getVerifiedOrders() {
+    try {
+      return JSON.parse(localStorage.getItem(ORDER_VERIFY_KEY) || '{}') || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveVerifiedOrders(map) {
+    try { localStorage.setItem(ORDER_VERIFY_KEY, JSON.stringify(map)); } catch (e) {}
+  }
+
+  function targetKey(type, id) { return `${type}:${id}`; }
+
+  window.isOrderVerified = function(type, id) {
+    const map = getVerifiedOrders();
+    return Boolean(map[targetKey(type, id)]);
+  };
+
+  window.getVerifiedOrderInfo = function(type, id) {
+    const map = getVerifiedOrders();
+    return map[targetKey(type, id)] || null;
+  };
+
+  // Ghi nhận xác nhận đặt hàng / đặt bàn để mở khóa quyền đánh giá
+  window.confirmCustomerOrder = function(type, id, silent = false) {
+    if (!type || !id) return;
+    const map = getVerifiedOrders();
+    const k = targetKey(type, id);
+    if (!map[k]) {
+      const code = 'DH-' + Math.floor(100000 + Math.random() * 900000);
+      map[k] = {
+        code,
+        confirmedAt: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN')
+      };
+      saveVerifiedOrders(map);
+    }
+    if (!silent) {
+      toast(`✅ Đã xác nhận đặt hàng (${map[k].code})! Bạn có thể gửi đánh giá ngay.`);
+    }
+    if (currentReviewTarget.type === type && currentReviewTarget.id === id) {
+      renderReviewModalContent();
+    }
+  };
+
+  function getReviewsFor(type, id) {
+    return ensureReviewsArray().filter(r => r.targetType === type && r.targetId === id);
+  }
+
+  function getReviewStats(type, id) {
+    const list = getReviewsFor(type, id);
+    if (!list.length) return { count: 0, avg: 0, avgService: 0, avgQuality: 0 };
+    let sumS = 0, sumQ = 0;
+    list.forEach(r => {
+      sumS += Number(r.serviceStars) || 5;
+      sumQ += Number(r.qualityStars) || 5;
+    });
+    const avgService = sumS / list.length;
+    const avgQuality = sumQ / list.length;
+    const avg = (avgService + avgQuality) / 2;
+    return { count: list.length, avg, avgService, avgQuality };
+  }
+
+  function renderStarsText(val) {
+    const n = Math.round(val);
+    return '★'.repeat(n) + '☆'.repeat(Math.max(0, 5 - n));
+  }
+
+  // =========================================================================
+  // A. TỰ ĐỘNG CẬP NHẬT SỐ LƯỢNG NHÀ HÀNG (VÀ CÁC CHỈ SỐ) TRÊN TOÀN TRANG
+  // =========================================================================
+  function syncDynamicCountsEverywhere() {
+    const vLm = (db.landmarks || []).filter(x => x.visible !== false).length;
+    const vSp = (db.specialties || []).filter(x => x.visible !== false).length;
+    const vRs = (db.restaurants || []).filter(x => x.visible !== false).length;
+    const vWd = (db.wards || []).length;
+
+    // 1. Cập nhật chú thích bản đồ (.map-legend)
+    const legendSpans = document.querySelectorAll('.map-legend > span');
+    legendSpans.forEach(sp => {
+      if (sp.textContent.includes('Danh thắng')) {
+        sp.innerHTML = `<span class="legend-dot" style="background:#f59e0b;"></span> 🏛️ Danh thắng (${vLm})`;
+      } else if (sp.textContent.includes('Đặc sản')) {
+        sp.innerHTML = `<span class="legend-dot" style="background:#0b6e63;"></span> 🎁 Đặc sản (${vSp})`;
+      } else if (sp.textContent.includes('Nhà hàng')) {
+        sp.innerHTML = `<span class="legend-dot" style="background:#7c3aed;"></span> 🍽️ Nhà hàng (${vRs})`;
+      }
+    });
+
+    // 2. Cập nhật các thẻ chỉ số ở chân trang (.scf-pill)
+    const pills = document.querySelectorAll('.site-contact-footer .scf-pill');
+    pills.forEach(p => {
+      if (p.textContent.includes('Danh thắng')) p.textContent = `🗺️ ${vLm} Danh thắng`;
+      else if (p.textContent.includes('Đặc sản')) p.textContent = `🎁 ${vSp} Đặc sản`;
+      else if (p.textContent.includes('Nhà hàng')) p.textContent = `🍽️ ${vRs} Nhà hàng`;
+      else if (p.textContent.includes('Phường')) p.textContent = `📍 ${vWd} Phường / Xã`;
+    });
+  }
+
+  if (typeof window.updateCounts === 'function') {
+    const _origUpdateCounts = window.updateCounts;
+    window.updateCounts = function() {
+      _origUpdateCounts();
+      syncDynamicCountsEverywhere();
+    };
+  }
+
+  // =========================================================================
+  // B. MODAL ĐÁNH GIÁ CHẤT LƯỢNG PHỤC VỤ & ĐẶC SẢN
+  // =========================================================================
+  window.openReviewModal = function(type, id) {
+    const item = getItemByTypeId(type, id);
+    if (!item) return;
+    currentReviewTarget = { type, id };
+    draftServiceStars = 5;
+    draftQualityStars = 5;
+
+    document.getElementById('rvm-title').textContent = `⭐ Đánh Giá: ${item.name}`;
+    document.getElementById('rvm-sub').textContent = type === 'restaurant'
+      ? `🍽️ Nhà hàng • 📍 ${item.ward || ''}`
+      : `🎁 Đặc sản • 🏪 ${item.shop || ''} • 📍 ${item.ward || ''}`;
+
+    renderReviewModalContent();
+    document.getElementById('rv-modal').classList.add('open');
+  };
+
+  window.setDraftStar = function(kind, val) {
+    if (kind === 'service') draftServiceStars = val;
+    else draftQualityStars = val;
+    updateStarPickersUI();
+  };
+
+  function updateStarPickersUI() {
+    document.querySelectorAll('#rv-service-stars .star-btn').forEach((b, i) => b.classList.toggle('on', i < draftServiceStars));
+    document.querySelectorAll('#rv-quality-stars .star-btn').forEach((b, i) => b.classList.toggle('on', i < draftQualityStars));
+    const lblS = document.getElementById('rv-service-val');
+    const lblQ = document.getElementById('rv-quality-val');
+    if (lblS) lblS.textContent = `${draftServiceStars}/5`;
+    if (lblQ) lblQ.textContent = `${draftQualityStars}/5`;
+  }
+
+  function renderReviewModalContent() {
+    const { type, id } = currentReviewTarget;
+    const item = getItemByTypeId(type, id);
+    if (!item) return;
+
+    const stats = getReviewStats(type, id);
+    const list = getReviewsFor(type, id);
+    const verified = getVerifiedOrderInfo(type, id);
+
+    // 1. Tóm tắt điểm trung bình
+    const sumBox = document.getElementById('rvm-summary');
+    if (stats.count > 0) {
+      sumBox.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div>
+            <span style="font-size:20px; font-weight:900; color:#b45309;">⭐ ${stats.avg.toFixed(1)} / 5.0</span>
+            <span style="font-size:12px; color:#78350f; font-weight:700;"> (${stats.count} đánh giá đã xác thực)</span>
+          </div>
+          <div style="font-size:11.5px; color:#78350f;">
+            🤝 Phục vụ: <b>${stats.avgService.toFixed(1)}★</b> • ${type === 'restaurant' ? '🍲 Món ăn' : '🎁 Đặc sản'}: <b>${stats.avgQuality.toFixed(1)}★</b>
+          </div>
+        </div>`;
+    } else {
+      sumBox.innerHTML = `<div style="font-size:12.5px; color:#78350f; font-weight:700;">⭐ Chưa có đánh giá nào. Hãy là du khách đầu tiên trải nghiệm và đánh giá!</div>`;
+    }
+
+    // 2. Cổng xác nhận đặt hàng hoặc Form đánh giá
+    const gate = document.getElementById('rvm-gate-area');
+    if (!verified) {
+      const targetName = type === 'restaurant' ? item.name : item.shop;
+      const cleanPhone = sanitizePhone(item.phone);
+      const slug = extractFbSlug(item.fb);
+      const msg = type === 'restaurant'
+        ? `Chào ${item.name}! Mình muốn đặt bàn qua Ninh Bình – Miền Di Sản.`
+        : `Chào ${item.shop}! Mình muốn đặt ${item.name} từ Ninh Bình – Miền Di Sản.`;
+
+      gate.innerHTML = `
+        <div class="rv-gate-box">
+          <div style="font-size:14px; font-weight:800; color:#92400e; margin-bottom:4px;">🔒 Chỉ du khách đã xác nhận đặt hàng mới được đánh giá</div>
+          <div style="font-size:12px; color:#78350f; margin-bottom:10px;">
+            Để đảm bảo đánh giá khách quan, vui lòng đặt hàng / đặt bàn với cơ sở hoặc bấm xác nhận nếu bạn đã hoàn tất đặt hàng.
+          </div>
+          <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+            <button type="button" class="btn btn-jade btn-sm" onclick="confirmCustomerOrder('${type}','${id}')">✅ Xác nhận tôi đã đặt hàng / đặt bàn</button>
+            ${slug ? `<button type="button" class="btn btn-fb btn-sm" onclick="confirmCustomerOrder('${type}','${id}',true); openMessengerOrder('${esc(targetName)}','${esc(item.fb)}',${JSON.stringify(msg).replace(/"/g,'&quot;')})">💬 Đặt qua Messenger</button>` : ''}
+            ${cleanPhone ? `<button type="button" class="btn btn-soft-jade btn-sm" onclick="confirmCustomerOrder('${type}','${id}',true); handlePhoneCall('${esc(targetName)}','${esc(cleanPhone)}','${esc(item.ward)}')">📞 Gọi đặt ngay</button>` : ''}
+          </div>
+        </div>`;
+    } else {
+      const starsHtml = kind => [1,2,3,4,5].map(n => `<button type="button" class="star-btn on" onclick="setDraftStar('${kind}',${n})">★</button>`).join('');
+      gate.innerHTML = `
+        <form onsubmit="submitVerifiedReview(event)" class="info-box" style="background:#f0fdf4; border-color:#86efac;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
+            <span class="rv-verified-pill">✅ Đã xác nhận đặt hàng (${esc(verified.code)})</span>
+            <span style="font-size:11px; color:var(--muted);">🕒 ${esc(verified.confirmedAt)}</span>
+          </div>
+          <div class="row-2" style="margin-bottom:6px;">
+            <div>
+              <label class="form-label">🤝 Chất lượng phục vụ (<b id="rv-service-val">5/5</b>)</label>
+              <div class="star-picker" id="rv-service-stars">${starsHtml('service')}</div>
+            </div>
+            <div>
+              <label class="form-label">${type === 'restaurant' ? '🍲 Chất lượng món ăn' : '🎁 Chất lượng đặc sản'} (<b id="rv-quality-val">5/5</b>)</label>
+              <div class="star-picker" id="rv-quality-stars">${starsHtml('quality')}</div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:6px;">
+            <label class="form-label">Tên của bạn (hiển thị kèm đánh giá)</label>
+            <input id="rv-author" class="form-control" placeholder="VD: Anh Minh, Chị Lan... (để trống = Du khách)">
+          </div>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label class="form-label">Nhận xét chi tiết *</label>
+            <textarea id="rv-comment" class="form-control" rows="2" required placeholder="Chia sẻ cảm nhận về thái độ phục vụ, hương vị món ăn / chất lượng đặc sản..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-food btn-sm" style="width:100%;">⭐ Gửi Đánh Giá Đã Xác Thực</button>
+        </form>`;
+      updateStarPickersUI();
+    }
+
+    // 3. Danh sách đánh giá
+    document.getElementById('rvm-count').textContent = list.length;
+    const listEl = document.getElementById('rvm-list');
+    if (!list.length) {
+      listEl.innerHTML = `<div style="text-align:center; padding:16px; color:var(--muted); font-size:12px;">Chưa có nhận xét nào cho mục này.</div>`;
+    } else {
+      listEl.innerHTML = list.map(r => `
+        <div class="rv-item-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <b style="font-size:13px;">👤 ${esc(r.author || 'Du khách')}</b>
+              <span class="rv-verified-pill">✓ Đã đặt hàng</span>
+            </div>
+            <span style="font-size:10.5px; color:var(--muted);">🕒 ${esc(r.createdAt || '')}</span>
+          </div>
+          <div style="font-size:11.5px; color:#b45309; font-weight:700;">
+            🤝 Phục vụ: ${renderStarsText(r.serviceStars)} (${r.serviceStars}/5) &nbsp;•&nbsp;
+            ${type === 'restaurant' ? '🍲 Món ăn' : '🎁 Đặc sản'}: ${renderStarsText(r.qualityStars)} (${r.qualityStars}/5)
+          </div>
+          <div style="font-size:12.5px; color:var(--text); white-space:pre-line;">${esc(r.comment)}</div>
+        </div>`).join('');
+    }
+  }
+
+  window.submitVerifiedReview = function(e) {
+    e.preventDefault();
+    const { type, id } = currentReviewTarget;
+    const verified = getVerifiedOrderInfo(type, id);
+    if (!verified) {
+      toast('Chỉ du khách đã xác nhận đặt hàng mới được gửi đánh giá.', 'error');
+      return;
+    }
+    const comment = (document.getElementById('rv-comment')?.value || '').trim();
+    if (!comment) {
+      toast('Vui lòng nhập nội dung nhận xét.', 'error');
+      return;
+    }
+    const author = (document.getElementById('rv-author')?.value || '').trim() || 'Du khách';
+    ensureReviewsArray().unshift({
+      id: 'rv_' + Date.now().toString(36),
+      targetType: type,
+      targetId: id,
+      author,
+      serviceStars: draftServiceStars,
+      qualityStars: draftQualityStars,
+      comment,
+      orderCode: verified.code,
+      createdAt: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN')
+    });
+    saveDB();
+    renderReviewModalContent();
+    if (ui.tab === 'market') renderMarket();
+    if (ui.tab === 'map') renderMapDetail();
+    toast('⭐ Cảm ơn bạn đã gửi đánh giá chất lượng!');
+  };
+
+  // =========================================================================
+  // C. TỰ ĐỘNG GẮN NÚT ĐÁNH GIÁ & ĐIỂM SAO VÀO THẺ ĐẶC SẢN / NHÀ HÀNG / BẢN ĐỒ
+  // =========================================================================
+  function injectReviewsIntoMarketCards() {
+    const grid = document.getElementById('market-grid');
+    if (!grid) return;
+    grid.querySelectorAll('article.smart-card').forEach(card => {
+      // Nhận diện loại & id từ nút "📍 Bản đồ" có sẵn trên thẻ
+      const mapBtn = card.querySelector('button[onclick*="onPinClick("]');
+      if (!mapBtn) return;
+      const m = (mapBtn.getAttribute('onclick') || '').match(/onPinClick\('(specialty|restaurant)','([^']+)'/);
+      if (!m) return;
+      const [, type, id] = m;
+      const stats = getReviewStats(type, id);
+
+      // Gắn badge sao vào hàng tag đầu tiên trong card-body
+      const tagRow = card.querySelector('.card-body > div:first-child');
+      if (tagRow && !tagRow.querySelector('.rv-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'rv-badge';
+        badge.onclick = () => openReviewModal(type, id);
+        badge.textContent = stats.count > 0 ? `⭐ ${stats.avg.toFixed(1)} (${stats.count})` : '⭐ Đánh giá';
+        tagRow.appendChild(badge);
+      }
+
+      // Gắn nút "⭐ Đánh giá" vào hàng nút thao tác cuối thẻ
+      const actionRow = mapBtn.parentElement;
+      if (actionRow && !actionRow.querySelector('.rv-open-btn')) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-soft-gold btn-xs rv-open-btn';
+        btn.textContent = stats.count > 0 ? `⭐ Đánh giá (${stats.count})` : '⭐ Đánh giá';
+        btn.onclick = () => openReviewModal(type, id);
+        actionRow.appendChild(btn);
+      }
+    });
+  }
+
+  function injectReviewIntoMapDetail() {
+    const box = document.getElementById('map-detail');
+    if (!box || !ui.selected) return;
+    const { type, id } = ui.selected;
+    if (type !== 'specialty' && type !== 'restaurant') return;
+    if (box.querySelector('.rv-detail-bar')) return;
+
+    const stats = getReviewStats(type, id);
+    const bar = document.createElement('div');
+    bar.className = 'rv-detail-bar';
+    bar.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; background:#fffbeb; border:1px solid #fcd34d; border-radius:10px;';
+    bar.innerHTML = `
+      <div style="font-size:12px; font-weight:700; color:#92400e;">
+        ${stats.count > 0 ? `⭐ <b>${stats.avg.toFixed(1)}/5</b> (${stats.count} đánh giá đã xác thực)` : '⭐ Chưa có đánh giá'}
+      </div>
+      <button type="button" class="btn btn-gold btn-xs" onclick="openReviewModal('${type}','${id}')">⭐ Xem &amp; Đánh giá</button>
+    `;
+    box.appendChild(bar);
+  }
+
+  // Bọc renderMarket & renderMapDetail (không sửa code gốc)
+  if (typeof window.renderMarket === 'function') {
+    const _origRenderMarket = window.renderMarket;
+    window.renderMarket = function() {
+      _origRenderMarket();
+      injectReviewsIntoMarketCards();
+    };
+  }
+  if (typeof window.renderMapDetail === 'function') {
+    const _origRenderMapDetail = window.renderMapDetail;
+    window.renderMapDetail = function() {
+      _origRenderMapDetail();
+      injectReviewIntoMapDetail();
+    };
+  }
+
+  // Tự động xác nhận đơn khi du khách chốt đơn từ Giỏ hàng hoặc Messenger/Gọi điện
+  if (typeof window.addToCart === 'function') {
+    const _origAddToCart = window.addToCart;
+    window.addToCart = function(id) {
+      _origAddToCart(id);
+      // Chưa tự xác nhận khi mới thêm vào giỏ; chỉ xác nhận khi bấm Gửi Messenger / Gọi điện / Xác nhận đặt hàng
+    };
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    ensureReviewsArray();
+    syncDynamicCountsEverywhere();
+    injectReviewIntoMapDetail();
   });
 })();
 </script>
