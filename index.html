@@ -1133,6 +1133,103 @@
     color: var(--text);
   }
 
+
+  /* =========================================================================
+     14. QUICK ONLINE ORDER & ZALO DISPATCH — ĐẶT HÀNG NHANH GỬI ZALO
+     ========================================================================= */
+  .btn-quick-zalo {
+    background: linear-gradient(135deg, #0068ff 0%, #00a8ff 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 104, 255, 0.28);
+  }
+  .btn-quick-zalo:hover { filter: brightness(1.06); }
+  .qo-summary-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #f0fdfa 100%);
+    border: 1.5px solid #93c5fd;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+  }
+  .qo-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 8px;
+    background: #fff;
+    border: 1px solid #dbeafe;
+    border-radius: 9px;
+    margin-top: 6px;
+  }
+  .qo-success-box {
+    background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
+    border: 2px solid #10b981;
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .ord-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2.5px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .ord-new { background: #fef3c7; color: #92400e; }
+  .ord-confirmed { background: #dbeafe; color: #1d4ed8; }
+  .ord-done { background: #dcfce7; color: #166534; }
+  .ord-cancel { background: #fee2e2; color: #991b1b; }
+
+
+  /* =========================================================================
+     15. ORDER PRIORITY ANALYTICS & CONTACT AUDIT — THỐNG KÊ ĐƠN & RÀ SOÁT LIÊN HỆ
+     ========================================================================= */
+  .ord-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .ord-kpi-card {
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    padding: 9px 10px;
+    background: #f8fafc;
+    text-align: center;
+  }
+  .ord-kpi-num { font-size: 18px; font-weight: 900; line-height: 1.15; }
+  .ord-kpi-lbl { font-size: 10.8px; color: var(--muted); font-weight: 700; margin-top: 2px; }
+  .prio-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+  }
+  .prio-1 { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+  .prio-2 { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }
+  .prio-3 { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+  .prio-4 { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .prio-5 { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+  .audit-inp {
+    width: 100%;
+    padding: 5.5px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #fff;
+    font-size: 12px;
+  }
+  .audit-inp.missing {
+    background: #fff7ed;
+    border-color: #fdba74;
+  }
+  @media (max-width: 720px) {
+    .ord-kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
 </style>
 </head>
 <body>
@@ -2275,46 +2372,46 @@ const DEFAULT_LANDMARKS = [
 
 // 24 ĐẶC SẢN THƯƠNG HIỆU ĐÃ RÀ SOÁT CHẶT CHẼ (TỌA ĐỘ KHỚP 129 PHƯỜNG/XÃ, KHÔNG BỊA SĐT/FB/WEB)
 const DEFAULT_SPECIALTIES = [
-  { id:'sp01', sku:'NB-NM01', name:'Nem chua Yên Mạc', shop:'Làng nghề Nem chua Yên Mạc', region:'hoalu', ward:'Xã Yên Mạc', priceNum:75000, priceText:'70.000đ - 85.000đ / quả 200g', unit:'Quả 200g', emoji:'🥬', grad:'linear-gradient(135deg,#065f46,#10b981)', fb:'', phone:'', website:'', lat:20.1185, lng:106.0485, visible:true, desc:'Đặc sản tiến vua từ thịt mông lợn tươi thái sợi, bì lợn, thính gạo rang gói lá ổi lên men tự nhiên, chua thanh giòn sật.' },
-  { id:'sp02', sku:'NB-RK02', name:'Rượu nếp Kim Sơn', shop:'Làng nghề Rượu Lai Thành', region:'hoalu', ward:'Xã Lai Thành', priceNum:95000, priceText:'80.000đ - 120.000đ / lít', unit:'Chai 1 Lít', emoji:'🍶', grad:'linear-gradient(135deg,#5b21b6,#9333ea)', fb:'', phone:'', website:'', lat:20.0725, lng:106.0480, visible:true, desc:'Nấu từ gạo nếp chiêm và men thuốc bắc 36 vị, ủ chum sành hạ thổ lâu năm êm dịu thơm nồng đặc trưng đất Kim Sơn.' },
-  { id:'sp03', sku:'NB-DE03', name:'Thịt dê núi Ninh Bình', shop:'Đặc sản Dê núi Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', priceNum:280000, priceText:'250.000đ - 350.000đ / set 500g', unit:'Set 500g', emoji:'🍖', grad:'linear-gradient(135deg,#991b1b,#ea580c)', fb:'', phone:'', website:'', lat:20.2815, lng:105.9082, visible:true, desc:'Dê thả núi đá vôi Tràng An ăn lá thuốc tự nhiên, thịt săn ngọt, đóng gói hút chân không kèm tương bần.' },
-  { id:'sp04', sku:'NB-CC04', name:'Cơm cháy ruốc Ninh Bình', shop:'Đặc sản Cơm cháy Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', priceNum:65000, priceText:'55.000đ - 85.000đ / gói 250g', unit:'Gói 250g', emoji:'🍘', grad:'linear-gradient(135deg,#b45309,#f59e0b)', fb:'', phone:'', website:'', lat:20.2539, lng:105.9750, visible:true, desc:'Gạo nếp cái hoa vàng chiên giòn rụm không hôi dầu, phủ ruốc heo chà bông đậm vị kèm gói nước sốt dê.' },
-  { id:'sp05', sku:'NB-MT05', name:'Mắm tép Gia Viễn', shop:'Cơ sở Mắm tép Gia Viễn', region:'hoalu', ward:'Xã Gia Viễn', priceNum:155000, priceText:'140.000đ - 180.000đ / hũ 500g', unit:'Hũ 500g', emoji:'🏺', grad:'linear-gradient(135deg,#9a3412,#ea580c)', fb:'', phone:'', website:'', lat:20.3320, lng:105.9180, visible:true, desc:'Tép riu tươi vùng chiêm trũng Gia Viễn ủ muối biển và thính nếp đủ tháng cho màu đỏ au, chưng thịt cực đưa cơm.' },
-  { id:'sp06', sku:'NB-GN06', name:'Gỏi cá nhệch Kim Sơn', shop:'Đặc sản Cá nhệch Phát Diệm', region:'hoalu', ward:'Xã Phát Diệm', priceNum:300000, priceText:'280.000đ - 350.000đ / set 3-4 người', unit:'Set 3-4 người', emoji:'🐟', grad:'linear-gradient(135deg,#0369a1,#0ea5e9)', fb:'', phone:'', website:'', lat:20.0910, lng:106.0920, visible:true, desc:'Cá nhệch nước lợ trộn thính nếp thơm bùi, ăn kèm bát chẻo xương cá béo ngậy và hơn 10 loại lá thơm.' },
-  { id:'sp07', sku:'NB-ON07', name:'Ốc núi Tam Điệp', shop:'Đặc sản Ốc núi đá Tam Điệp', region:'hoalu', ward:'Phường Tam Điệp', priceNum:180000, priceText:'160.000đ - 220.000đ / kg', unit:'1 Kg ốc sống', emoji:'🐌', grad:'linear-gradient(135deg,#0f766e,#14b8a6)', fb:'', phone:'', website:'', lat:20.1512, lng:105.9225, visible:true, desc:'Ốc sống trong hang đá vôi ăn thảo dược tự nhiên, thịt giòn sần sật, ngọt mát thoảng hương thuốc bắc.' },
-  { id:'sp08', sku:'NB-DD08', name:'Dứa Đồng Giao', shop:'Vùng trồng Dứa Đồng Giao', region:'hoalu', ward:'Phường Trung Sơn', priceNum:30000, priceText:'25.000đ - 35.000đ / quả', unit:'Quả chín cây', emoji:'🍍', grad:'linear-gradient(135deg,#ca8a04,#facc15)', fb:'', phone:'', website:'', lat:20.1380, lng:105.9480, visible:true, desc:'Dứa chín cây Đồng Giao mắt nhỏ, cùi vàng ươm ngọt lịm ít xơ; có cả phiên bản dứa sấy dẻo giữ trọn hương vị.' },
-  { id:'sp09', sku:'NB-MO09', name:'Mật ong rừng Cúc Phương', shop:'Đặc sản rừng Cúc Phương', region:'hoalu', ward:'Xã Cúc Phương', priceNum:280000, priceText:'250.000đ - 350.000đ / chai 750ml', unit:'Chai 750ml', emoji:'🍯', grad:'linear-gradient(135deg,#a16207,#eab308)', fb:'', phone:'', website:'', lat:20.2910, lng:105.6850, visible:true, desc:'Mật hoa rừng nguyên chất vùng đệm VQG Cúc Phương, sánh đặc màu vàng hổ phách, thơm ngát tự nhiên.' },
-  { id:'sp10', sku:'NB-CR10', name:'Cá rô Tổng Trường', shop:'Đặc sản Hang động Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', priceNum:180000, priceText:'160.000đ - 200.000đ / kg', unit:'1 Kg cá tươi', emoji:'🐠', grad:'linear-gradient(135deg,#92400e,#d97706)', fb:'', phone:'', website:'', lat:20.2760, lng:105.9140, visible:true, desc:'Giống cá rô đặc hữu vùng hang ngập nước Trường Yên, thịt chắc béo kho niêu đất với tương bần riềng sả.' },
-  { id:'sp11', sku:'NB-BD11', name:'Bánh đa vừng Yên Khánh', shop:'Làng nghề Bánh đa Yên Khánh', region:'hoalu', ward:'Xã Yên Khánh', priceNum:65000, priceText:'60.000đ - 75.000đ / tập 10 chiếc', unit:'Tập 10 chiếc', emoji:'🫓', grad:'linear-gradient(135deg,#b45309,#d97706)', fb:'', phone:'', website:'', lat:20.1850, lng:106.0750, visible:true, desc:'Bánh đa tráng thủ công phủ kín vừng đen rang thơm, nướng trên than hoa nở đều giòn tan bùi béo.' },
-  { id:'sp12', sku:'NB-CM12', name:'Cói mỹ nghệ Kim Sơn', shop:'Làng nghề Cói mỹ nghệ Kim Sơn', region:'hoalu', ward:'Xã Kim Sơn', priceNum:180000, priceText:'120.000đ - 350.000đ / sản phẩm', unit:'Sản phẩm thủ công', emoji:'🧺', grad:'linear-gradient(135deg,#15803d,#16a34a)', fb:'', phone:'', website:'', lat:20.0780, lng:106.1220, visible:true, desc:'Túi xách, giỏ, chiếu và đồ trang trí đan thủ công tinh xảo từ sợi cói vùng bãi bồi ven biển Kim Sơn.' },
-  { id:'sp13', sku:'NB-VD13', name:'Cá kho niêu đất Làng Vũ Đại', shop:'Làng nghề Cá kho Vũ Đại', region:'tamchuc', ward:'Xã Nam Lý', priceNum:550000, priceText:'500.000đ - 900.000đ / niêu 1.5-3kg', unit:'Niêu 1.5 Kg', emoji:'🍲', grad:'linear-gradient(135deg,#78350f,#b45309)', fb:'', phone:'', website:'', lat:20.5250, lng:106.1020, visible:true, desc:'Cá trắm đen kho niêu đất cùng riềng, gừng, nước cốt chanh, tương cua trên củi nhãn liên tục 14 tiếng.' },
-  { id:'sp14', sku:'NB-CN14', name:'Chuối ngự Đại Hoàng', shop:'Vườn Chuối ngự Đại Hoàng', region:'tamchuc', ward:'Xã Nam Lý', priceNum:85000, priceText:'70.000đ - 100.000đ / nải', unit:'Nải tuyển chọn', emoji:'🍌', grad:'linear-gradient(135deg,#a16207,#f59e0b)', fb:'', phone:'', website:'', lat:20.5285, lng:106.1060, visible:true, desc:'Giống chuối ngự tiến vua quả nhỏ xinh, vỏ mỏng vàng ươm, thịt dẻo ngọt thanh và hương thơm đặc trưng.' },
-  { id:'sp15', sku:'NB-BC15', name:'Bánh cuốn chả Phủ Lý', shop:'Ẩm thực Bánh cuốn chả Phủ Lý', region:'tamchuc', ward:'Phường Phủ Lý', priceNum:45000, priceText:'40.000đ - 55.000đ / suất', unit:'Suất đầy đủ', emoji:'🥟', grad:'linear-gradient(135deg,#15803d,#22c55e)', fb:'', phone:'', website:'', lat:20.5410, lng:105.9120, visible:true, desc:'Bánh cuốn tráng mỏng từ gạo Tám ăn cùng chả thịt ba chỉ nướng than hoa nóng hổi và nước chấm đu đủ.' },
-  { id:'sp16', sku:'NB-KK16', name:'Bánh đa Kiện Khê', shop:'Làng nghề Bánh đa Kiện Khê', region:'tamchuc', ward:'Xã Thanh Liêm', priceNum:70000, priceText:'65.000đ - 80.000đ / túi 5 chiếc', unit:'Túi 5 chiếc lớn', emoji:'🥯', grad:'linear-gradient(135deg,#9a3412,#d97706)', fb:'', phone:'', website:'', lat:20.4580, lng:105.8620, visible:true, desc:'Bánh đa dày dặn trộn lạc nhân, vừng trắng, dừa nạo và gừng tươi nướng giòn rụm thơm lừng.' },
-  { id:'sp17', sku:'NB-LX17', name:'Lụa tơ tằm Nha Xá', shop:'Làng nghề Dệt lụa Nha Xá', region:'tamchuc', ward:'Phường Duy Hà', priceNum:350000, priceText:'300.000đ - 650.000đ / khăn hoặc mét', unit:'Khăn / Mét lụa', emoji:'🧣', grad:'linear-gradient(135deg,#be185d,#ec4899)', fb:'', phone:'', website:'', lat:20.6180, lng:105.9950, visible:true, desc:'Lụa dệt từ tơ tằm tự nhiên mềm mại, thoáng mát vào mùa hè và ấm áp vào mùa đông, nhuộm màu thủ công.' },
-  { id:'sp18', sku:'NB-DT18', name:'Trống gỗ Đọi Tam', shop:'Làng nghề Trống Đọi Tam', region:'tamchuc', ward:'Phường Tiên Sơn', priceNum:0, priceText:'Theo kích thước & đặt chế tác', unit:'Đặt chế tác', emoji:'🥁', grad:'linear-gradient(135deg,#991b1b,#dc2626)', fb:'', phone:'', website:'', lat:20.5920, lng:105.9780, visible:true, desc:'Làng nghề làm trống gỗ mít bịt da trâu truyền thống hơn 1.000 năm tuổi dưới chân núi Đọi Sơn.' },
-  { id:'sp19', sku:'NB-SC19', name:'Kẹo Sìu Châu Thành Nam', shop:'Đặc sản Kẹo Sìu Châu', region:'thanhnam', ward:'Phường Nam Định', priceNum:90000, priceText:'80.000đ - 110.000đ / hộp 500g', unit:'Hộp quà 500g', emoji:'🍬', grad:'linear-gradient(135deg,#9a3412,#f97316)', fb:'', phone:'', website:'', lat:20.4280, lng:106.1680, visible:true, desc:'Lạc nhân tuyển chọn, vừng trắng, mạch nha và đường kính — giòn tan thơm bùi, uống cùng trà nóng cực hợp.' },
-  { id:'sp20', sku:'NB-PB20', name:'Phở bò Thành Nam', shop:'Ẩm thực Phở bò Thành Nam', region:'thanhnam', ward:'Phường Thành Nam', priceNum:50000, priceText:'45.000đ - 65.000đ / bát', unit:'Bát đặc trưng', emoji:'🍜', grad:'linear-gradient(135deg,#b91c1c,#f97316)', fb:'', phone:'', website:'', lat:20.4150, lng:106.1520, visible:true, desc:'Bánh phở sợi nhỏ mềm dai chuẩn vị Thành Nam kết hợp nước dùng cốt xương bò ninh thảo mộc đậm đà.' },
-  { id:'sp21', sku:'NB-NN21', name:'Nem nắm Giao Thủy', shop:'Đặc sản Nem nắm Giao Thủy', region:'thanhnam', ward:'Xã Giao Thủy', priceNum:65000, priceText:'60.000đ - 75.000đ / quả 250g', unit:'Quả 250g', emoji:'🥗', grad:'linear-gradient(135deg,#047857,#10b981)', fb:'', phone:'', website:'', lat:20.2450, lng:106.4520, visible:true, desc:'Thịt lợn chần chín tới trộn bì thái chỉ, tỏi ta, nước mắm Sa Châu và thính gạo Tám, cuốn lá sung chấm mắm cốt.' },
-  { id:'sp22', sku:'NB-MS22', name:'Nước mắm Sa Châu', shop:'Làng nghề Nước mắm Sa Châu', region:'thanhnam', ward:'Xã Giao Hưng', priceNum:125000, priceText:'110.000đ - 150.000đ / lít', unit:'Chai 1 Lít', emoji:'🍾', grad:'linear-gradient(135deg,#92400e,#ea580c)', fb:'', phone:'', website:'', lat:20.2550, lng:106.4980, visible:true, desc:'Nước mắm cốt cá biển ủ chượp tự nhiên theo bí quyết truyền thống làng Sa Châu, màu cánh gián thơm dịu.' },
-  { id:'sp23', sku:'NB-GT23', name:'Gạo Tám Xoan Hải Hậu', shop:'Đặc sản Gạo Tám Xoan Hải Hậu', region:'thanhnam', ward:'Xã Hải Hậu', priceNum:150000, priceText:'140.000đ - 170.000đ / túi 5kg', unit:'Túi 5 Kg', emoji:'🌾', grad:'linear-gradient(135deg,#4338ca,#6366f1)', fb:'', phone:'', website:'', lat:20.1750, lng:106.2980, visible:true, desc:'Hạt gạo nhỏ dài trắng trong, nấu cơm dẻo ngọt đậm đà và tỏa hương thơm ngát đặc sản vùng biển Hải Hậu.' },
-  { id:'sp24', sku:'NB-BN24', name:'Bánh nhãn Hải Hậu', shop:'Làng nghề Bánh nhãn Hải Hậu', region:'thanhnam', ward:'Xã Hải Anh', priceNum:75000, priceText:'65.000đ - 85.000đ / hộp 500g', unit:'Hộp 500g', emoji:'🟡', grad:'linear-gradient(135deg,#d97706,#fbbf24)', fb:'', phone:'', website:'', lat:20.2120, lng:106.3120, visible:true, desc:'Làm từ bột gạo nếp hương, trứng gà ta và đường kính trắng — viên tròn vàng ruộm giòn tan béo ngậy.' }
+  { id:'sp01', sku:'NB-NM01', name:'Nem chua Yên Mạc', shop:'Làng nghề Nem chua Yên Mạc', region:'hoalu', ward:'Xã Yên Mạc', address:'Khu vực làng nghề Nem chua Yên Mạc, Xã Yên Mạc, Ninh Bình', priceNum:75000, priceText:'70.000đ - 85.000đ / quả 200g', unit:'Quả 200g', emoji:'🥬', grad:'linear-gradient(135deg,#065f46,#10b981)', fb:'', phone:'', website:'', lat:20.1185, lng:106.0485, visible:true, desc:'Đặc sản tiến vua từ thịt mông lợn tươi thái sợi, bì lợn, thính gạo rang gói lá ổi lên men tự nhiên, chua thanh giòn sật.' },
+  { id:'sp02', sku:'NB-RK02', name:'Rượu nếp Kim Sơn', shop:'Làng nghề Rượu Lai Thành', region:'hoalu', ward:'Xã Lai Thành', address:'Khu vực làng nghề nấu rượu Lai Thành, Xã Lai Thành, Ninh Bình', priceNum:95000, priceText:'80.000đ - 120.000đ / lít', unit:'Chai 1 Lít', emoji:'🍶', grad:'linear-gradient(135deg,#5b21b6,#9333ea)', fb:'', phone:'', website:'', lat:20.0725, lng:106.0480, visible:true, desc:'Nấu từ gạo nếp chiêm và men thuốc bắc 36 vị, ủ chum sành hạ thổ lâu năm êm dịu thơm nồng đặc trưng đất Kim Sơn.' },
+  { id:'sp03', sku:'NB-DE03', name:'Thịt dê núi Ninh Bình', shop:'Đặc sản Dê núi Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', address:'Khu vực Trường Yên – Tràng An, Phường Tây Hoa Lư, Ninh Bình', priceNum:280000, priceText:'250.000đ - 350.000đ / set 500g', unit:'Set 500g', emoji:'🍖', grad:'linear-gradient(135deg,#991b1b,#ea580c)', fb:'', phone:'', website:'', lat:20.2815, lng:105.9082, visible:true, desc:'Dê thả núi đá vôi Tràng An ăn lá thuốc tự nhiên, thịt săn ngọt, đóng gói hút chân không kèm tương bần.' },
+  { id:'sp04', sku:'NB-CC04', name:'Cơm cháy ruốc Ninh Bình', shop:'Đặc sản Cơm cháy Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', address:'Khu vực trung tâm Phường Hoa Lư, Ninh Bình', priceNum:65000, priceText:'55.000đ - 85.000đ / gói 250g', unit:'Gói 250g', emoji:'🍘', grad:'linear-gradient(135deg,#b45309,#f59e0b)', fb:'', phone:'', website:'', lat:20.2539, lng:105.9750, visible:true, desc:'Gạo nếp cái hoa vàng chiên giòn rụm không hôi dầu, phủ ruốc heo chà bông đậm vị kèm gói nước sốt dê.' },
+  { id:'sp05', sku:'NB-MT05', name:'Mắm tép Gia Viễn', shop:'Cơ sở Mắm tép Gia Viễn', region:'hoalu', ward:'Xã Gia Viễn', address:'Khu vực làng nghề Mắm tép Gia Viễn, Xã Gia Viễn, Ninh Bình', priceNum:155000, priceText:'140.000đ - 180.000đ / hũ 500g', unit:'Hũ 500g', emoji:'🏺', grad:'linear-gradient(135deg,#9a3412,#ea580c)', fb:'', phone:'', website:'', lat:20.3320, lng:105.9180, visible:true, desc:'Tép riu tươi vùng chiêm trũng Gia Viễn ủ muối biển và thính nếp đủ tháng cho màu đỏ au, chưng thịt cực đưa cơm.' },
+  { id:'sp06', sku:'NB-GN06', name:'Gỏi cá nhệch Kim Sơn', shop:'Đặc sản Cá nhệch Phát Diệm', region:'hoalu', ward:'Xã Phát Diệm', address:'Khu vực trung tâm Phát Diệm, Xã Phát Diệm, Ninh Bình', priceNum:300000, priceText:'280.000đ - 350.000đ / set 3-4 người', unit:'Set 3-4 người', emoji:'🐟', grad:'linear-gradient(135deg,#0369a1,#0ea5e9)', fb:'', phone:'', website:'', lat:20.0910, lng:106.0920, visible:true, desc:'Cá nhệch nước lợ trộn thính nếp thơm bùi, ăn kèm bát chẻo xương cá béo ngậy và hơn 10 loại lá thơm.' },
+  { id:'sp07', sku:'NB-ON07', name:'Ốc núi Tam Điệp', shop:'Đặc sản Ốc núi đá Tam Điệp', region:'hoalu', ward:'Phường Tam Điệp', address:'Khu vực trung tâm Phường Tam Điệp, Ninh Bình', priceNum:180000, priceText:'160.000đ - 220.000đ / kg', unit:'1 Kg ốc sống', emoji:'🐌', grad:'linear-gradient(135deg,#0f766e,#14b8a6)', fb:'', phone:'', website:'', lat:20.1512, lng:105.9225, visible:true, desc:'Ốc sống trong hang đá vôi ăn thảo dược tự nhiên, thịt giòn sần sật, ngọt mát thoảng hương thuốc bắc.' },
+  { id:'sp08', sku:'NB-DD08', name:'Dứa Đồng Giao', shop:'Vùng trồng Dứa Đồng Giao', region:'hoalu', ward:'Phường Trung Sơn', address:'Vùng trồng dứa Đồng Giao, Phường Trung Sơn, Ninh Bình', priceNum:30000, priceText:'25.000đ - 35.000đ / quả', unit:'Quả chín cây', emoji:'🍍', grad:'linear-gradient(135deg,#ca8a04,#facc15)', fb:'', phone:'', website:'', lat:20.1380, lng:105.9480, visible:true, desc:'Dứa chín cây Đồng Giao mắt nhỏ, cùi vàng ươm ngọt lịm ít xơ; có cả phiên bản dứa sấy dẻo giữ trọn hương vị.' },
+  { id:'sp09', sku:'NB-MO09', name:'Mật ong rừng Cúc Phương', shop:'Đặc sản rừng Cúc Phương', region:'hoalu', ward:'Xã Cúc Phương', address:'Vùng đệm Vườn Quốc gia Cúc Phương, Xã Cúc Phương, Ninh Bình', priceNum:280000, priceText:'250.000đ - 350.000đ / chai 750ml', unit:'Chai 750ml', emoji:'🍯', grad:'linear-gradient(135deg,#a16207,#eab308)', fb:'', phone:'', website:'', lat:20.2910, lng:105.6850, visible:true, desc:'Mật hoa rừng nguyên chất vùng đệm VQG Cúc Phương, sánh đặc màu vàng hổ phách, thơm ngát tự nhiên.' },
+  { id:'sp10', sku:'NB-CR10', name:'Cá rô Tổng Trường', shop:'Đặc sản Hang động Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', address:'Khu vực hang động Trường Yên, Phường Tây Hoa Lư, Ninh Bình', priceNum:180000, priceText:'160.000đ - 200.000đ / kg', unit:'1 Kg cá tươi', emoji:'🐠', grad:'linear-gradient(135deg,#92400e,#d97706)', fb:'', phone:'', website:'', lat:20.2760, lng:105.9140, visible:true, desc:'Giống cá rô đặc hữu vùng hang ngập nước Trường Yên, thịt chắc béo kho niêu đất với tương bần riềng sả.' },
+  { id:'sp11', sku:'NB-BD11', name:'Bánh đa vừng Yên Khánh', shop:'Làng nghề Bánh đa Yên Khánh', region:'hoalu', ward:'Xã Yên Khánh', address:'Làng nghề Bánh đa vừng Yên Khánh, Xã Yên Khánh, Ninh Bình', priceNum:65000, priceText:'60.000đ - 75.000đ / tập 10 chiếc', unit:'Tập 10 chiếc', emoji:'🫓', grad:'linear-gradient(135deg,#b45309,#d97706)', fb:'', phone:'', website:'', lat:20.1850, lng:106.0750, visible:true, desc:'Bánh đa tráng thủ công phủ kín vừng đen rang thơm, nướng trên than hoa nở đều giòn tan bùi béo.' },
+  { id:'sp12', sku:'NB-CM12', name:'Cói mỹ nghệ Kim Sơn', shop:'Làng nghề Cói mỹ nghệ Kim Sơn', region:'hoalu', ward:'Xã Kim Sơn', address:'Làng nghề Cói mỹ nghệ Kim Sơn, Xã Kim Sơn, Ninh Bình', priceNum:180000, priceText:'120.000đ - 350.000đ / sản phẩm', unit:'Sản phẩm thủ công', emoji:'🧺', grad:'linear-gradient(135deg,#15803d,#16a34a)', fb:'', phone:'', website:'', lat:20.0780, lng:106.1220, visible:true, desc:'Túi xách, giỏ, chiếu và đồ trang trí đan thủ công tinh xảo từ sợi cói vùng bãi bồi ven biển Kim Sơn.' },
+  { id:'sp13', sku:'NB-VD13', name:'Cá kho niêu đất Làng Vũ Đại', shop:'Làng nghề Cá kho Vũ Đại', region:'tamchuc', ward:'Xã Nam Lý', address:'Làng nghề Cá kho Nhân Hậu (Vũ Đại), Xã Nam Lý, Ninh Bình', priceNum:550000, priceText:'500.000đ - 900.000đ / niêu 1.5-3kg', unit:'Niêu 1.5 Kg', emoji:'🍲', grad:'linear-gradient(135deg,#78350f,#b45309)', fb:'', phone:'', website:'', lat:20.5250, lng:106.1020, visible:true, desc:'Cá trắm đen kho niêu đất cùng riềng, gừng, nước cốt chanh, tương cua trên củi nhãn liên tục 14 tiếng.' },
+  { id:'sp14', sku:'NB-CN14', name:'Chuối ngự Đại Hoàng', shop:'Vườn Chuối ngự Đại Hoàng', region:'tamchuc', ward:'Xã Nam Lý', address:'Vùng trồng Chuối ngự Đại Hoàng, Xã Nam Lý, Ninh Bình', priceNum:85000, priceText:'70.000đ - 100.000đ / nải', unit:'Nải tuyển chọn', emoji:'🍌', grad:'linear-gradient(135deg,#a16207,#f59e0b)', fb:'', phone:'', website:'', lat:20.5285, lng:106.1060, visible:true, desc:'Giống chuối ngự tiến vua quả nhỏ xinh, vỏ mỏng vàng ươm, thịt dẻo ngọt thanh và hương thơm đặc trưng.' },
+  { id:'sp15', sku:'NB-BC15', name:'Bánh cuốn chả Phủ Lý', shop:'Ẩm thực Bánh cuốn chả Phủ Lý', region:'tamchuc', ward:'Phường Phủ Lý', address:'Khu vực trung tâm Phường Phủ Lý, Ninh Bình', priceNum:45000, priceText:'40.000đ - 55.000đ / suất', unit:'Suất đầy đủ', emoji:'🥟', grad:'linear-gradient(135deg,#15803d,#22c55e)', fb:'', phone:'', website:'', lat:20.5410, lng:105.9120, visible:true, desc:'Bánh cuốn tráng mỏng từ gạo Tám ăn cùng chả thịt ba chỉ nướng than hoa nóng hổi và nước chấm đu đủ.' },
+  { id:'sp16', sku:'NB-KK16', name:'Bánh đa Kiện Khê', shop:'Làng nghề Bánh đa Kiện Khê', region:'tamchuc', ward:'Xã Thanh Liêm', address:'Làng nghề Bánh đa Kiện Khê, Xã Thanh Liêm, Ninh Bình', priceNum:70000, priceText:'65.000đ - 80.000đ / túi 5 chiếc', unit:'Túi 5 chiếc lớn', emoji:'🥯', grad:'linear-gradient(135deg,#9a3412,#d97706)', fb:'', phone:'', website:'', lat:20.4580, lng:105.8620, visible:true, desc:'Bánh đa dày dặn trộn lạc nhân, vừng trắng, dừa nạo và gừng tươi nướng giòn rụm thơm lừng.' },
+  { id:'sp17', sku:'NB-LX17', name:'Lụa tơ tằm Nha Xá', shop:'Làng nghề Dệt lụa Nha Xá', region:'tamchuc', ward:'Phường Duy Hà', address:'Làng nghề Dệt lụa Nha Xá, Phường Duy Hà, Ninh Bình', priceNum:350000, priceText:'300.000đ - 650.000đ / khăn hoặc mét', unit:'Khăn / Mét lụa', emoji:'🧣', grad:'linear-gradient(135deg,#be185d,#ec4899)', fb:'', phone:'', website:'', lat:20.6180, lng:105.9950, visible:true, desc:'Lụa dệt từ tơ tằm tự nhiên mềm mại, thoáng mát vào mùa hè và ấm áp vào mùa đông, nhuộm màu thủ công.' },
+  { id:'sp18', sku:'NB-DT18', name:'Trống gỗ Đọi Tam', shop:'Làng nghề Trống Đọi Tam', region:'tamchuc', ward:'Phường Tiên Sơn', address:'Làng nghề Trống gỗ Đọi Tam, Phường Tiên Sơn, Ninh Bình', priceNum:0, priceText:'Theo kích thước & đặt chế tác', unit:'Đặt chế tác', emoji:'🥁', grad:'linear-gradient(135deg,#991b1b,#dc2626)', fb:'', phone:'', website:'', lat:20.5920, lng:105.9780, visible:true, desc:'Làng nghề làm trống gỗ mít bịt da trâu truyền thống hơn 1.000 năm tuổi dưới chân núi Đọi Sơn.' },
+  { id:'sp19', sku:'NB-SC19', name:'Kẹo Sìu Châu Thành Nam', shop:'Đặc sản Kẹo Sìu Châu', region:'thanhnam', ward:'Phường Nam Định', address:'Khu vực phố cổ Thành Nam, Phường Nam Định, Ninh Bình', priceNum:90000, priceText:'80.000đ - 110.000đ / hộp 500g', unit:'Hộp quà 500g', emoji:'🍬', grad:'linear-gradient(135deg,#9a3412,#f97316)', fb:'', phone:'', website:'', lat:20.4280, lng:106.1680, visible:true, desc:'Lạc nhân tuyển chọn, vừng trắng, mạch nha và đường kính — giòn tan thơm bùi, uống cùng trà nóng cực hợp.' },
+  { id:'sp20', sku:'NB-PB20', name:'Phở bò Thành Nam', shop:'Ẩm thực Phở bò Thành Nam', region:'thanhnam', ward:'Phường Thành Nam', address:'Khu vực trung tâm Phường Thành Nam, Ninh Bình', priceNum:50000, priceText:'45.000đ - 65.000đ / bát', unit:'Bát đặc trưng', emoji:'🍜', grad:'linear-gradient(135deg,#b91c1c,#f97316)', fb:'', phone:'', website:'', lat:20.4150, lng:106.1520, visible:true, desc:'Bánh phở sợi nhỏ mềm dai chuẩn vị Thành Nam kết hợp nước dùng cốt xương bò ninh thảo mộc đậm đà.' },
+  { id:'sp21', sku:'NB-NN21', name:'Nem nắm Giao Thủy', shop:'Đặc sản Nem nắm Giao Thủy', region:'thanhnam', ward:'Xã Giao Thủy', address:'Khu vực trung tâm Xã Giao Thủy, Ninh Bình', priceNum:65000, priceText:'60.000đ - 75.000đ / quả 250g', unit:'Quả 250g', emoji:'🥗', grad:'linear-gradient(135deg,#047857,#10b981)', fb:'', phone:'', website:'', lat:20.2450, lng:106.4520, visible:true, desc:'Thịt lợn chần chín tới trộn bì thái chỉ, tỏi ta, nước mắm Sa Châu và thính gạo Tám, cuốn lá sung chấm mắm cốt.' },
+  { id:'sp22', sku:'NB-MS22', name:'Nước mắm Sa Châu', shop:'Làng nghề Nước mắm Sa Châu', region:'thanhnam', ward:'Xã Giao Hưng', address:'Làng nghề Nước mắm Sa Châu, Xã Giao Hưng, Ninh Bình', priceNum:125000, priceText:'110.000đ - 150.000đ / lít', unit:'Chai 1 Lít', emoji:'🍾', grad:'linear-gradient(135deg,#92400e,#ea580c)', fb:'', phone:'', website:'', lat:20.2550, lng:106.4980, visible:true, desc:'Nước mắm cốt cá biển ủ chượp tự nhiên theo bí quyết truyền thống làng Sa Châu, màu cánh gián thơm dịu.' },
+  { id:'sp23', sku:'NB-GT23', name:'Gạo Tám Xoan Hải Hậu', shop:'Đặc sản Gạo Tám Xoan Hải Hậu', region:'thanhnam', ward:'Xã Hải Hậu', address:'Vùng lúa Tám Xoan Hải Hậu, Xã Hải Hậu, Ninh Bình', priceNum:150000, priceText:'140.000đ - 170.000đ / túi 5kg', unit:'Túi 5 Kg', emoji:'🌾', grad:'linear-gradient(135deg,#4338ca,#6366f1)', fb:'', phone:'', website:'', lat:20.1750, lng:106.2980, visible:true, desc:'Hạt gạo nhỏ dài trắng trong, nấu cơm dẻo ngọt đậm đà và tỏa hương thơm ngát đặc sản vùng biển Hải Hậu.' },
+  { id:'sp24', sku:'NB-BN24', name:'Bánh nhãn Hải Hậu', shop:'Làng nghề Bánh nhãn Hải Hậu', region:'thanhnam', ward:'Xã Hải Anh', address:'Làng nghề Bánh nhãn Hải Hậu, Xã Hải Anh, Ninh Bình', priceNum:75000, priceText:'65.000đ - 85.000đ / hộp 500g', unit:'Hộp 500g', emoji:'🟡', grad:'linear-gradient(135deg,#d97706,#fbbf24)', fb:'', phone:'', website:'', lat:20.2120, lng:106.3120, visible:true, desc:'Làm từ bột gạo nếp hương, trứng gà ta và đường kính trắng — viên tròn vàng ruộm giòn tan béo ngậy.' }
 ];
 
 // 12 NHÀ HÀNG TIÊU BIỂU PHỦ 3 VÙNG (CHỈ GIỮ SĐT/WEB XÁC THỰC, ĐỂ TRỐNG NẾU CHƯA CÓ)
 const DEFAULT_RESTAURANTS = [
-  { id:'rs01', name:'Nhà hàng Thịt Dê Chính Thư', region:'hoalu', ward:'Phường Nam Hoa Lư', priceRange:'180k - 300k/người', signature:'Dê tái chanh, Dê ủ trấu, Dê nướng tảng, Cơm cháy sốt dê', fb:'', phone:'0948426882', website:'', lat:20.2385, lng:105.9320, visible:true, account:{ username:'chinhthu', password:'123456', active:true }, desc:'Quán dê gia truyền nổi tiếng bậc nhất Hoa Lư, thuận tiện trên trục tham quan Hang Múa & Tràng An.' },
-  { id:'rs02', name:'Nhà hàng Đức Dê — Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', priceRange:'150k - 250k/người', signature:'Dê hấp tía tô, Dê xào lăn, Tiết canh dê, Cơm cháy chà bông', fb:'', phone:'02293874858', website:'', lat:20.2410, lng:105.9780, visible:true, account:null, desc:'Thịt dê tươi mỗi ngày, chế biến chuẩn vị được người dân địa phương và du khách yêu thích.' },
-  { id:'rs03', name:'Nhà hàng Thăng Long — Tràng An', region:'hoalu', ward:'Phường Tây Hoa Lư', priceRange:'180k - 320k/người', signature:'Dê núi 7 món, Cá rô Tổng Trường, Cơm cháy ruốc dê', fb:'', phone:'0975155458', website:'https://nhahangdenuininhbinh.vn/', lat:20.2580, lng:105.9310, visible:true, account:null, desc:'Không gian rộng rãi phục vụ khách đoàn và gia đình ngay trục đường vào Quần thể danh thắng Tràng An.' },
-  { id:'rs04', name:'Nhà hàng Hoàng Giang — Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', priceRange:'170k - 300k/người', signature:'Dê nướng xiên, Lẩu dê thuốc bắc, Gà đồi nướng mật ong', fb:'', phone:'', website:'', lat:20.2740, lng:105.9150, visible:true, account:null, desc:'Nhà hàng sân vườn ven núi đá vôi gần Cố đô Hoa Lư và Chùa Bái Đính.' },
-  { id:'rs05', name:'Nhà hàng Ba Cửa — Tam Cốc', region:'hoalu', ward:'Phường Nam Hoa Lư', priceRange:'160k - 280k/người', signature:'Dê áp chảo, Nem dê, Ốc núi hấp sả, Cơm cháy sốt dê', fb:'', phone:'0916311658', website:'', lat:20.2245, lng:105.9355, visible:true, account:null, desc:'Vị trí thuận tiện trên tuyến đường từ Hang Múa vào bến thuyền Tam Cốc – Bích Động.' },
-  { id:'rs06', name:'Nhà hàng Vũ Bảo — Kim Sơn', region:'hoalu', ward:'Xã Phát Diệm', priceRange:'200k - 350k/người', signature:'Gỏi cá nhệch Kim Sơn trứ danh, Cua đồng rang muối, Lẩu cua đồng', fb:'', phone:'0886505588', website:'https://vubao.vn/nha-hang-vu-bao-kim-son/', lat:20.0915, lng:106.0915, visible:true, account:{ username:'vubao', password:'123456', active:true }, desc:'Thương hiệu ẩm thực hàng đầu về Gỏi cá nhệch Kim Sơn và đặc sản đồng quê vùng biển.' },
-  { id:'rs07', name:'Phố Ẩm Thực Phố Cổ Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', priceRange:'50k - 180k/người', signature:'Bánh trôi, Miến lươn, Bánh đa cá rô, Xiên nướng & đặc sản đêm', fb:'', phone:'', website:'', lat:20.2542, lng:105.9675, visible:true, account:null, desc:'Khu ẩm thực sầm uất ven hồ Kỳ Lân, lung linh về đêm bên hai tòa tháp Tứ Ân.' },
-  { id:'rs08', name:'Nhà hàng Sinh Thái Vân Long', region:'hoalu', ward:'Xã Gia Vân', priceRange:'150k - 250k/người', signature:'Mắm tép chưng thịt, Cá rô đầm Vân Long, Dê núi hấp gừng', fb:'', phone:'', website:'', lat:20.3940, lng:105.8790, visible:true, account:null, desc:'Điểm dừng ăn trưa lý tưởng ngay sát bến đò Khu bảo tồn Vân Long và Nhà thờ Lãng Vân.' },
-  { id:'rs09', name:'Nhà hàng Thủy Đình — Tam Chúc', region:'tamchuc', ward:'Phường Tam Chúc', priceRange:'150k - 280k/người', signature:'Cơm chay Tam Chúc, Cá kho Vũ Đại, Gà đồi Ba Sao', fb:'', phone:'', website:'', lat:20.5530, lng:105.8120, visible:true, account:{ username:'thuydinh', password:'123456', active:true }, desc:'View thẳng hồ Tam Chúc, phục vụ cả thực đơn chay thanh tịnh và đặc sản mặn vùng Sơn Nam.' },
-  { id:'rs10', name:'Bánh Cuốn Chả Phủ Lý Phú Mạnh', region:'tamchuc', ward:'Phường Phủ Lý', priceRange:'45k - 85k/người', signature:'Bánh cuốn nóng/nguội, Chả nướng than hoa, Bún cá rô đồng', fb:'', phone:'', website:'', lat:20.5418, lng:105.9180, visible:true, account:null, desc:'Điểm ăn sáng và trưa trứ danh ngay trung tâm Phường Phủ Lý.' },
-  { id:'rs11', name:'Phở Bò Gia Truyền Cụ Tặng', region:'thanhnam', ward:'Phường Nam Định', priceRange:'45k - 75k/người', signature:'Phở bò tái chín nạm gầu, Phở sốt vang, Quẩy nóng', fb:'', phone:'02286252178', website:'', lat:20.4285, lng:106.1695, visible:true, account:null, desc:'Nước dùng ninh xương bò ngọt tự nhiên, bánh phở sợi nhỏ mềm mịn chuẩn gốc Thành Nam.' },
-  { id:'rs12', name:'Nhà hàng Hải Sản Biển Thịnh Long', region:'thanhnam', ward:'Xã Hải Thịnh', priceRange:'220k - 380k/người', signature:'Bề bề rang muối, Ghẹ xanh hấp bia, Cá song hấp xì dầu', fb:'', phone:'', website:'', lat:20.0685, lng:106.2355, visible:true, account:null, desc:'Hải sản tươi sống đánh bắt trong ngày từ tàu cá ven biển Thịnh Long – Hải Hậu.' }
+  { id:'rs01', name:'Nhà hàng Thịt Dê Chính Thư', region:'hoalu', ward:'Phường Nam Hoa Lư', address:'Thôn Khê Thượng, trục đường Hang Múa – Tràng An, Phường Nam Hoa Lư, Ninh Bình', priceRange:'180k - 300k/người', signature:'Dê tái chanh, Dê ủ trấu, Dê nướng tảng, Cơm cháy sốt dê', fb:'', phone:'0948426882', website:'', lat:20.2385, lng:105.9320, visible:true, account:{ username:'chinhthu', password:'123456', active:true }, desc:'Quán dê gia truyền nổi tiếng bậc nhất Hoa Lư, thuận tiện trên trục tham quan Hang Múa & Tràng An.' },
+  { id:'rs02', name:'Nhà hàng Đức Dê — Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', address:'Khu vực trung tâm Phường Hoa Lư, Ninh Bình', priceRange:'150k - 250k/người', signature:'Dê hấp tía tô, Dê xào lăn, Tiết canh dê, Cơm cháy chà bông', fb:'', phone:'02293874858', website:'', lat:20.2410, lng:105.9780, visible:true, account:null, desc:'Thịt dê tươi mỗi ngày, chế biến chuẩn vị được người dân địa phương và du khách yêu thích.' },
+  { id:'rs03', name:'Nhà hàng Thăng Long — Tràng An', region:'hoalu', ward:'Phường Tây Hoa Lư', address:'Trục đường vào Quần thể danh thắng Tràng An, Phường Tây Hoa Lư, Ninh Bình', priceRange:'180k - 320k/người', signature:'Dê núi 7 món, Cá rô Tổng Trường, Cơm cháy ruốc dê', fb:'', phone:'0975155458', website:'https://nhahangdenuininhbinh.vn/', lat:20.2580, lng:105.9310, visible:true, account:null, desc:'Không gian rộng rãi phục vụ khách đoàn và gia đình ngay trục đường vào Quần thể danh thắng Tràng An.' },
+  { id:'rs04', name:'Nhà hàng Hoàng Giang — Trường Yên', region:'hoalu', ward:'Phường Tây Hoa Lư', address:'Khu vực Trường Yên, gần Cố đô Hoa Lư – Bái Đính, Phường Tây Hoa Lư, Ninh Bình', priceRange:'170k - 300k/người', signature:'Dê nướng xiên, Lẩu dê thuốc bắc, Gà đồi nướng mật ong', fb:'', phone:'', website:'', lat:20.2740, lng:105.9150, visible:true, account:null, desc:'Nhà hàng sân vườn ven núi đá vôi gần Cố đô Hoa Lư và Chùa Bái Đính.' },
+  { id:'rs05', name:'Nhà hàng Ba Cửa — Tam Cốc', region:'hoalu', ward:'Phường Nam Hoa Lư', address:'Tuyến đường Hang Múa – Bến thuyền Tam Cốc, Phường Nam Hoa Lư, Ninh Bình', priceRange:'160k - 280k/người', signature:'Dê áp chảo, Nem dê, Ốc núi hấp sả, Cơm cháy sốt dê', fb:'', phone:'0916311658', website:'', lat:20.2245, lng:105.9355, visible:true, account:null, desc:'Vị trí thuận tiện trên tuyến đường từ Hang Múa vào bến thuyền Tam Cốc – Bích Động.' },
+  { id:'rs06', name:'Nhà hàng Vũ Bảo — Kim Sơn', region:'hoalu', ward:'Xã Phát Diệm', address:'Khu vực trung tâm Phát Diệm, gần Nhà thờ đá Phát Diệm, Xã Phát Diệm, Ninh Bình', priceRange:'200k - 350k/người', signature:'Gỏi cá nhệch Kim Sơn trứ danh, Cua đồng rang muối, Lẩu cua đồng', fb:'', phone:'0886505588', website:'https://vubao.vn/nha-hang-vu-bao-kim-son/', lat:20.0915, lng:106.0915, visible:true, account:{ username:'vubao', password:'123456', active:true }, desc:'Thương hiệu ẩm thực hàng đầu về Gỏi cá nhệch Kim Sơn và đặc sản đồng quê vùng biển.' },
+  { id:'rs07', name:'Phố Ẩm Thực Phố Cổ Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', address:'Khu vực Hồ Kỳ Lân – Phố cổ Hoa Lư, Phường Hoa Lư, Ninh Bình', priceRange:'50k - 180k/người', signature:'Bánh trôi, Miến lươn, Bánh đa cá rô, Xiên nướng & đặc sản đêm', fb:'', phone:'', website:'', lat:20.2542, lng:105.9675, visible:true, account:null, desc:'Khu ẩm thực sầm uất ven hồ Kỳ Lân, lung linh về đêm bên hai tòa tháp Tứ Ân.' },
+  { id:'rs08', name:'Nhà hàng Sinh Thái Vân Long', region:'hoalu', ward:'Xã Gia Vân', address:'Khu vực bến đò Đầm Vân Long, Xã Gia Vân, Ninh Bình', priceRange:'150k - 250k/người', signature:'Mắm tép chưng thịt, Cá rô đầm Vân Long, Dê núi hấp gừng', fb:'', phone:'', website:'', lat:20.3940, lng:105.8790, visible:true, account:null, desc:'Điểm dừng ăn trưa lý tưởng ngay sát bến đò Khu bảo tồn Vân Long và Nhà thờ Lãng Vân.' },
+  { id:'rs09', name:'Nhà hàng Thủy Đình — Tam Chúc', region:'tamchuc', ward:'Phường Tam Chúc', address:'Khu du lịch tâm linh Tam Chúc, Phường Tam Chúc, Ninh Bình', priceRange:'150k - 280k/người', signature:'Cơm chay Tam Chúc, Cá kho Vũ Đại, Gà đồi Ba Sao', fb:'', phone:'', website:'', lat:20.5530, lng:105.8120, visible:true, account:{ username:'thuydinh', password:'123456', active:true }, desc:'View thẳng hồ Tam Chúc, phục vụ cả thực đơn chay thanh tịnh và đặc sản mặn vùng Sơn Nam.' },
+  { id:'rs10', name:'Bánh Cuốn Chả Phủ Lý Phú Mạnh', region:'tamchuc', ward:'Phường Phủ Lý', address:'Khu vực trung tâm Phường Phủ Lý, Ninh Bình', priceRange:'45k - 85k/người', signature:'Bánh cuốn nóng/nguội, Chả nướng than hoa, Bún cá rô đồng', fb:'', phone:'', website:'', lat:20.5418, lng:105.9180, visible:true, account:null, desc:'Điểm ăn sáng và trưa trứ danh ngay trung tâm Phường Phủ Lý.' },
+  { id:'rs11', name:'Phở Bò Gia Truyền Cụ Tặng', region:'thanhnam', ward:'Phường Nam Định', address:'Khu vực trung tâm Thành Nam, Phường Nam Định, Ninh Bình', priceRange:'45k - 75k/người', signature:'Phở bò tái chín nạm gầu, Phở sốt vang, Quẩy nóng', fb:'', phone:'02286252178', website:'', lat:20.4285, lng:106.1695, visible:true, account:null, desc:'Nước dùng ninh xương bò ngọt tự nhiên, bánh phở sợi nhỏ mềm mịn chuẩn gốc Thành Nam.' },
+  { id:'rs12', name:'Nhà hàng Hải Sản Biển Thịnh Long', region:'thanhnam', ward:'Xã Hải Thịnh', address:'Khu vực bãi biển Thịnh Long, Xã Hải Thịnh, Ninh Bình', priceRange:'220k - 380k/người', signature:'Bề bề rang muối, Ghẹ xanh hấp bia, Cá song hấp xì dầu', fb:'', phone:'', website:'', lat:20.0685, lng:106.2355, visible:true, account:null, desc:'Hải sản tươi sống đánh bắt trong ngày từ tàu cá ven biển Thịnh Long – Hải Hậu.' }
 ];
 
 // 6 CUNG ĐƯỜNG DI SẢN LIÊN VÙNG GỢI Ý
@@ -3029,6 +3126,7 @@ function renderMapDetail() {
       </div>
       <p style="font-size:12.5px; color:var(--muted);">${esc(item.desc)}</p>
       <div class="info-box">
+        ${item.address ? `<div>🏠 <b>Địa chỉ:</b> ${esc(item.address)}</div>` : ''}
         <div>💰 <b>Giá tham khảo:</b> <span style="font-size:14.5px; font-weight:800; color:var(--fb);">${esc(pText)}</span></div>
         <div>📞 <b>Điện thoại:</b> ${cleanPhone ? `<b>${esc(dispP)}</b>` : '<span style="color:var(--muted);">Chưa cập nhật SĐT</span>'}${distTxt}</div>
         <div>💬 <b>Facebook:</b> ${slug ? `<code>https://m.me/${esc(slug)}</code>` : '<span style="color:var(--muted);">Chưa liên kết Facebook</span>'}</div>
@@ -3231,6 +3329,7 @@ function renderMarket() {
               ${cleanSite ? `<a href="${esc(cleanSite)}" target="_blank" rel="noopener noreferrer" class="tag tag-fb">🌐 ${esc(formatWebsiteDisplay(cleanSite))}</a>` : ''}
             </div>
             <div style="font-size:15.5px; font-weight:800;">${esc(s.name)}</div>
+            ${s.address ? `<div style="font-size:11.8px; color:var(--text);"><b>🏠 Địa chỉ:</b> ${esc(s.address)}</div>` : ''}
             <p style="font-size:12.2px; color:var(--muted); flex:1;">${esc(s.desc)}</p>
             ${(() => {
               const lp = getPostsForRestaurant(s.id)[0];
@@ -5051,6 +5150,7 @@ function openAdminForm(id = null) {
         <div class="form-group"><label class="form-label">Phân khu</label><select id="f-region" class="form-control">${regOpts}</select></div>
         <div class="form-group"><label class="form-label">Phường / Xã</label><select id="f-ward" class="form-control">${wardOpts}</select></div>
       </div>
+      <div class="form-group"><label class="form-label">Địa chỉ chi tiết cơ sở / làng nghề</label><input id="f-address" class="form-control" value="${esc(item.address||'')}" placeholder="Số nhà, thôn/xóm, tuyến đường..."></div>
       <div class="row-3">
         <div class="form-group"><label class="form-label">Giá tham khảo hiển thị</label><input id="f-priceText" class="form-control" value="${esc(pTextVal)}" placeholder="VD: 70.000đ - 85.000đ / quả"></div>
         <div class="form-group"><label class="form-label">Giá số VNĐ (0 = thời giá)</label><input id="f-priceNum" type="number" class="form-control" value="${pNumVal}"></div>
@@ -5177,7 +5277,7 @@ function saveAdminForm(e) {
   } else if (ui.adminTab === 'specialties') {
     const pNum = Math.max(0, num('f-priceNum', 0));
     const pText = val('f-priceText') || (pNum > 0 ? fmtVND(pNum) : 'Liên hệ báo giá');
-    Object.assign(obj, { sku: 'NB-' + Math.floor(100 + Math.random()*900), shop: val('f-shop'), ward: val('f-ward'), priceNum: pNum, priceText: pText, unit: '', emoji: val('f-emoji') || '🎁', grad: 'linear-gradient(135deg,#0b6e63,#1877f2)', fb: cleanFb, phone: cleanPhone, website: cleanSite, desc: val('f-desc'), account: parsedAccount, visible: true });
+    Object.assign(obj, { sku: 'NB-' + Math.floor(100 + Math.random()*900), shop: val('f-shop'), ward: val('f-ward'), address: val('f-address'), priceNum: pNum, priceText: pText, unit: '', emoji: val('f-emoji') || '🎁', grad: 'linear-gradient(135deg,#0b6e63,#1877f2)', fb: cleanFb, phone: cleanPhone, website: cleanSite, desc: val('f-desc'), account: parsedAccount, visible: true });
   } else if (ui.adminTab === 'restaurants') {
     Object.assign(obj, { ward: val('f-ward'), address: val('f-address'), priceRange: val('f-priceRange'), signature: val('f-signature'), fb: cleanFb, phone: cleanPhone, website: cleanSite, desc: val('f-desc'), account: parsedAccount, visible: true });
   }
@@ -5626,6 +5726,7 @@ window.addEventListener('DOMContentLoaded', () => {
       restaurantPosts: db.restaurantPosts || [],
       wards: db.wards || [],
       reviews: db.reviews || [],
+      orders: db.orders || [],
       _meta: {
         updatedAt: Date.now(),
         updatedAtVN: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN'),
@@ -5649,6 +5750,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (Array.isArray(data.restaurantPosts)) db.restaurantPosts = data.restaurantPosts;
       if (Array.isArray(data.wards)) db.wards = data.wards;
       if (Array.isArray(data.reviews)) db.reviews = data.reviews;
+      if (Array.isArray(data.orders)) db.orders = data.orders;
       db.cart = localCart;
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
@@ -6475,6 +6577,7 @@ window.addEventListener('DOMContentLoaded', () => {
       restaurantPosts: db.restaurantPosts || [],
       wards: db.wards || [],
       reviews: db.reviews || [],
+      orders: db.orders || [],
       _deletedIds: db._deletedIds || [],
       _lastModified: Date.now()
     };
@@ -6513,6 +6616,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (Array.isArray(data.restaurantPosts)) db.restaurantPosts = data.restaurantPosts;
     if (Array.isArray(data.wards)) db.wards = data.wards;
     if (Array.isArray(data.reviews)) db.reviews = data.reviews;
+    if (Array.isArray(data.orders)) db.orders = data.orders;
     if (Array.isArray(data._deletedIds)) db._deletedIds = data._deletedIds;
     db._lastModified = data._lastModified || Date.now();
     db.cart = localCart;
@@ -6715,6 +6819,1105 @@ window.addEventListener('DOMContentLoaded', () => {
       btn.className = 'btn btn-soft-gold btn-sm';
       btn.textContent = '🛡️ Bảo toàn & Xuất bản';
       btn.onclick = openVaultModal;
+      adminToolbar.insertBefore(btn, adminToolbar.firstChild);
+    }
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN BỔ SUNG: ĐẶT HÀNG NHANH ONLINE & GỬI ĐƠN QUA ZALO NHÀ HÀNG ==================== -->
+<div id="quick-order-modal" class="modal-bg" onclick="if(event.target===this)closeModal('quick-order-modal')">
+  <div class="modal-box" style="max-width:540px;">
+    <div class="modal-head">
+      <div>
+        <div id="qo-title" style="font-size:15.5px; font-weight:800;">⚡ Đặt Hàng Online &amp; Gửi Nhanh Zalo</div>
+        <div id="qo-sub" style="font-size:11.5px; color:var(--muted);"></div>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('quick-order-modal')">✕</button>
+    </div>
+
+    <div class="modal-body" id="qo-body">
+      <!-- Bước 1: Form tạo đơn -->
+      <form id="qo-form" onsubmit="submitQuickOrderToZalo(event)">
+        <div class="qo-summary-box" style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+            <b id="qo-target-name" style="color:var(--fb);"></b>
+            <span id="qo-zalo-badge" class="tag tag-fb"></span>
+          </div>
+          <div id="qo-items-list"></div>
+          <div id="qo-total-row" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:7px; border-top:1px dashed #93c5fd; font-size:13.5px;">
+            <span>Tạm tính đơn hàng:</span>
+            <b id="qo-total-val" style="color:var(--fb); font-size:15.5px;"></b>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label class="form-label">👤 Họ tên người đặt *</label>
+            <input id="qo-cust-name" class="form-control" required placeholder="VD: Anh Minh / Chị Lan">
+          </div>
+          <div class="form-group">
+            <label class="form-label">📞 Số điện thoại người đặt *</label>
+            <input id="qo-cust-phone" type="tel" inputmode="numeric" class="form-control" required placeholder="VD: 0912345678">
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label class="form-label">📦 Hình thức đặt</label>
+            <select id="qo-method" class="form-control" onchange="updateQuickOrderAddressLabel()">
+              <option value="Đặt bàn ăn tại quán">🍽️ Đặt bàn ăn tại quán</option>
+              <option value="Giao hàng tận nơi">🚚 Giao hàng tận nơi</option>
+              <option value="Đến lấy trực tiếp">🛍️ Đến lấy trực tiếp</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">👥 Số khách / Số lượng</label>
+            <input id="qo-party-size" type="number" min="1" max="500" class="form-control" value="2" oninput="recalcQuickOrderTotal()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">⏰ Thời gian nhận hàng / Đến quán *</label>
+          <input id="qo-time" class="form-control" required placeholder="VD: Trưa nay 11:30 hoặc Giao ngay">
+          <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;">
+            <button type="button" class="btn btn-xs btn-soft" onclick="document.getElementById('qo-time').value='Ngay bây giờ'">⚡ Ngay bây giờ</button>
+            <button type="button" class="btn btn-xs btn-soft" onclick="document.getElementById('qo-time').value='Trưa nay (11:30)'">☀️ Trưa nay</button>
+            <button type="button" class="btn btn-xs btn-soft" onclick="document.getElementById('qo-time').value='Chiều tối nay (18:30)'">🌙 Tối nay</button>
+            <button type="button" class="btn btn-xs btn-soft" onclick="document.getElementById('qo-time').value='Ngày mai'">📅 Ngày mai</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" id="qo-addr-label">📍 Địa chỉ giao hàng / Ghi chú món ăn</label>
+          <textarea id="qo-note" class="form-control" rows="2" placeholder="Nhập địa chỉ nhận hàng (nếu giao tận nơi) hoặc yêu cầu món ăn..."></textarea>
+        </div>
+
+        <div style="font-size:11.5px; color:var(--muted); margin-bottom:6px;">
+          💡 Khi bấm nút bên dưới, hệ thống sẽ <b>tạo mã đơn hàng</b>, tự động <b>sao chép phiếu đơn</b> kèm SĐT người đặt và <b>mở thẳng Zalo nhà hàng</b> để gửi ngay.
+        </div>
+        <button type="submit" class="btn btn-quick-zalo" style="width:100%; font-size:13.5px; padding:10px 14px;">
+          ⚡ Tạo Đơn &amp; Gửi Nhanh Tới Zalo Nhà Hàng
+        </button>
+      </form>
+
+      <!-- Bước 2: Xác nhận đơn thành công & gửi lại Zalo -->
+      <div id="qo-success-view" class="hidden">
+        <div class="qo-success-box">
+          <div style="font-size:16px; font-weight:900; color:var(--jade-dark); margin-bottom:4px;">✅ Đã Tạo Đơn Hàng Online Thành Công!</div>
+          <div id="qos-code-line" style="font-size:12.5px; font-weight:700; color:var(--text); margin-bottom:8px;"></div>
+          <label class="form-label">📋 Phiếu đơn đã tự động sao chép (chỉ cần Dán vào khung chat Zalo nếu Zalo chưa tự điền):</label>
+          <textarea id="qos-ticket-text" class="form-control" rows="8" readonly style="font-size:12px; background:#fff; line-height:1.5;"></textarea>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">
+            <a id="qos-zalo-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-quick-zalo btn-sm" style="flex:1;">💬 Mở Zalo Nhà Hàng</a>
+            <button type="button" class="btn btn-soft-jade btn-sm" onclick="copyText(document.getElementById('qos-ticket-text').value,'Đã sao chép phiếu đơn!')">📋 Copy Phiếu Đơn</button>
+            <a id="qos-tel-btn" href="#" class="btn btn-jade btn-sm">📲 Gọi Nhanh</a>
+          </div>
+          <div id="qos-fallback-note" style="font-size:11.2px; color:var(--muted); margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" id="qo-new-btn" class="btn btn-soft-fb btn-sm hidden" onclick="resetQuickOrderView()">+ Đặt thêm đơn khác</button>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('quick-order-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL QUẢN LÝ ĐƠN HÀNG ONLINE (ADMIN) -->
+<div id="admin-orders-modal" class="modal-bg" onclick="if(event.target===this)closeModal('admin-orders-modal')">
+  <div class="modal-box" style="max-width:760px;">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:15.5px; font-weight:800;">📦 Quản Lý Đơn Hàng Online (<span id="adm-ord-cnt">0</span> đơn)</div>
+        <div style="font-size:11.5px; color:var(--muted);">Theo dõi đơn đặt bàn, đặt đặc sản online &amp; số điện thoại khách hàng gửi qua Zalo</div>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('admin-orders-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="admin-orders-body" style="display:flex; flex-direction:column; gap:8px;"></div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('admin-orders-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initQuickOnlineOrderZaloAddon() {
+  const CUST_PROFILE_KEY = 'nb_customer_order_profile_v1';
+  const SUPPORT_HOTLINE = '0918918826';
+  let qoState = {
+    partnerType: 'restaurant',
+    partnerId: null,
+    partner: null,
+    items: [], // [{ id, name, priceNum, priceText, qty }]
+    fromCart: false,
+    postTitle: ''
+  };
+
+  function ensureOrdersArray() {
+    if (!Array.isArray(db.orders)) db.orders = [];
+    return db.orders;
+  }
+
+  function loadCustomerProfile() {
+    try { return JSON.parse(localStorage.getItem(CUST_PROFILE_KEY) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+
+  function saveCustomerProfile(name, phone, note) {
+    try {
+      localStorage.setItem(CUST_PROFILE_KEY, JSON.stringify({ name, phone, note }));
+    } catch (e) {}
+  }
+
+  window.updateQuickOrderAddressLabel = function() {
+    const m = document.getElementById('qo-method')?.value || '';
+    const lbl = document.getElementById('qo-addr-label');
+    if (!lbl) return;
+    if (m === 'Giao hàng tận nơi') lbl.textContent = '📍 Địa chỉ giao hàng chi tiết * & Ghi chú';
+    else if (m === 'Đặt bàn ăn tại quán') lbl.textContent = '📝 Ghi chú món ăn / Yêu cầu bàn (phòng riêng, trẻ nhỏ...)';
+    else lbl.textContent = '📝 Ghi chú khi đến lấy hàng';
+  };
+
+  window.changeQuickOrderItemQty = function(idx, delta) {
+    if (!qoState.items[idx]) return;
+    qoState.items[idx].qty = Math.max(1, (qoState.items[idx].qty || 1) + delta);
+    renderQuickOrderItems();
+  };
+
+  window.recalcQuickOrderTotal = function() {
+    const totalEl = document.getElementById('qo-total-val');
+    const rowEl = document.getElementById('qo-total-row');
+    if (!totalEl || !rowEl) return;
+
+    if (qoState.partnerType === 'restaurant' && !qoState.items.length) {
+      const guests = Math.max(1, parseInt(document.getElementById('qo-party-size')?.value || '2', 10));
+      totalEl.textContent = `${guests} khách • ${qoState.partner?.priceRange || 'Theo thực đơn'}`;
+      return;
+    }
+
+    let sum = 0;
+    let hasVar = false;
+    qoState.items.forEach(it => {
+      if (it.priceNum > 0) sum += it.priceNum * (it.qty || 1);
+      else hasVar = true;
+    });
+    totalEl.textContent = sum > 0
+      ? (fmtVND(sum) + (hasVar ? ' + mục theo thời giá' : ''))
+      : 'Theo thời giá / nhà hàng xác nhận';
+  };
+
+  function renderQuickOrderItems() {
+    const listEl = document.getElementById('qo-items-list');
+    if (!listEl) return;
+
+    if (!qoState.items.length) {
+      listEl.innerHTML = qoState.postTitle
+        ? `<div class="qo-item-row"><span>📢 <b>${esc(qoState.postTitle)}</b></span><span class="tag tag-food">Ưu đãi / Thực đơn</span></div>`
+        : `<div class="qo-item-row"><span>🍽️ Đặt bàn / Đặt món tại <b>${esc(qoState.partner?.name || '')}</b></span><span class="tag tag-food">${esc(qoState.partner?.priceRange || '')}</span></div>`;
+    } else {
+      listEl.innerHTML = qoState.items.map((it, idx) => `
+        <div class="qo-item-row">
+          <div style="min-width:0; flex:1;">
+            <div style="font-weight:800; font-size:12.5px;">${esc(it.name)}</div>
+            <div style="font-size:11px; color:var(--muted);">${it.priceNum > 0 ? fmtVND(it.priceNum) : esc(it.priceText || 'Theo thời giá')}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+            <button type="button" class="btn btn-soft btn-xs" onclick="changeQuickOrderItemQty(${idx},-1)">−</button>
+            <b>${it.qty}</b>
+            <button type="button" class="btn btn-soft btn-xs" onclick="changeQuickOrderItemQty(${idx},1)">+</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    recalcQuickOrderTotal();
+  }
+
+  window.resetQuickOrderView = function() {
+    document.getElementById('qo-form').classList.remove('hidden');
+    document.getElementById('qo-success-view').classList.add('hidden');
+    document.getElementById('qo-new-btn').classList.add('hidden');
+  };
+
+  // Mở Modal Đặt hàng nhanh cho 1 Nhà hàng / Đặc sản (tùy chọn kèm bài đăng hoặc danh sách giỏ)
+  window.openQuickOrderModal = function(type, id, extra = {}) {
+    const partnerObj = typeof findPartnerById === 'function' ? findPartnerById(id) : null;
+    const item = partnerObj?.item || getItemByTypeId(type, id);
+    if (!item) { toast('Không tìm thấy cơ sở để đặt hàng.', 'error'); return; }
+
+    const actualType = partnerObj?.type || type;
+    qoState = {
+      partnerType: actualType,
+      partnerId: item.id,
+      partner: item,
+      items: [],
+      fromCart: Boolean(extra.fromCart),
+      postTitle: extra.postTitle || ''
+    };
+
+    if (Array.isArray(extra.cartItems) && extra.cartItems.length) {
+      qoState.items = extra.cartItems.map(ci => {
+        const { pNum, pText } = getSpecialtyPriceInfo(ci.s);
+        return { id: ci.s.id, name: ci.s.name, priceNum: pNum, priceText: pText, qty: ci.qty };
+      });
+    } else if (actualType === 'specialty') {
+      const { pNum, pText } = getSpecialtyPriceInfo(item);
+      qoState.items = [{ id: item.id, name: item.name, priceNum: pNum, priceText: pText, qty: 1 }];
+    }
+
+    const cleanPhone = sanitizePhone(item.phone);
+    document.getElementById('qo-title').textContent = actualType === 'restaurant'
+      ? '⚡ Đặt Bàn / Đặt Món Online — Gửi Zalo'
+      : '⚡ Đặt Hàng Đặc Sản Online — Gửi Zalo';
+    document.getElementById('qo-sub').textContent = `📍 ${item.ward || ''} • Tạo phiếu đơn & gửi thẳng Zalo nhà hàng`;
+    document.getElementById('qo-target-name').textContent = actualType === 'restaurant'
+      ? `🍽️ ${item.name}`
+      : `🎁 ${item.shop || item.name}`;
+    document.getElementById('qo-zalo-badge').textContent = cleanPhone
+      ? `💬 Zalo: ${formatPhoneDisplay(cleanPhone)}`
+      : `💬 Zalo hỗ trợ: ${formatPhoneDisplay(SUPPORT_HOTLINE)}`;
+
+    // Khôi phục SĐT & Họ tên khách đã nhập trước đó
+    const prof = loadCustomerProfile();
+    document.getElementById('qo-cust-name').value = prof.name || '';
+    document.getElementById('qo-cust-phone').value = prof.phone || '';
+    document.getElementById('qo-method').value = actualType === 'restaurant' ? 'Đặt bàn ăn tại quán' : 'Giao hàng tận nơi';
+    document.getElementById('qo-party-size').value = actualType === 'restaurant' ? '4' : '1';
+    document.getElementById('qo-time').value = actualType === 'restaurant' ? 'Trưa nay (11:30)' : 'Ngay bây giờ';
+    document.getElementById('qo-note').value = extra.postTitle ? `Đặt theo bài đăng: ${extra.postTitle}` : '';
+    updateQuickOrderAddressLabel();
+
+    renderQuickOrderItems();
+    resetQuickOrderView();
+    document.getElementById('quick-order-modal').classList.add('open');
+  };
+
+  // Mở đặt hàng nhanh từ Giỏ gom đơn cho 1 nhóm cửa hàng
+  window.openQuickOrderFromCartShop = function(shopKey) {
+    const matched = [];
+    let firstSpec = null;
+    (db.cart || []).forEach(c => {
+      const s = (db.specialties || []).find(x => x.id === c.id);
+      if (!s) return;
+      const slug = extractFbSlug(s.fb);
+      const k = (slug || s.id) + '||' + s.shop;
+      if (k === shopKey) {
+        if (!firstSpec) firstSpec = s;
+        matched.push({ s, qty: c.qty });
+      }
+    });
+    if (!firstSpec || !matched.length) return;
+    closeCart();
+    openQuickOrderModal('specialty', firstSpec.id, { fromCart: true, cartItems: matched });
+  };
+
+  window.submitQuickOrderToZalo = function(e) {
+    e.preventDefault();
+    const custName = (document.getElementById('qo-cust-name').value || '').trim();
+    const rawCustPhone = (document.getElementById('qo-cust-phone').value || '').trim();
+    const custPhone = sanitizePhone(rawCustPhone);
+    const method = document.getElementById('qo-method').value;
+    const partySize = Math.max(1, parseInt(document.getElementById('qo-party-size').value || '1', 10));
+    const desiredTime = (document.getElementById('qo-time').value || '').trim();
+    const note = (document.getElementById('qo-note').value || '').trim();
+
+    if (!custName) {
+      toast('Vui lòng nhập họ tên người đặt.', 'error');
+      return;
+    }
+    if (!custPhone || custPhone.length < 10 || custPhone.length > 11 || !custPhone.startsWith('0')) {
+      toast('Vui lòng nhập đúng Số điện thoại người đặt (10–11 số, bắt đầu bằng 0).', 'error');
+      document.getElementById('qo-cust-phone').focus();
+      return;
+    }
+    if (method === 'Giao hàng tận nơi' && !note) {
+      toast('Vui lòng nhập địa chỉ giao hàng chi tiết.', 'error');
+      document.getElementById('qo-note').focus();
+      return;
+    }
+
+    saveCustomerProfile(custName, custPhone, note);
+
+    const rs = qoState.partner;
+    const orderCode = 'DH-' + Math.floor(100000 + Math.random() * 900000);
+    const nowVN = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+    const totalText = document.getElementById('qo-total-val')?.textContent || '';
+
+    const itemLines = qoState.items.length
+      ? qoState.items.map((it, i) => `  ${i + 1}. ${it.name} x${it.qty} (${it.priceNum > 0 ? fmtVND(it.priceNum * it.qty) : it.priceText})`).join('\n')
+      : `  • Đặt bàn cho ${partySize} khách${qoState.postTitle ? ' — ' + qoState.postTitle : ''}`;
+
+    const targetLabel = qoState.partnerType === 'restaurant' ? rs.name : `${rs.shop || rs.name}`;
+    const ticketText =
+      `🧾 ĐƠN ĐẶT HÀNG ONLINE — NINH BÌNH MIỀN DI SẢN\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🔖 Mã đơn: ${orderCode}\n` +
+      `🏪 Cơ sở: ${targetLabel} (${rs.ward || ''})\n` +
+      `📦 Hình thức: ${method}\n` +
+      `📋 Chi tiết đơn:\n${itemLines}\n` +
+      `💰 Tạm tính: ${totalText}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 Người đặt: ${custName}\n` +
+      `📞 SĐT người đặt: ${formatPhoneDisplay(custPhone)} (${custPhone})\n` +
+      `⏰ Thời gian: ${desiredTime}\n` +
+      (note ? `📍 Địa chỉ / Ghi chú: ${note}\n` : '') +
+      `🕒 Tạo lúc: ${nowVN}\n` +
+      `👉 Nhà hàng vui lòng xác nhận giúp mình qua Zalo hoặc gọi SĐT trên nhé!`;
+
+    // Lưu đơn vào hệ thống (đồng bộ Vault & Firebase)
+    ensureOrdersArray().unshift({
+      id: 'ord_' + Date.now().toString(36),
+      code: orderCode,
+      partnerType: qoState.partnerType,
+      partnerId: rs.id,
+      partnerName: targetLabel,
+      partnerPhone: sanitizePhone(rs.phone),
+      customerName: custName,
+      customerPhone: custPhone,
+      method,
+      partySize,
+      desiredTime,
+      note,
+      items: JSON.parse(JSON.stringify(qoState.items)),
+      totalText,
+      status: 'Mới đặt',
+      createdAt: nowVN
+    });
+
+    if (typeof logAdminActivity === 'function') {
+      logAdminActivity(`Khách: ${custName} (${custPhone})`, `Đặt hàng online ${orderCode} tới ${targetLabel}`);
+    }
+    saveDB();
+    if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
+
+    // Tự động xác nhận đặt hàng để mở khóa quyền đánh giá
+    if (typeof window.confirmCustomerOrder === 'function') {
+      window.confirmCustomerOrder(qoState.partnerType, rs.id, true);
+    }
+
+    // Xác định số Zalo nhà hàng (dự phòng Hotline hỗ trợ nếu nhà hàng chưa cập nhật SĐT)
+    const rsPhone = sanitizePhone(rs.phone);
+    const targetZaloPhone = rsPhone || SUPPORT_HOTLINE;
+    const zaloUrl = `https://zalo.me/${targetZaloPhone}`;
+
+    // Tự động sao chép phiếu đơn vào clipboard & mở Zalo
+    copyText(ticketText, `✅ Đã tạo đơn ${orderCode} & sao chép phiếu! Đang mở Zalo...`);
+    window.open(zaloUrl, '_blank', 'noopener,noreferrer');
+
+    // Hiển thị màn hình thành công trong Modal
+    document.getElementById('qo-form').classList.add('hidden');
+    document.getElementById('qo-success-view').classList.remove('hidden');
+    document.getElementById('qo-new-btn').classList.remove('hidden');
+    document.getElementById('qos-code-line').textContent = `🔖 Mã đơn: ${orderCode} • 👤 ${custName} • 📞 ${formatPhoneDisplay(custPhone)}`;
+    document.getElementById('qos-ticket-text').value = ticketText;
+    document.getElementById('qos-zalo-btn').href = zaloUrl;
+    document.getElementById('qos-zalo-btn').textContent = rsPhone
+      ? `💬 Mở Zalo Nhà Hàng (${formatPhoneDisplay(rsPhone)})`
+      : `💬 Gửi Zalo Điều Phối (${formatPhoneDisplay(SUPPORT_HOTLINE)})`;
+    document.getElementById('qos-tel-btn').href = `tel:${targetZaloPhone}`;
+    document.getElementById('qos-fallback-note').textContent = rsPhone
+      ? `💡 Đã mở Zalo chính thức của "${targetLabel}". Bạn chỉ cần Dán (Ctrl+V / Chạm giữ -> Dán) phiếu đơn vừa sao chép và bấm Gửi.`
+      : `ℹ️ Cơ sở này chưa cập nhật SĐT riêng nên hệ thống chuyển sang Zalo Điều Phối (${formatPhoneDisplay(SUPPORT_HOTLINE)}) để hỗ trợ kết nối nhanh.`;
+
+    if (ui.merchantRestaurantId === rs.id) renderMerchantOrdersPanel();
+  };
+
+  // =========================================================================
+  // QUẢN LÝ ĐƠN HÀNG ONLINE (CỔNG NHÀ HÀNG & QUẢN TRỊ ADMIN)
+  // =========================================================================
+  function getStatusClass(st) {
+    if (st === 'Đã xác nhận') return 'ord-confirmed';
+    if (st === 'Hoàn tất') return 'ord-done';
+    if (st === 'Đã hủy') return 'ord-cancel';
+    return 'ord-new';
+  }
+
+  window.updateOnlineOrderStatus = function(orderId, newStatus) {
+    const ord = ensureOrdersArray().find(o => o.id === orderId);
+    if (!ord) return;
+    ord.status = newStatus;
+    saveDB();
+    if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
+    renderMerchantOrdersPanel();
+    if (document.getElementById('admin-orders-modal')?.classList.contains('open')) renderAdminOrdersModal();
+    toast(`Đã chuyển trạng thái đơn ${ord.code} -> ${newStatus}`);
+  };
+
+  function renderOrderCardsHTML(list) {
+    if (!list.length) {
+      return '<div style="text-align:center; padding:22px; color:var(--muted); font-size:12.5px;">Chưa có đơn đặt hàng online nào.</div>';
+    }
+    return list.map(o => `
+      <div style="border:1px solid var(--border); border-radius:12px; padding:11px 13px; background:#f8fafc; display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div>
+            <b style="color:var(--fb);">🔖 ${esc(o.code)}</b> • <b>${esc(o.partnerName)}</b>
+            <span class="ord-status-pill ${getStatusClass(o.status)}">${esc(o.status || 'Mới đặt')}</span>
+          </div>
+          <span style="font-size:11px; color:var(--muted);">🕒 ${esc(o.createdAt || '')}</span>
+        </div>
+        <div style="font-size:12.5px;">
+          👤 <b>${esc(o.customerName)}</b> • 📞 <a href="tel:${esc(o.customerPhone)}" style="color:var(--jade-dark); font-weight:800;">${esc(formatPhoneDisplay(o.customerPhone))}</a>
+          • 📦 <b>${esc(o.method)}</b> • ⏰ ${esc(o.desiredTime)}
+        </div>
+        <div style="font-size:12px; color:var(--text);">
+          💰 <b>${esc(o.totalText)}</b>${o.note ? ` • 📍 ${esc(o.note)}` : ''}
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; justify-content:space-between; border-top:1px solid #e2e8f0; padding-top:6px;">
+          <div style="display:flex; gap:5px; flex-wrap:wrap;">
+            <a href="tel:${esc(o.customerPhone)}" class="btn btn-jade btn-xs">📲 Gọi khách</a>
+            <a href="https://zalo.me/${esc(o.customerPhone)}" target="_blank" rel="noopener noreferrer" class="btn btn-quick-zalo btn-xs">💬 Zalo khách</a>
+          </div>
+          <select class="form-control" style="width:auto; min-height:30px; padding:4px 8px; font-size:11.5px;" onchange="updateOnlineOrderStatus('${o.id}', this.value)">
+            ${['Mới đặt','Đã xác nhận','Hoàn tất','Đã hủy'].map(st => `<option value="${st}" ${(o.status||'Mới đặt')===st?'selected':''}>${st}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderMerchantOrdersPanel() {
+    const dash = document.getElementById('merchant-dashboard');
+    if (!dash || !ui.merchantRestaurantId) return;
+    let panel = document.getElementById('mc-online-orders-panel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'mc-online-orders-panel';
+      panel.className = 'panel';
+      dash.appendChild(panel);
+    }
+    const myOrders = ensureOrdersArray().filter(o => o.partnerId === ui.merchantRestaurantId);
+    panel.innerHTML = `
+      <div class="panel-head">
+        <div>
+          <div style="font-size:15.5px; font-weight:800;">📦 Đơn Đặt Hàng Online Của Cơ Sở (${myOrders.length} đơn)</div>
+          <div style="font-size:12px; color:var(--muted);">Danh sách khách đặt bàn / đặt đặc sản online kèm SĐT để gọi hoặc nhắn Zalo xác nhận ngay.</div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">${renderOrderCardsHTML(myOrders)}</div>
+    `;
+  }
+
+  window.openAdminOrdersModal = function() {
+    renderAdminOrdersModal();
+    document.getElementById('admin-orders-modal').classList.add('open');
+  };
+
+  function renderAdminOrdersModal() {
+    const list = ensureOrdersArray();
+    const cntEl = document.getElementById('adm-ord-cnt');
+    if (cntEl) cntEl.textContent = list.length;
+    const body = document.getElementById('admin-orders-body');
+    if (body) body.innerHTML = renderOrderCardsHTML(list);
+  }
+
+  // =========================================================================
+  // TỰ ĐỘNG GẮN NÚT "⚡ ĐẶT NHANH (ZALO)" VÀO CÁC MÀN HÌNH HIỆN CÓ
+  // =========================================================================
+  function injectQuickOrderIntoMarket() {
+    const grid = document.getElementById('market-grid');
+    if (!grid) return;
+    grid.querySelectorAll('article.smart-card').forEach(card => {
+      if (card.querySelector('.qo-card-btn')) return;
+      const mapBtn = card.querySelector('button[onclick*="onPinClick("]');
+      if (!mapBtn) return;
+      const m = (mapBtn.getAttribute('onclick') || '').match(/onPinClick\('(specialty|restaurant)','([^']+)'/);
+      if (!m) return;
+      const [, type, id] = m;
+
+      const body = card.querySelector('.card-body');
+      if (!body) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-quick-zalo btn-sm qo-card-btn';
+      btn.textContent = type === 'restaurant' ? '⚡ Đặt bàn / Đặt nhanh (Zalo)' : '⚡ Đặt hàng nhanh (Zalo)';
+      btn.onclick = () => openQuickOrderModal(type, id);
+
+      const actionRow = mapBtn.parentElement;
+      if (actionRow && actionRow.parentElement === body) {
+        body.insertBefore(btn, actionRow);
+      } else {
+        body.appendChild(btn);
+      }
+    });
+  }
+
+  function injectQuickOrderIntoMapDetail() {
+    const box = document.getElementById('map-detail');
+    if (!box || !ui.selected) return;
+    const { type, id } = ui.selected;
+    if (type !== 'specialty' && type !== 'restaurant') return;
+    if (box.querySelector('.qo-detail-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-quick-zalo btn-sm qo-detail-btn';
+    btn.textContent = type === 'restaurant' ? '⚡ Đặt bàn / Đặt món online (Zalo)' : '⚡ Đặt hàng online nhanh (Zalo)';
+    btn.onclick = () => openQuickOrderModal(type, id);
+
+    const rvBar = box.querySelector('.rv-detail-bar');
+    if (rvBar) box.insertBefore(btn, rvBar);
+    else box.appendChild(btn);
+  }
+
+  function injectQuickOrderIntoCart() {
+    const body = document.getElementById('cart-body');
+    if (!body || !db.cart || !db.cart.length) return;
+    const groups = [];
+    const seen = {};
+    db.cart.forEach(c => {
+      const s = db.specialties.find(x => x.id === c.id);
+      if (!s) return;
+      const slug = extractFbSlug(s.fb);
+      const k = (slug || s.id) + '||' + s.shop;
+      if (!seen[k]) { seen[k] = true; groups.push(k); }
+    });
+
+    const cards = body.querySelectorAll(':scope > div');
+    cards.forEach((card, idx) => {
+      const key = groups[idx];
+      if (!key || card.querySelector('.qo-cart-zalo-btn')) return;
+      const foot = card.lastElementChild;
+      if (!foot) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-quick-zalo btn-sm qo-cart-zalo-btn';
+      btn.style.cssText = 'width:100%; margin-top:6px;';
+      btn.textContent = '⚡ Đặt hàng online & Gửi nhanh Zalo';
+      btn.onclick = () => openQuickOrderFromCartShop(key);
+      foot.appendChild(btn);
+    });
+  }
+
+  // Bọc các hàm render để tự động gắn nút đặt nhanh
+  if (typeof window.renderMarket === 'function') {
+    const _prevRenderMarket = window.renderMarket;
+    window.renderMarket = function() {
+      _prevRenderMarket();
+      injectQuickOrderIntoMarket();
+    };
+  }
+  if (typeof window.renderMapDetail === 'function') {
+    const _prevRenderMapDetail = window.renderMapDetail;
+    window.renderMapDetail = function() {
+      _prevRenderMapDetail();
+      injectQuickOrderIntoMapDetail();
+    };
+  }
+  if (typeof window.renderCart === 'function') {
+    const _prevRenderCart = window.renderCart;
+    window.renderCart = function() {
+      _prevRenderCart();
+      injectQuickOrderIntoCart();
+    };
+  }
+  if (typeof window.renderMerchantPortal === 'function') {
+    const _prevRenderMerchant = window.renderMerchantPortal;
+    window.renderMerchantPortal = function() {
+      _prevRenderMerchant();
+      renderMerchantOrdersPanel();
+    };
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    ensureOrdersArray();
+    injectQuickOrderIntoMapDetail();
+
+    // Chèn nút Quản lý Đơn hàng Online vào thanh công cụ Quản trị Admin
+    const adminToolbar = document.querySelector('#admin-panel .panel-head > div:last-child');
+    if (adminToolbar && !document.getElementById('btn-admin-orders')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'btn-admin-orders';
+      btn.className = 'btn btn-quick-zalo btn-sm';
+      btn.textContent = '📦 Đơn hàng Online';
+      btn.onclick = openAdminOrdersModal;
+      adminToolbar.insertBefore(btn, adminToolbar.firstChild);
+    }
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN BỔ SUNG: TỔNG RÀ SOÁT FACEBOOK, SĐT & ĐỊA CHỈ ==================== -->
+<div id="contact-audit-modal" class="modal-bg" onclick="if(event.target===this)closeModal('contact-audit-modal')">
+  <div class="modal-box" style="max-width:980px;">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:15.5px; font-weight:800;">🔍 Tổng Rà Soát &amp; Cập Nhật Liên Kết Facebook, SĐT, Địa Chỉ</div>
+        <div style="font-size:11.5px; color:var(--muted);">Rà soát toàn bộ Nhà hàng &amp; Đặc sản — nhập trực tiếp và bấm <b>Lưu Toàn Bộ</b> để đồng bộ ngay lên Bản đồ, Zalo &amp; Messenger</div>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('contact-audit-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:10px;">
+      <div id="audit-kpi-row" class="ord-kpi-row"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <input id="audit-search" class="form-control" style="flex:1; min-width:190px;" oninput="renderContactAuditTable()" placeholder="🔍 Tìm tên nhà hàng, đặc sản, phường/xã...">
+        <select id="audit-filter" class="form-control" style="width:230px;" onchange="renderContactAuditTable()">
+          <option value="all">✨ Tất cả Nhà hàng &amp; Đặc sản</option>
+          <option value="missing_phone">⚠️ Thiếu SĐT (Zalo)</option>
+          <option value="missing_fb">⚠️ Thiếu liên kết Facebook</option>
+          <option value="missing_addr">⚠️ Thiếu Địa chỉ chi tiết</option>
+          <option value="restaurant">🍽️ Chỉ Nhà hàng</option>
+          <option value="specialty">🎁 Chỉ Đặc sản</option>
+        </select>
+        <button type="button" class="btn btn-soft-jade btn-sm" onclick="autoFillMissingAddresses()">📍 Tự điền Địa chỉ chuẩn bị thiếu</button>
+      </div>
+      <div class="table-wrap" style="max-height:52vh;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="min-width:185px;">Cơ sở &amp; Phường/Xã</th>
+              <th style="min-width:240px;">🏠 Địa chỉ chi tiết</th>
+              <th style="min-width:145px;">📞 SĐT / Zalo</th>
+              <th style="min-width:195px;">💬 Facebook (Link hoặc Username)</th>
+              <th style="min-width:80px;">Kiểm tra</th>
+            </tr>
+          </thead>
+          <tbody id="audit-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('contact-audit-modal')">Đóng</button>
+      <button type="button" class="btn btn-fb btn-sm" onclick="saveAllContactAudit()">💾 Lưu Toàn Bộ Rà Soát</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initOrderPriorityAndContactAuditAddon() {
+  // =========================================================================
+  // PHẦN 1: THỐNG KÊ ĐƠN HÀNG THEO THỨ TỰ ƯU TIÊN PHÙ HỢP
+  // =========================================================================
+  function parseOrderEstimatedVND(order) {
+    if (Array.isArray(order.items) && order.items.length) {
+      return order.items.reduce((sum, it) => sum + ((Number(it.priceNum) || 0) * (Number(it.qty) || 1)), 0);
+    }
+    return 0;
+  }
+
+  function getOrderPriorityMeta(o) {
+    const st = o.status || 'Mới đặt';
+    const tm = String(o.desiredTime || '').toLowerCase();
+    const isUrgentTime = /ngay|bây giờ|gấp|trưa nay|tối nay|hôm nay/.test(tm);
+
+    if (st === 'Mới đặt' && isUrgentTime) {
+      return { rank: 1, label: '🔴 Ưu tiên 1 — Khẩn cấp', cls: 'prio-1' };
+    }
+    if (st === 'Mới đặt') {
+      return { rank: 2, label: '🟠 Ưu tiên 2 — Chờ xác nhận', cls: 'prio-2' };
+    }
+    if (st === 'Đã xác nhận') {
+      return { rank: 3, label: '🔵 Ưu tiên 3 — Đang phục vụ/giao', cls: 'prio-3' };
+    }
+    if (st === 'Hoàn tất') {
+      return { rank: 4, label: '🟢 Ưu tiên 4 — Hoàn tất', cls: 'prio-4' };
+    }
+    return { rank: 5, label: '⚪ Ưu tiên 5 — Đã hủy', cls: 'prio-5' };
+  }
+
+  function sortOrdersByPriority(list) {
+    return [...(list || [])].sort((a, b) => {
+      const pa = getOrderPriorityMeta(a).rank;
+      const pb = getOrderPriorityMeta(b).rank;
+      if (pa !== pb) return pa - pb;
+      return String(b.id || '').localeCompare(String(a.id || ''));
+    });
+  }
+
+  function renderPriorityOrderCard(o) {
+    const pr = getOrderPriorityMeta(o);
+    const estVND = parseOrderEstimatedVND(o);
+    const itemSummary = Array.isArray(o.items) && o.items.length
+      ? o.items.map(it => `${it.name} x${it.qty}`).join(', ')
+      : `Đặt bàn ${o.partySize || 2} khách`;
+
+    return `
+      <div style="border:1.5px solid ${pr.rank <= 2 ? '#fdba74' : 'var(--border)'}; border-radius:12px; padding:11px 13px; background:${pr.rank === 1 ? '#fff7ed' : '#f8fafc'}; display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span class="prio-badge ${pr.cls}">${pr.label}</span>
+            <b style="color:var(--fb);">🔖 ${esc(o.code)}</b>
+            <b>${o.partnerType === 'specialty' ? '🎁' : '🍽️'} ${esc(o.partnerName)}</b>
+          </div>
+          <span style="font-size:11px; color:var(--muted);">🕒 ${esc(o.createdAt || '')}</span>
+        </div>
+        <div style="font-size:12.5px;">
+          👤 <b>${esc(o.customerName)}</b> • 📞 <a href="tel:${esc(o.customerPhone)}" style="color:var(--jade-dark); font-weight:800;">${esc(formatPhoneDisplay(o.customerPhone))}</a>
+          • 📦 <b>${esc(o.method)}</b> • ⏰ <b>${esc(o.desiredTime)}</b>
+        </div>
+        <div style="font-size:12px; color:var(--text);">
+          📋 ${esc(itemSummary)} • 💰 <b>${estVND > 0 ? fmtVND(estVND) : esc(o.totalText)}</b>${o.note ? ` • 📍 ${esc(o.note)}` : ''}
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; justify-content:space-between; border-top:1px solid #e2e8f0; padding-top:6px;">
+          <div style="display:flex; gap:5px; flex-wrap:wrap;">
+            <a href="tel:${esc(o.customerPhone)}" class="btn btn-jade btn-xs">📲 Gọi khách</a>
+            <a href="https://zalo.me/${esc(o.customerPhone)}" target="_blank" rel="noopener noreferrer" class="btn btn-quick-zalo btn-xs">💬 Zalo khách</a>
+          </div>
+          <select class="form-control" style="width:auto; min-height:30px; padding:4px 8px; font-size:11.5px;" onchange="updateOnlineOrderStatus('${o.id}', this.value)">
+            ${['Mới đặt','Đã xác nhận','Hoàn tất','Đã hủy'].map(st => `<option value="${st}" ${(o.status||'Mới đặt')===st?'selected':''}>${st}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+  }
+
+  function buildOrderStatsSummaryHTML(orders) {
+    const newCnt = orders.filter(o => (o.status || 'Mới đặt') === 'Mới đặt').length;
+    const cfmCnt = orders.filter(o => o.status === 'Đã xác nhận').length;
+    const doneCnt = orders.filter(o => o.status === 'Hoàn tất').length;
+    const estSum = orders.filter(o => o.status !== 'Đã hủy').reduce((acc, o) => acc + parseOrderEstimatedVND(o), 0);
+
+    // Thống kê theo từng cơ sở xếp theo ưu tiên (nhiều đơn Mới đặt nhất -> nhiều tổng đơn nhất)
+    const byPartner = {};
+    orders.forEach(o => {
+      const k = o.partnerId || o.partnerName;
+      if (!byPartner[k]) {
+        byPartner[k] = {
+          name: o.partnerName || 'Cơ sở',
+          type: o.partnerType || 'restaurant',
+          total: 0,
+          pending: 0,
+          confirmed: 0,
+          done: 0,
+          revenue: 0
+        };
+      }
+      const g = byPartner[k];
+      g.total++;
+      if ((o.status || 'Mới đặt') === 'Mới đặt') g.pending++;
+      else if (o.status === 'Đã xác nhận') g.confirmed++;
+      else if (o.status === 'Hoàn tất') g.done++;
+      if (o.status !== 'Đã hủy') g.revenue += parseOrderEstimatedVND(o);
+    });
+
+    const ranked = Object.values(byPartner).sort((a, b) => b.pending - a.pending || b.total - a.total || b.revenue - a.revenue);
+
+    return `
+      <div class="ord-kpi-row">
+        <div class="ord-kpi-card" style="background:#fff7ed; border-color:#fdba74;">
+          <div class="ord-kpi-num" style="color:#c2410c;">${newCnt}</div>
+          <div class="ord-kpi-lbl">🔴 Mới đặt (Ưu tiên xử lý)</div>
+        </div>
+        <div class="ord-kpi-card" style="background:#eff6ff; border-color:#93c5fd;">
+          <div class="ord-kpi-num" style="color:#1d4ed8;">${cfmCnt}</div>
+          <div class="ord-kpi-lbl">🔵 Đã xác nhận</div>
+        </div>
+        <div class="ord-kpi-card" style="background:#ecfdf5; border-color:#6ee7b7;">
+          <div class="ord-kpi-num" style="color:#047857;">${doneCnt}</div>
+          <div class="ord-kpi-lbl">🟢 Hoàn tất</div>
+        </div>
+        <div class="ord-kpi-card" style="background:#faf5ff; border-color:#d8b4fe;">
+          <div class="ord-kpi-num" style="color:#6d28d9; font-size:15px;">${estSum > 0 ? fmtVND(estSum) : orders.length + ' đơn'}</div>
+          <div class="ord-kpi-lbl">💰 Tạm tính (${orders.length} tổng đơn)</div>
+        </div>
+      </div>
+      ${ranked.length ? `
+        <div class="info-box" style="margin-bottom:10px; background:#fff;">
+          <div style="font-size:12.5px; font-weight:800; margin-bottom:4px;">📊 Thống Kê Theo Cơ Sở (Xếp theo thứ tự ưu tiên đơn chờ xử lý)</div>
+          <div class="table-wrap" style="max-height:170px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Cơ sở Nhà hàng / Đặc sản</th>
+                  <th>🔴 Chờ xử lý</th>
+                  <th>🔵 Xác nhận</th>
+                  <th>🟢 Hoàn tất</th>
+                  <th>Tổng đơn</th>
+                  <th>Tạm tính</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${ranked.map((r, i) => `<tr>
+                  <td><b>${i + 1}</b></td>
+                  <td>${r.type === 'specialty' ? '🎁' : '🍽️'} <b>${esc(r.name)}</b></td>
+                  <td><b style="color:${r.pending > 0 ? '#dc2626' : 'var(--muted)'};">${r.pending}</b></td>
+                  <td>${r.confirmed}</td>
+                  <td>${r.done}</td>
+                  <td><b>${r.total}</b></td>
+                  <td style="font-weight:700; color:var(--fb);">${r.revenue > 0 ? fmtVND(r.revenue) : 'Theo bàn'}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>` : ''}
+    `;
+  }
+
+  window.exportOrdersCSV = function() {
+    const list = sortOrdersByPriority(db.orders || []);
+    if (!list.length) { toast('Chưa có đơn hàng nào để xuất CSV.', 'info'); return; }
+    const q = v => `"${String(v || '').replace(/"/g, '""')}"`;
+    const rows = list.map(o => {
+      const pr = getOrderPriorityMeta(o);
+      return [q(pr.label), q(o.code), q(o.status || 'Mới đặt'), q(o.partnerName), q(o.customerName), q(o.customerPhone), q(o.method), q(o.desiredTime), q(o.totalText), q(o.note), q(o.createdAt)].join(',');
+    });
+    const csv = '\uFEFF' + ['UuTien,MaDon,TrangThai,CoSo,KhachHang,SDT,HinhThuc,ThoiGian,TamTinh,DiaChiGhiChu,NgayTao', ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Thong-Ke-Don-Hang-Uu-Tien.csv';
+    a.click();
+    toast(`📥 Đã xuất ${list.length} đơn hàng theo thứ tự ưu tiên ra CSV!`);
+  };
+
+  window.renderAdminOrdersPriorityView = function() {
+    const body = document.getElementById('admin-orders-body');
+    if (!body) return;
+    const allOrders = Array.isArray(db.orders) ? db.orders : [];
+    const cntEl = document.getElementById('adm-ord-cnt');
+    if (cntEl) cntEl.textContent = allOrders.length;
+
+    const statusFlt = document.getElementById('ord-flt-status')?.value || 'all';
+    const typeFlt = document.getElementById('ord-flt-type')?.value || 'all';
+    const q = (document.getElementById('ord-flt-q')?.value || '').trim().toLowerCase();
+
+    const filtered = sortOrdersByPriority(allOrders).filter(o => {
+      const st = o.status || 'Mới đặt';
+      if (statusFlt !== 'all' && st !== statusFlt) return false;
+      if (typeFlt !== 'all' && (o.partnerType || 'restaurant') !== typeFlt) return false;
+      if (q && !`${o.code} ${o.customerName} ${o.customerPhone} ${o.partnerName} ${o.note}`.toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    body.innerHTML = `
+      ${buildOrderStatsSummaryHTML(allOrders)}
+      <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:4px;">
+        <input id="ord-flt-q" class="form-control" style="flex:1; min-width:170px;" value="${esc(q)}" oninput="renderAdminOrdersPriorityView()" placeholder="🔍 Tìm mã đơn, SĐT, tên khách, nhà hàng...">
+        <select id="ord-flt-status" class="form-control" style="width:185px;" onchange="renderAdminOrdersPriorityView()">
+          <option value="all" ${statusFlt==='all'?'selected':''}>📋 Tất cả trạng thái</option>
+          <option value="Mới đặt" ${statusFlt==='Mới đặt'?'selected':''}>🔴 Mới đặt (Ưu tiên)</option>
+          <option value="Đã xác nhận" ${statusFlt==='Đã xác nhận'?'selected':''}>🔵 Đã xác nhận</option>
+          <option value="Hoàn tất" ${statusFlt==='Hoàn tất'?'selected':''}>🟢 Hoàn tất</option>
+          <option value="Đã hủy" ${statusFlt==='Đã hủy'?'selected':''}>⚪ Đã hủy</option>
+        </select>
+        <select id="ord-flt-type" class="form-control" style="width:150px;" onchange="renderAdminOrdersPriorityView()">
+          <option value="all" ${typeFlt==='all'?'selected':''}>🍽️🎁 Tất cả loại</option>
+          <option value="restaurant" ${typeFlt==='restaurant'?'selected':''}>🍽️ Nhà hàng</option>
+          <option value="specialty" ${typeFlt==='specialty'?'selected':''}>🎁 Đặc sản</option>
+        </select>
+        <button type="button" class="btn btn-soft-jade btn-sm" onclick="exportOrdersCSV()">📥 Xuất CSV</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${filtered.length ? filtered.map(renderPriorityOrderCard).join('') : '<div style="text-align:center; padding:22px; color:var(--muted); font-size:12.5px;">Không có đơn hàng nào khớp bộ lọc.</div>'}
+      </div>
+    `;
+  };
+
+  // Ghi đè openAdminOrdersModal & updateOnlineOrderStatus để luôn dùng bản thống kê ưu tiên
+  window.openAdminOrdersModal = function() {
+    renderAdminOrdersPriorityView();
+    document.getElementById('admin-orders-modal').classList.add('open');
+  };
+
+  const _origUpdateOrderStatus = window.updateOnlineOrderStatus;
+  window.updateOnlineOrderStatus = function(orderId, newStatus) {
+    if (typeof _origUpdateOrderStatus === 'function') _origUpdateOrderStatus(orderId, newStatus);
+    if (document.getElementById('admin-orders-modal')?.classList.contains('open')) {
+      renderAdminOrdersPriorityView();
+    }
+    if (ui.merchantRestaurantId) renderMerchantPriorityOrdersPanel();
+  };
+
+  function renderMerchantPriorityOrdersPanel() {
+    const dash = document.getElementById('merchant-dashboard');
+    if (!dash || !ui.merchantRestaurantId) return;
+    let panel = document.getElementById('mc-online-orders-panel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'mc-online-orders-panel';
+      panel.className = 'panel';
+      dash.appendChild(panel);
+    }
+    const myOrders = sortOrdersByPriority((db.orders || []).filter(o => o.partnerId === ui.merchantRestaurantId));
+    const pendingCnt = myOrders.filter(o => (o.status || 'Mới đặt') === 'Mới đặt').length;
+    panel.innerHTML = `
+      <div class="panel-head">
+        <div>
+          <div style="font-size:15.5px; font-weight:800;">📦 Thống Kê &amp; Đơn Đặt Hàng Online Theo Ưu Tiên (${myOrders.length} đơn • <span style="color:#dc2626;">${pendingCnt} chờ xử lý</span>)</div>
+          <div style="font-size:12px; color:var(--muted);">Tự động xếp đơn <b>Mới đặt / Giao ngay</b> lên đầu để cơ sở gọi hoặc nhắn Zalo xác nhận kịp thời.</div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${myOrders.length ? myOrders.map(renderPriorityOrderCard).join('') : '<div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">Chưa có đơn hàng online nào.</div>'}
+      </div>
+    `;
+  }
+
+  if (typeof window.renderMerchantPortal === 'function') {
+    const _prevRenderMerchant = window.renderMerchantPortal;
+    window.renderMerchantPortal = function() {
+      _prevRenderMerchant();
+      renderMerchantPriorityOrdersPanel();
+    };
+  }
+
+  // =========================================================================
+  // PHẦN 2: TỔNG RÀ SOÁT & CẬP NHẬT LIÊN KẾT FACEBOOK, SĐT, ĐỊA CHỈ
+  // =========================================================================
+  function backfillDefaultAddressesIfMissing() {
+    let changed = false;
+    const defRsMap = {};
+    (DEFAULT_RESTAURANTS || []).forEach(r => { defRsMap[r.id] = r; });
+    const defSpMap = {};
+    (DEFAULT_SPECIALTIES || []).forEach(s => { defSpMap[s.id] = s; });
+
+    (db.restaurants || []).forEach(r => {
+      if (!r.address || !String(r.address).trim()) {
+        r.address = defRsMap[r.id]?.address || `Khu vực ${r.ward || 'Ninh Bình'}, Ninh Bình`;
+        changed = true;
+      }
+      if (r.phone) {
+        const cp = sanitizePhone(r.phone);
+        if (cp !== r.phone) { r.phone = cp; changed = true; }
+      }
+      if (r.fb) {
+        const cf = extractFbSlug(r.fb);
+        if (cf !== r.fb) { r.fb = cf; changed = true; }
+      }
+    });
+
+    (db.specialties || []).forEach(s => {
+      if (!s.address || !String(s.address).trim()) {
+        s.address = defSpMap[s.id]?.address || `Khu vực ${s.ward || 'Ninh Bình'}, Ninh Bình`;
+        changed = true;
+      }
+      if (s.phone) {
+        const cp = sanitizePhone(s.phone);
+        if (cp !== s.phone) { s.phone = cp; changed = true; }
+      }
+      if (s.fb) {
+        const cf = extractFbSlug(s.fb);
+        if (cf !== s.fb) { s.fb = cf; changed = true; }
+      }
+    });
+
+    if (changed) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+    }
+  }
+
+  window.openContactAuditModal = function() {
+    renderContactAuditTable();
+    document.getElementById('contact-audit-modal').classList.add('open');
+  };
+
+  window.autoFillMissingAddresses = function() {
+    backfillDefaultAddressesIfMissing();
+    saveDB();
+    renderContactAuditTable();
+    toast('✅ Đã tự động chuẩn hóa & điền đủ địa chỉ cho các cơ sở bị thiếu!');
+  };
+
+  window.renderContactAuditTable = function() {
+    const all = getAllPartners();
+    const total = all.length;
+    const hasAddr = all.filter(p => (p.item.address || '').trim()).length;
+    const hasPhone = all.filter(p => sanitizePhone(p.item.phone)).length;
+    const hasFb = all.filter(p => extractFbSlug(p.item.fb)).length;
+
+    const kpi = document.getElementById('audit-kpi-row');
+    if (kpi) {
+      kpi.innerHTML = `
+        <div class="ord-kpi-card"><div class="ord-kpi-num" style="color:var(--text);">${total}</div><div class="ord-kpi-lbl">Tổng Nhà hàng &amp; Đặc sản</div></div>
+        <div class="ord-kpi-card" style="background:#ecfdf5; border-color:#6ee7b7;"><div class="ord-kpi-num" style="color:#047857;">${hasAddr}/${total}</div><div class="ord-kpi-lbl">🏠 Đã có Địa chỉ chi tiết</div></div>
+        <div class="ord-kpi-card" style="background:#eff6ff; border-color:#93c5fd;"><div class="ord-kpi-num" style="color:#1d4ed8;">${hasPhone}/${total}</div><div class="ord-kpi-lbl">📞 Đã có SĐT (Zalo)</div></div>
+        <div class="ord-kpi-card" style="background:#faf5ff; border-color:#d8b4fe;"><div class="ord-kpi-num" style="color:#6d28d9;">${hasFb}/${total}</div><div class="ord-kpi-lbl">💬 Đã gắn Facebook</div></div>
+      `;
+    }
+
+    const q = (document.getElementById('audit-search')?.value || '').trim().toLowerCase();
+    const flt = document.getElementById('audit-filter')?.value || 'all';
+
+    const list = all.filter(p => {
+      const it = p.item;
+      if (flt === 'restaurant' && p.type !== 'restaurant') return false;
+      if (flt === 'specialty' && p.type !== 'specialty') return false;
+      if (flt === 'missing_phone' && sanitizePhone(it.phone)) return false;
+      if (flt === 'missing_fb' && extractFbSlug(it.fb)) return false;
+      if (flt === 'missing_addr' && (it.address || '').trim()) return false;
+      if (q && !`${it.name} ${it.shop || ''} ${it.ward || ''} ${it.address || ''} ${it.phone || ''} ${it.fb || ''}`.toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    const tb = document.getElementById('audit-tbody');
+    if (!tb) return;
+    tb.innerHTML = list.map(p => {
+      const it = p.item;
+      const cleanP = sanitizePhone(it.phone);
+      const slug = extractFbSlug(it.fb);
+      return `<tr data-audit-type="${p.type}" data-audit-id="${it.id}">
+        <td>
+          <b>${p.icon} ${esc(it.name)}</b>
+          <div style="font-size:11px; color:var(--muted);">📍 ${esc(it.ward || '')} ${it.shop ? '• ' + esc(it.shop) : ''}</div>
+        </td>
+        <td>
+          <input class="audit-inp audit-addr ${!(it.address||'').trim()?'missing':''}" value="${esc(it.address||'')}" placeholder="Nhập địa chỉ chi tiết...">
+        </td>
+        <td>
+          <input class="audit-inp audit-phone ${!cleanP?'missing':''}" value="${esc(cleanP)}" placeholder="Chưa có SĐT...">
+        </td>
+        <td>
+          <input class="audit-inp audit-fb ${!slug?'missing':''}" value="${esc(slug)}" placeholder="Link FB hoặc username...">
+        </td>
+        <td style="white-space:nowrap;">
+          ${cleanP ? `<a href="https://zalo.me/${esc(cleanP)}" target="_blank" rel="noopener noreferrer" class="btn btn-quick-zalo btn-xs" title="Thử Zalo">Zalo</a>` : ''}
+          ${slug ? `<a href="https://m.me/${esc(slug)}" target="_blank" rel="noopener noreferrer" class="btn btn-soft-fb btn-xs" title="Thử Messenger">FB</a>` : ''}
+        </td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="5" style="text-align:center; padding:18px; color:var(--muted);">Không có cơ sở nào phù hợp bộ lọc.</td></tr>';
+  };
+
+  window.saveAllContactAudit = function() {
+    const rows = document.querySelectorAll('#audit-tbody tr[data-audit-id]');
+    let updatedCount = 0;
+    rows.forEach(tr => {
+      const type = tr.dataset.auditType;
+      const id = tr.dataset.auditId;
+      const arr = type === 'restaurant' ? db.restaurants : db.specialties;
+      const item = (arr || []).find(x => x.id === id);
+      if (!item) return;
+
+      const addr = (tr.querySelector('.audit-addr')?.value || '').trim();
+      const phoneRaw = (tr.querySelector('.audit-phone')?.value || '').trim();
+      const fbRaw = (tr.querySelector('.audit-fb')?.value || '').trim();
+
+      item.address = addr;
+      item.phone = phoneRaw ? sanitizePhone(phoneRaw) : '';
+      item.fb = fbRaw ? extractFbSlug(fbRaw) : '';
+      updatedCount++;
+    });
+
+    if (typeof logAdminActivity === 'function') {
+      logAdminActivity(getCurrentAdminAccount()?.username, `Tổng rà soát & cập nhật FB/SĐT/Địa chỉ cho ${updatedCount} cơ sở`);
+    }
+    saveDB();
+    if (typeof window.pushAllToFirebase === 'function') window.pushAllToFirebase(false);
+    renderContactAuditTable();
+    renderAdminTable();
+    renderMap();
+    renderMarket();
+    renderLiveNewItemsBanner();
+    toast(`✅ Đã lưu & chuẩn hóa FB, SĐT, Địa chỉ cho ${updatedCount} cơ sở!`);
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      backfillDefaultAddressesIfMissing();
+      if (ui.tab === 'map') renderMapDetail();
+      if (ui.tab === 'market') renderMarket();
+    }, 120);
+
+    // Chèn nút Tổng Rà Soát FB/SĐT/Địa Chỉ vào thanh công cụ Quản trị Admin
+    const adminToolbar = document.querySelector('#admin-panel .panel-head > div:last-child');
+    if (adminToolbar && !document.getElementById('btn-contact-audit')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'btn-contact-audit';
+      btn.className = 'btn btn-soft-jade btn-sm';
+      btn.textContent = '🔍 Rà soát FB / SĐT / ĐC';
+      btn.onclick = openContactAuditModal;
       adminToolbar.insertBefore(btn, adminToolbar.firstChild);
     }
   });
