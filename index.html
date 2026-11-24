@@ -1099,6 +1099,40 @@
     text-align: center;
   }
 
+
+  /* =========================================================================
+     13. PASSWORD VISIBILITY TOGGLE — ẨN/HIỆN MẬT KHẨU ĐĂNG NHẬP
+     ========================================================================= */
+  .pw-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .pw-wrap input.form-control {
+    padding-right: 42px;
+  }
+  .pw-toggle-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--muted);
+    background: transparent;
+    cursor: pointer;
+    user-select: none;
+  }
+  .pw-toggle-btn:hover {
+    background: #e2e8f0;
+    color: var(--text);
+  }
+
 </style>
 </head>
 <body>
@@ -6086,6 +6120,149 @@ window.addEventListener('DOMContentLoaded', () => {
     ensureReviewsArray();
     syncDynamicCountsEverywhere();
     injectReviewIntoMapDetail();
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN BỔ SUNG: ẨN/HIỆN MẬT KHẨU & SỬA LỖI ĐĂNG NHẬP ==================== -->
+<script>
+(function initPasswordToggleAndLoginFix() {
+  // 1. Gắn nút 👁️ / 🙈 Ẩn/Hiện cho tất cả các ô input type="password"
+  function attachPasswordToggles() {
+    const pwInputs = document.querySelectorAll('input[type="password"]');
+    pwInputs.forEach(inp => {
+      if (inp.dataset.pwEnhanced === '1') return;
+      inp.dataset.pwEnhanced = '1';
+
+      const wrap = document.createElement('div');
+      wrap.className = 'pw-wrap';
+      inp.parentNode.insertBefore(wrap, inp);
+      wrap.appendChild(inp);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pw-toggle-btn';
+      btn.title = 'Hiện mật khẩu';
+      btn.setAttribute('aria-label', 'Hiện hoặc ẩn mật khẩu');
+      btn.textContent = '👁️';
+
+      btn.addEventListener('click', () => {
+        const isHidden = inp.type === 'password';
+        inp.type = isHidden ? 'text' : 'password';
+        btn.textContent = isHidden ? '🙈' : '👁️';
+        btn.title = isHidden ? 'Ẩn mật khẩu' : 'Hiện mật khẩu';
+        inp.focus();
+      });
+
+      wrap.appendChild(btn);
+    });
+  }
+
+  // 2. Vá hàm đăng nhập Admin (ép kiểu String, tránh lỗi số vs chuỗi từ JSON/Firebase)
+  window.loginAdmin = function() {
+    const uInp = String(document.getElementById('admin-user-input')?.value || 'admin').trim().toLowerCase();
+    const pInp = String(document.getElementById('admin-pin-input')?.value || '').trim();
+    if (!pInp) {
+      toast('Vui lòng nhập mật khẩu hoặc mã PIN quản trị.', 'error');
+      return;
+    }
+    if (!Array.isArray(db.adminAccounts) || !db.adminAccounts.length) {
+      db.adminAccounts = JSON.parse(JSON.stringify(DEFAULT_ADMIN_ACCOUNTS));
+    }
+
+    let acc = db.adminAccounts.find(a =>
+      String(a.username || '').trim().toLowerCase() === uInp &&
+      String(a.password ?? '').trim() === pInp
+    );
+
+    // Dự phòng: khớp theo mã PIN gốc nếu nhập tài khoản admin hoặc để trống user
+    if (!acc && (uInp === 'admin' || !uInp) && String(db.pin ?? '2026').trim() === pInp) {
+      acc = db.adminAccounts[0];
+    }
+
+    if (!acc) {
+      toast('Sai tên đăng nhập hoặc mật khẩu Admin! Hãy bấm 👁️ để kiểm tra lại.', 'error');
+      return;
+    }
+    if (acc.active === false) {
+      toast(`Tài khoản "${acc.username}" đang bị tạm khóa!`, 'error');
+      return;
+    }
+
+    ui.adminLoggedIn = true;
+    ui.currentAdminId = acc.id;
+    acc.lastLogin = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+    if (typeof logAdminActivity === 'function') {
+      logAdminActivity(`${acc.fullName} (${acc.username})`, 'Đăng nhập Cổng Quản Trị Admin');
+    }
+    saveDB();
+
+    const pinInp = document.getElementById('admin-pin-input');
+    if (pinInp) { pinInp.value = ''; pinInp.type = 'password'; }
+    renderAdminView();
+    toast(`Chào mừng ${acc.fullName} đăng nhập Quản Trị!`);
+  };
+
+  // 3. Vá hàm đăng nhập Nhà hàng (ép kiểu String, tránh lỗi số vs chuỗi)
+  window.loginMerchant = function() {
+    const u = String(document.getElementById('mc-user-inp')?.value || '').trim().toLowerCase();
+    const p = String(document.getElementById('mc-pass-inp')?.value || '').trim();
+    if (!u || !p) {
+      toast('Vui lòng nhập tên đăng nhập và mật khẩu.', 'error');
+      return;
+    }
+
+    const rs = (db.restaurants || []).find(r =>
+      r.account &&
+      String(r.account.username || '').trim().toLowerCase() === u &&
+      String(r.account.password ?? '').trim() === p
+    );
+
+    if (!rs) {
+      toast('Sai tên đăng nhập hoặc mật khẩu nhà hàng! Hãy bấm 👁️ để kiểm tra lại.', 'error');
+      return;
+    }
+    if (rs.account.active === false) {
+      toast('Tài khoản nhà hàng này đang bị Admin tạm khóa.', 'error');
+      return;
+    }
+
+    ui.merchantRestaurantId = rs.id;
+    const passInp = document.getElementById('mc-pass-inp');
+    if (passInp) { passInp.value = ''; passInp.type = 'password'; }
+    renderMerchantPortal();
+    toast(`Chào mừng ${rs.name} đăng nhập thành công!`);
+  };
+
+  // 4. Nút khôi phục nhanh tài khoản mặc định nếu localStorage cũ bị lệch mật khẩu
+  window.resetDefaultLoginAccounts = function() {
+    db.pin = '2026';
+    db.adminAccounts = JSON.parse(JSON.stringify(DEFAULT_ADMIN_ACCOUNTS));
+    const sampleMap = { rs01: 'chinhthu', rs06: 'vubao', rs09: 'thuydinh' };
+    (db.restaurants || []).forEach(r => {
+      if (sampleMap[r.id]) {
+        r.account = { username: sampleMap[r.id], password: '123456', active: true };
+      }
+    });
+    saveDB();
+    toast('✅ Đã khôi phục TK mặc định: Admin (admin / 2026) & Nhà hàng (chinhthu / 123456)!', 'info');
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    attachPasswordToggles();
+
+    // Chèn nút khôi phục nhanh vào khung đăng nhập Admin & Nhà hàng
+    ['admin-login-box', 'merchant-login-box'].forEach(boxId => {
+      const box = document.getElementById(boxId);
+      if (!box || box.querySelector('.reset-acc-btn')) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-soft btn-xs reset-acc-btn';
+      btn.style.cssText = 'width:100%; margin-top:8px; color:var(--muted);';
+      btn.textContent = '🔄 Không vào được? Khôi phục tài khoản mặc định';
+      btn.onclick = resetDefaultLoginAccounts;
+      box.appendChild(btn);
+    });
   });
 })();
 </script>
