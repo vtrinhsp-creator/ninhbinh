@@ -12078,5 +12078,645 @@ service cloud.firestore {
   });
 })();
 </script>
+
+<!-- ==================== MÔ-ĐUN 26 (V31): TÍNH NĂNG XUẤT HÓA ĐƠN TRỰC TIẾP TRÊN TỪNG ĐƠN HÀNG ==================== -->
+<div id="v31-invoice-modal" class="modal-bg" onclick="if(event.target===this)closeModal('v31-invoice-modal')">
+  <div class="modal-box" style="max-width:620px;">
+    <div class="modal-head">
+      <div>
+        <div id="v31-inv-title" style="font-size:15.5px; font-weight:800;">🧾 Hóa Đơn Bán Hàng / Đặt Bàn</div>
+        <div id="v31-inv-sub" style="font-size:11.5px; color:var(--muted);">Xem chi tiết, tùy chỉnh đơn giá/số tiền, in hóa đơn, tải phiếu hoặc gửi Zalo khách</div>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('v31-invoice-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="v31-inv-body" style="display:flex; flex-direction:column; gap:10px;"></div>
+    <div class="modal-foot" style="justify-content:space-between;">
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button type="button" id="v31-btn-print" class="btn btn-fb btn-sm">🖨️ In hóa đơn</button>
+        <button type="button" id="v31-btn-download" class="btn btn-soft-fb btn-sm">⬇️ Tải hóa đơn (.txt)</button>
+        <button type="button" id="v31-btn-copy" class="btn btn-soft btn-sm">📋 Sao chép</button>
+      </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button type="button" id="v31-btn-zalo" class="btn btn-jade btn-sm">💬 Gửi hóa đơn Zalo</button>
+        <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('v31-invoice-modal')">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initOrderExportInvoiceFeatureV31() {
+  function ensureOrdersList() {
+    if (!Array.isArray(db.orders)) db.orders = [];
+    return db.orders;
+  }
+
+  function findOrderByIdOrCode(ordKey) {
+    const list = ensureOrdersList();
+    return list.find(o => o.id === ordKey || o.code === ordKey) || null;
+  }
+
+  function getOrderItemsWithPrice(ord) {
+    if (Array.isArray(ord.items) && ord.items.length) {
+      return ord.items.map(it => {
+        const qty = Math.max(1, Number(it.qty) || 1);
+        const unitPrice = Math.max(0, Math.round(Number(it.unitPrice ?? it.priceNum ?? it.price ?? 0) || 0));
+        return {
+          name: it.name || 'Món / Đặc sản',
+          qty,
+          unitPrice,
+          lineTotal: unitPrice * qty
+        };
+      });
+    }
+    const partySize = Math.max(1, Number(ord.partySize) || 1);
+    const estTotal = Math.max(0, Math.round(Number(ord.finalAmount ?? ord.totalAmount ?? ord.amount ?? 0) || 0));
+    const unitPrice = estTotal > 0 ? Math.round(estTotal / partySize) : 0;
+    return [{
+      name: ord.itemsText || `Đặt bàn (${partySize} khách)`,
+      qty: partySize,
+      unitPrice,
+      lineTotal: estTotal > 0 ? estTotal : unitPrice * partySize
+    }];
+  }
+
+  function computeInvoiceTotal(ord) {
+    const items = getOrderItemsWithPrice(ord);
+    const sumItems = items.reduce((acc, it) => acc + it.lineTotal, 0);
+    if (sumItems > 0) return sumItems;
+    return Math.max(0, Math.round(Number(ord.finalAmount ?? ord.totalAmount ?? ord.amount ?? 0) || 0));
+  }
+
+  function formatPlainInvoiceText(ord) {
+    const partnerObj = typeof findPartnerById === 'function' ? findPartnerById(ord.partnerId) : null;
+    const rs = partnerObj?.item || {};
+    const items = getOrderItemsWithPrice(ord);
+    const total = computeInvoiceTotal(ord);
+    const nowStr = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+    const payState = ord.paymentStatus || (ord.status === 'Hoàn tất' ? 'Đã thanh toán' : 'Chưa thanh toán');
+
+    const lines = [
+      '========================================',
+      `HÓA ĐƠN BÁN HÀNG — ${String(ord.partnerName || rs.name || 'NINH BÌNH MIỀN DI SẢN').toUpperCase()}`,
+      '========================================',
+      `Mã hóa đơn / Mã đơn: ${ord.code || ord.id}`,
+      `Ngày xuất HĐ: ${nowStr}`,
+      `Thời gian đặt: ${ord.createdAt || ''}`,
+      `Khách hàng: ${ord.customerName || 'Khách lẻ'} (${ord.customerPhone || 'Chưa có SĐT'})`,
+      `Hình thức: ${ord.method || 'Đặt hàng / Đặt bàn'} • Thời gian nhận: ${ord.desiredTime || ''}`,
+      ord.note ? `Địa chỉ / Ghi chú: ${ord.note}` : '',
+      '----------------------------------------',
+      'CHI TIẾT MẶT HÀNG / DỊCH VỤ:'
+    ].filter(Boolean);
+
+    items.forEach((it, idx) => {
+      lines.push(`${idx + 1}. ${it.name}`);
+      lines.push(`   SL: ${it.qty} x ${fmtVND(it.unitPrice)} = ${fmtVND(it.lineTotal)}`);
+    });
+
+    lines.push(
+      '----------------------------------------',
+      `TỔNG CỘNG THANH TOÁN: ${fmtVND(total)}`,
+      `Trạng thái đơn: ${ord.status || 'Mới đặt'} • Thanh toán: ${payState}`,
+      rs.address || rs.ward ? `Địa chỉ cơ sở: ${rs.address ? rs.address + ', ' : ''}${rs.ward || ''}` : '',
+      rs.phone ? `Hotline cơ sở: ${formatPhoneDisplay(rs.phone)}` : '',
+      '========================================'
+    );
+
+    return lines.filter(Boolean).join('\n');
+  }
+
+  window.openOrderInvoiceModal = function(ordKey) {
+    const ord = findOrderByIdOrCode(ordKey);
+    if (!ord) {
+      toast('Không tìm thấy thông tin đơn hàng để xuất hóa đơn.', 'error');
+      return;
+    }
+
+    const partnerObj = typeof findPartnerById === 'function' ? findPartnerById(ord.partnerId) : null;
+    const rs = partnerObj?.item || {};
+    const items = getOrderItemsWithPrice(ord);
+    const total = computeInvoiceTotal(ord);
+    const payState = ord.paymentStatus || (ord.status === 'Hoàn tất' ? 'Đã thanh toán' : 'Chưa thanh toán');
+
+    document.getElementById('v31-inv-title').textContent = `🧾 Hóa Đơn Đơn Hàng #${ord.code || ord.id}`;
+    document.getElementById('v31-inv-sub').textContent = `${ord.partnerName || rs.name || 'Cơ sở đối tác'} • Ngày đặt: ${ord.createdAt || ''}`;
+
+    const body = document.getElementById('v31-inv-body');
+    body.innerHTML = `
+      <div class="info-box" style="background:#f8fafc;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div><b>🏪 Cơ sở:</b> ${esc(ord.partnerName || rs.name || '')}</div>
+          <span class="pay-pill ${payState === 'Đã thanh toán' ? 'pay-paid' : 'pay-unpaid'}">${esc(payState)}</span>
+        </div>
+        <div><b>👤 Khách hàng:</b> ${esc(ord.customerName || '')} • <b>📞 SĐT:</b> ${esc(formatPhoneDisplay(ord.customerPhone || ''))}</div>
+        <div><b>📦 Hình thức:</b> ${esc(ord.method || '')} • <b>⏰ Thời gian:</b> ${esc(ord.desiredTime || '')}</div>
+        ${ord.note ? `<div><b>📍 Địa chỉ / Ghi chú:</b> ${esc(ord.note)}</div>` : ''}
+      </div>
+
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th>Mặt hàng / Dịch vụ</th>
+            <th style="width:65px; text-align:center;">SL</th>
+            <th style="width:120px; text-align:right;">Đơn giá</th>
+            <th style="width:125px; text-align:right;">Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map((it, i) => `
+            <tr>
+              <td><b>${esc(it.name)}</b></td>
+              <td style="text-align:center;">${it.qty}</td>
+              <td style="text-align:right;">
+                <input type="number" class="v31-up-inp" data-idx="${i}" value="${it.unitPrice}" min="0" step="1000" style="width:105px; text-align:right; padding:3px 6px; border:1px solid #cbd5e1; border-radius:6px; font-weight:700;">
+              </td>
+              <td class="v31-line-sub" style="text-align:right; font-weight:800; color:var(--fb);">${fmtVND(it.lineTotal)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; background:#fffbeb; border:1px solid #fcd34d; border-radius:11px; padding:9px 12px;">
+        <span style="font-weight:800; color:#78350f;">💰 Tổng tiền hóa đơn:</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <input type="number" id="v31-inv-total-inp" value="${total}" min="0" step="1000" style="width:135px; text-align:right; padding:4px 8px; border:1px solid #f59e0b; border-radius:8px; font-weight:900; color:#b45309; background:#fff;">
+          <button type="button" id="v31-btn-save-price" class="btn btn-gold btn-xs">💾 Lưu giá HĐ</button>
+        </div>
+      </div>
+    `;
+
+    // Cập nhật tự động khi đổi đơn giá từng dòng
+    const upInputs = body.querySelectorAll('.v31-up-inp');
+    const lineSubs = body.querySelectorAll('.v31-line-sub');
+    const totInp = document.getElementById('v31-inv-total-inp');
+
+    upInputs.forEach((inp, idx) => {
+      inp.addEventListener('input', () => {
+        const up = Math.max(0, Math.round(Number(inp.value) || 0));
+        const q = items[idx]?.qty || 1;
+        const sub = up * q;
+        if (lineSubs[idx]) lineSubs[idx].textContent = fmtVND(sub);
+        let running = 0;
+        upInputs.forEach((el, k) => {
+          running += Math.max(0, Math.round(Number(el.value) || 0)) * (items[k]?.qty || 1);
+        });
+        if (running > 0 && totInp) totInp.value = running;
+      });
+    });
+
+    document.getElementById('v31-btn-save-price').onclick = () => {
+      if (Array.isArray(ord.items) && ord.items.length) {
+        upInputs.forEach((el, idx) => {
+          if (ord.items[idx]) {
+            const newUp = Math.max(0, Math.round(Number(el.value) || 0));
+            ord.items[idx].unitPrice = newUp;
+            ord.items[idx].priceNum = newUp;
+          }
+        });
+      }
+      const manualTot = Math.max(0, Math.round(Number(totInp.value) || 0));
+      ord.finalAmount = manualTot;
+      ord.totalAmount = manualTot;
+      if (typeof saveDB === 'function') saveDB();
+      toast(`✅ Đã cập nhật tổng tiền hóa đơn #${ord.code}: ${fmtVND(manualTot)}`);
+    };
+
+    document.getElementById('v31-btn-copy').onclick = () => {
+      copyText(formatPlainInvoiceText(ord), `Đã sao chép hóa đơn #${ord.code}!`);
+    };
+
+    document.getElementById('v31-btn-download').onclick = () => {
+      const txt = formatPlainInvoiceText(ord);
+      const blob = new Blob(['\uFEFF' + txt], { type: 'text/plain;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `Hoa-Don-${ord.code || ord.id}.txt`;
+      a.click();
+      toast(`⬇️ Đã tải hóa đơn #${ord.code}!`);
+    };
+
+    document.getElementById('v31-btn-print').onclick = () => {
+      const txt = formatPlainInvoiceText(ord);
+      const win = window.open('', '_blank', 'width=680,height=780');
+      if (!win) {
+        toast('Trình duyệt đang chặn cửa sổ in (popup). Hãy cho phép popup hoặc dùng "Tải hóa đơn (.txt)".', 'error');
+        return;
+      }
+      win.document.write(`<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>Hóa Đơn ${esc(ord.code || ord.id)}</title>
+        <style>body{font-family:ui-monospace,Consolas,Arial,sans-serif;padding:24px;line-height:1.55;color:#111;} pre{white-space:pre-wrap;font-size:13px;}</style></head>
+        <body><pre>${esc(txt)}</pre><script>window.onload=()=>window.print();<\/script></body></html>`);
+      win.document.close();
+    };
+
+    document.getElementById('v31-btn-zalo').onclick = () => {
+      if (typeof window.dispatchPaidInvoiceToCustomerZalo === 'function') {
+        window.dispatchPaidInvoiceToCustomerZalo(ord.id, true);
+      } else {
+        copyText(formatPlainInvoiceText(ord), `Đã sao chép hóa đơn #${ord.code}!`);
+        const ph = sanitizePhone(ord.customerPhone);
+        if (ph) window.open(`https://zalo.me/${ph}`, '_blank', 'noopener,noreferrer');
+      }
+    };
+
+    document.getElementById('v31-invoice-modal').classList.add('open');
+  };
+
+  function attachExportInvoiceButtons(container) {
+    if (!container) return;
+    container.querySelectorAll('select[onchange*="updateOnlineOrderStatus("]').forEach(sel => {
+      const m = (sel.getAttribute('onchange') || '').match(/updateOnlineOrderStatus\('([^']+)'/);
+      if (!m) return;
+      const ordId = m[1];
+      const ord = ensureOrdersList().find(o => o.id === ordId);
+      if (!ord) return;
+      const card = sel.closest('div[style*="border:1px solid"]');
+      if (!card) return;
+
+      const btnWrap = sel.parentElement?.querySelector('div:first-child') || sel.parentElement;
+      if (!btnWrap) return;
+
+      if (!btnWrap.querySelector('.v31-export-inv-btn')) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-soft-fb btn-xs v31-export-inv-btn';
+        btn.textContent = '🧾 Xuất hóa đơn';
+        btn.onclick = (ev) => {
+          ev.stopPropagation();
+          window.openOrderInvoiceModal(ord.id);
+        };
+        btnWrap.appendChild(btn);
+      }
+    });
+  }
+
+  const obs31 = new MutationObserver(() => {
+    const mcPanel = document.getElementById('mc-online-orders-panel');
+    if (mcPanel) attachExportInvoiceButtons(mcPanel);
+    const admBody = document.getElementById('admin-orders-body');
+    if (admBody) attachExportInvoiceButtons(admBody);
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    obs31.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => {
+      const mcPanel = document.getElementById('mc-online-orders-panel');
+      if (mcPanel) attachExportInvoiceButtons(mcPanel);
+      const admBody = document.getElementById('admin-orders-body');
+      if (admBody) attachExportInvoiceButtons(admBody);
+    }, 600);
+  });
+})();
+</script>
+
+<!-- ==================== MÔ-ĐUN 27 (V32): XUẤT MÃ QR HÓA ĐƠN TRÊN ĐƠN & TRONG HÓA ĐƠN ==================== -->
+<style>
+  .v32-inv-qr-card {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1.5px solid #38bdf8;
+    background: linear-gradient(135deg, #f0f9ff 0%, #f0fdfa 100%);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .v32-inv-qr-box {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 6px;
+    width: 146px;
+    min-height: 146px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .v32-inv-qr-box img {
+    width: 132px;
+    height: 132px;
+    object-fit: contain;
+    border-radius: 6px;
+    display: block;
+  }
+  .v32-inline-bank-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-top: 6px;
+  }
+  .v32-inline-bank-bar select,
+  .v32-inline-bank-bar input {
+    padding: 4.5px 7px;
+    border-radius: 7px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-size: 11.5px;
+  }
+</style>
+
+<script>
+(function initOrderInvoiceQRFeatureV32() {
+  const BANK_STORE_KEY = 'nb_default_merchant_bank_v1';
+  const BANKS = [
+    { bin: '970422', code: 'MB', name: 'MB Bank (Quân Đội)' },
+    { bin: '970436', code: 'VCB', name: 'Vietcombank' },
+    { bin: '970407', code: 'TCB', name: 'Techcombank' },
+    { bin: '970415', code: 'ICB', name: 'VietinBank' },
+    { bin: '970418', code: 'BIDV', name: 'BIDV' },
+    { bin: '970405', code: 'AGR', name: 'Agribank' },
+    { bin: '970416', code: 'ACB', name: 'ACB' },
+    { bin: '970423', code: 'TPB', name: 'TPBank' },
+    { bin: '970432', code: 'VPB', name: 'VPBank' },
+    { bin: '970403', code: 'STB', name: 'Sacombank' }
+  ];
+
+  function toAsciiUpper(str) {
+    return String(str || '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+      .replace(/[^a-zA-Z0-9\s\-]/g, ' ')
+      .replace(/\s+/g, ' ').trim().toUpperCase();
+  }
+
+  function getOrderByAnyKey(key) {
+    if (!key || !Array.isArray(db.orders)) return null;
+    return db.orders.find(o => o.id === key || o.code === key) || null;
+  }
+
+  function calcTotalMoney(ord) {
+    if (!ord) return 0;
+    if (Array.isArray(ord.items) && ord.items.length) {
+      const s = ord.items.reduce((acc, it) => {
+        const up = Number(it.unitPrice ?? it.priceNum ?? it.price ?? 0) || 0;
+        const q = Math.max(1, Number(it.qty) || 1);
+        return acc + up * q;
+      }, 0);
+      if (s > 0) return Math.round(s);
+    }
+    const direct = Number(ord.finalAmount ?? ord.totalAmount ?? ord.amount ?? 0) || 0;
+    if (direct > 0) return Math.round(direct);
+    const txt = `${ord.itemsText || ''} ${ord.note || ''} ${ord.totalText || ''}`;
+    const mK = txt.match(/(\d+(?:[.,]\d+)?)\s*(?:k|ngh[ìi]n)/i);
+    if (mK) return Math.round(parseFloat(mK[1].replace(',', '.')) * 1000);
+    const mD = txt.match(/(\d{1,3}(?:[.,]\d{3})+|\d{5,})\s*(?:đ|vnd)?/i);
+    if (mD) return Math.round(parseFloat(mD[1].replace(/[.,]/g, '')));
+    return 0;
+  }
+
+  function getBankForOrder(ord) {
+    const pObj = ord && typeof findPartnerById === 'function' ? findPartnerById(ord.partnerId) : null;
+    const rs = pObj?.item || (ui.merchantRestaurantId && typeof findPartnerById === 'function' ? findPartnerById(ui.merchantRestaurantId)?.item : null);
+    if (rs && rs.bank && rs.bank.accountNo) {
+      return Object.assign({}, rs.bank);
+    }
+    try {
+      const defB = JSON.parse(localStorage.getItem(BANK_STORE_KEY) || 'null');
+      if (defB && defB.accountNo) return Object.assign({}, defB);
+    } catch (e) {}
+    const found = (db.restaurants || []).find(r => r.bank && r.bank.accountNo)
+      || (db.specialties || []).find(s => s.bank && s.bank.accountNo);
+    if (found) return Object.assign({}, found.bank);
+    return {
+      bin: '970422',
+      code: 'MB',
+      name: 'MB Bank (Quân Đội)',
+      accountNo: '',
+      accountName: toAsciiUpper(rs?.name || ord?.partnerName || 'HOA DON')
+    };
+  }
+
+  function saveBankForOrder(ord, bin, accountNo, accountName, amountVal) {
+    const cleanAcc = String(accountNo || '').replace(/\s+/g, '');
+    if (!cleanAcc) {
+      toast('Vui lòng nhập Số tài khoản để tạo mã QR hóa đơn.', 'error');
+      return null;
+    }
+    const bObj = BANKS.find(b => b.bin === bin) || BANKS[0];
+    const cleanHolder = toAsciiUpper(accountName || ord?.partnerName || 'HOA DON');
+    const cfg = { bin: bObj.bin, code: bObj.code, name: bObj.name, accountNo: cleanAcc, accountName: cleanHolder };
+    try { localStorage.setItem(BANK_STORE_KEY, JSON.stringify(cfg)); } catch (e) {}
+
+    const targetPid = ord?.partnerId || ui.merchantRestaurantId;
+    const pObj = targetPid && typeof findPartnerById === 'function' ? findPartnerById(targetPid) : null;
+    if (pObj?.item) pObj.item.bank = Object.assign({}, cfg);
+
+    if (ord && Number.isFinite(amountVal) && amountVal > 0) {
+      ord.finalAmount = Math.round(amountVal);
+      ord.totalAmount = Math.round(amountVal);
+    }
+    if (typeof saveDB === 'function') saveDB();
+    toast(`✅ Đã lưu thông tin STK ${bObj.code} (${cleanAcc}) & tạo QR hóa đơn!`);
+    return cfg;
+  }
+
+  function buildInvoiceContentString(ord, totalVND, memo) {
+    const itemsTxt = Array.isArray(ord.items) && ord.items.length
+      ? ord.items.map(it => `${it.name} x${it.qty || 1}`).join(', ')
+      : (ord.itemsText || `Dat ban ${ord.partySize || 1} khach`);
+    return `HD:${ord.code || ord.id}|CO_SO:${toAsciiUpper(ord.partnerName || '')}|KHACH:${toAsciiUpper(ord.customerName || '')}|SDT:${ord.customerPhone || ''}|MON:${toAsciiUpper(itemsTxt)}|TIEN:${totalVND}VND|ND:${memo}`;
+  }
+
+  function renderInvoiceQRBlock(targetEl, ord, overrideBank = null, overrideAmount = null) {
+    const bank = overrideBank || getBankForOrder(ord);
+    const amount = overrideAmount !== null && Number.isFinite(overrideAmount)
+      ? Math.max(0, Math.round(overrideAmount))
+      : calcTotalMoney(ord);
+    const memo = `HD ${ord.code || ord.id} ${toAsciiUpper(ord.customerName || '')}`.trim();
+    const bObj = BANKS.find(b => b.bin === bank.bin) || BANKS[0];
+    const hasAcc = Boolean(String(bank.accountNo || '').replace(/\s+/g, ''));
+
+    targetEl.innerHTML = '';
+
+    const qrBox = document.createElement('div');
+    qrBox.className = 'v32-inv-qr-box';
+
+    const img = document.createElement('img');
+    img.alt = `QR hóa đơn ${ord.code || ord.id}`;
+
+    const cv = document.createElement('canvas');
+    cv.width = 132;
+    cv.height = 132;
+    cv.style.display = 'none';
+
+    const qrPayloadText = hasAcc
+      ? `https://img.vietqr.io/image/${encodeURIComponent(bObj.bin)}-${encodeURIComponent(bank.accountNo.replace(/\s+/g, ''))}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(toAsciiUpper(memo).slice(0, 45))}&accountName=${encodeURIComponent(toAsciiUpper(bank.accountName || '').slice(0, 40))}`
+      : '';
+
+    if (typeof drawPureQR === 'function') {
+      try {
+        drawPureQR(buildInvoiceContentString(ord, amount, memo), cv);
+      } catch (e) {}
+    }
+
+    if (hasAcc && qrPayloadText) {
+      img.onload = () => {
+        img.style.display = 'block';
+        cv.style.display = 'none';
+      };
+      img.onerror = () => {
+        img.style.display = 'none';
+        cv.style.display = 'block';
+      };
+      img.src = qrPayloadText;
+    } else {
+      img.style.display = 'none';
+      cv.style.display = 'block';
+    }
+
+    qrBox.appendChild(img);
+    qrBox.appendChild(cv);
+    targetEl.appendChild(qrBox);
+
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1; min-width:220px; font-size:12px;';
+    info.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+        <b style="color:#0369a1; font-size:13px;">🧾 Mã QR Hóa Đơn — #${esc(ord.code || ord.id)}</b>
+        <span style="font-size:15px; font-weight:900; color:#b45309;">${amount > 0 ? fmtVND(amount) : 'Chưa nhập số tiền'}</span>
+      </div>
+      <div style="color:#334155; font-size:11.5px; margin-top:2px;">
+        ${hasAcc
+          ? `🏦 <b>${esc(bObj.code)}</b> • STK: <code><b>${esc(bank.accountNo)}</b></code>${bank.accountName ? ` • <b>${esc(bank.accountName)}</b>` : ''}<br>📝 ND CK: <code>${esc(memo)}</code>`
+          : `⚠️ Quét QR để xem mã hóa đơn #${esc(ord.code || ord.id)} hoặc nhập STK bên dưới để tạo QR chuyển khoản theo số tiền:`}
+      </div>
+      <div class="v32-inline-bank-bar">
+        <select class="v32-b-sel">
+          ${BANKS.map(b => `<option value="${b.bin}" ${b.bin === bObj.bin ? 'selected' : ''}>${b.code} - ${b.name}</option>`).join('')}
+        </select>
+        <input type="text" class="v32-acc-inp" style="width:125px;" placeholder="Số tài khoản *" value="${esc(bank.accountNo || '')}">
+        <input type="text" class="v32-hold-inp" style="width:130px;" placeholder="Tên chủ TK" value="${esc(bank.accountName || '')}">
+        <input type="number" class="v32-amt-inp" style="width:108px; font-weight:800; color:#b45309;" placeholder="Số tiền (đ)" value="${amount > 0 ? amount : ''}">
+        <button type="button" class="btn btn-fb btn-xs v32-upd-btn">🔄 Xuất QR HĐ</button>
+        <button type="button" class="btn btn-soft-jade btn-xs v32-dl-btn">⬇️ Tải QR</button>
+      </div>
+    `;
+
+    const bSel = info.querySelector('.v32-b-sel');
+    const aInp = info.querySelector('.v32-acc-inp');
+    const hInp = info.querySelector('.v32-hold-inp');
+    const mInp = info.querySelector('.v32-amt-inp');
+
+    info.querySelector('.v32-upd-btn').onclick = () => {
+      const amtVal = Math.max(0, Math.round(Number(mInp.value) || 0));
+      const saved = saveBankForOrder(ord, bSel.value, aInp.value, hInp.value, amtVal > 0 ? amtVal : null);
+      renderInvoiceQRBlock(targetEl, ord, saved || bank, amtVal > 0 ? amtVal : amount);
+    };
+
+    info.querySelector('.v32-dl-btn').onclick = () => {
+      const link = document.createElement('a');
+      link.download = `QR-Hoa-Don-${ord.code || ord.id}.png`;
+      if (img.style.display !== 'none' && img.complete && img.naturalWidth > 0) {
+        try {
+          const tmpCv = document.createElement('canvas');
+          tmpCv.width = img.naturalWidth;
+          tmpCv.height = img.naturalHeight;
+          tmpCv.getContext('2d').drawImage(img, 0, 0);
+          link.href = tmpCv.toDataURL('image/png');
+          link.click();
+          toast(`⬇️ Đã tải mã QR hóa đơn #${ord.code || ord.id}!`);
+          return;
+        } catch (e) {}
+      }
+      link.href = cv.toDataURL('image/png');
+      link.click();
+      toast(`⬇️ Đã tải mã QR hóa đơn #${ord.code || ord.id}!`);
+    };
+
+    targetEl.appendChild(info);
+  }
+
+  // 1. Gắn mã QR hóa đơn ngay trong cửa sổ Hóa đơn (V31) khi mở
+  if (typeof window.openOrderInvoiceModal === 'function') {
+    const _prevOpenInv32 = window.openOrderInvoiceModal;
+    window.openOrderInvoiceModal = function(ordKey) {
+      _prevOpenInv32(ordKey);
+      const ord = getOrderByAnyKey(ordKey);
+      const invBody = document.getElementById('v31-inv-body');
+      if (!ord || !invBody) return;
+      let qrSec = document.getElementById('v32-modal-inv-qr');
+      if (!qrSec) {
+        qrSec = document.createElement('div');
+        qrSec.id = 'v32-modal-inv-qr';
+        qrSec.className = 'v32-inv-qr-card';
+        invBody.appendChild(qrSec);
+      }
+      renderInvoiceQRBlock(qrSec, ord);
+    };
+  }
+
+  // 2. Toggle mã QR hóa đơn trực tiếp ngay trên từng thẻ đơn hàng
+  window.toggleOrderInvoiceQRInline = function(ordId, cardEl) {
+    if (!cardEl) return;
+    let qrCard = cardEl.querySelector('.v32-inv-qr-card');
+    if (qrCard) {
+      qrCard.classList.toggle('hidden');
+      return;
+    }
+    const ord = getOrderByAnyKey(ordId);
+    if (!ord) {
+      toast('Không tìm thấy đơn hàng để xuất mã QR hóa đơn.', 'error');
+      return;
+    }
+    qrCard = document.createElement('div');
+    qrCard.className = 'v32-inv-qr-card';
+    const actionRow = cardEl.querySelector('select[onchange*="updateOnlineOrderStatus("]')?.parentElement;
+    if (actionRow && actionRow.parentElement === cardEl) {
+      cardEl.insertBefore(qrCard, actionRow);
+    } else {
+      cardEl.appendChild(qrCard);
+    }
+    renderInvoiceQRBlock(qrCard, ord);
+  };
+
+  // 3. Gắn nút "🧾 QR Hóa đơn" lên tất cả thẻ đơn hàng
+  function attachInvoiceQRButtonsToOrders(container) {
+    if (!container) return;
+    container.querySelectorAll('select[onchange*="updateOnlineOrderStatus("]').forEach(sel => {
+      const m = (sel.getAttribute('onchange') || '').match(/updateOnlineOrderStatus\('([^']+)'/);
+      if (!m) return;
+      const ordId = m[1];
+      const ord = getOrderByAnyKey(ordId);
+      if (!ord) return;
+      const card = sel.closest('div[style*="border:1px solid"]');
+      if (!card) return;
+      const btnWrap = sel.parentElement?.querySelector('div:first-child') || sel.parentElement;
+      if (!btnWrap) return;
+
+      if (!btnWrap.querySelector('.v32-inv-qr-btn')) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-soft-fb btn-xs v32-inv-qr-btn';
+        btn.textContent = '🧾 QR Hóa đơn';
+        btn.onclick = (ev) => {
+          ev.stopPropagation();
+          window.toggleOrderInvoiceQRInline(ord.id, card);
+        };
+        btnWrap.appendChild(btn);
+      }
+    });
+  }
+
+  const obs32 = new MutationObserver(() => {
+    const mcPanel = document.getElementById('mc-online-orders-panel');
+    if (mcPanel) attachInvoiceQRButtonsToOrders(mcPanel);
+    const admBody = document.getElementById('admin-orders-body');
+    if (admBody) attachInvoiceQRButtonsToOrders(admBody);
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    obs32.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => {
+      const mcPanel = document.getElementById('mc-online-orders-panel');
+      if (mcPanel) attachInvoiceQRButtonsToOrders(mcPanel);
+      const admBody = document.getElementById('admin-orders-body');
+      if (admBody) attachInvoiceQRButtonsToOrders(admBody);
+    }, 600);
+  });
+})();
+</script>
 </body>
 </html>
