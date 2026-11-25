@@ -11745,5 +11745,338 @@ service cloud.firestore {
   });
 })();
 </script>
+
+<!-- ==================== MÔ-ĐUN 25 (V30): TẠO QR THU TIỀN NGAY TRÊN TỪNG ĐƠN HÀNG ==================== -->
+<style>
+  .v30-qr-box {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1.5px solid #f59e0b;
+    background: linear-gradient(135deg, #fffbeb 0%, #f0f9ff 100%);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .v30-qr-frame {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 6px;
+    width: 148px;
+    min-height: 148px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .v30-qr-frame img {
+    width: 134px;
+    height: 134px;
+    object-fit: contain;
+    border-radius: 6px;
+    display: block;
+  }
+  .v30-inline-setup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-top: 6px;
+  }
+  .v30-inline-setup select,
+  .v30-inline-setup input {
+    padding: 5px 8px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-size: 11.5px;
+  }
+</style>
+
+<script>
+(function initInlineOrderPaymentQRAddon() {
+  const DEFAULT_BANK_KEY = 'nb_default_merchant_bank_v1';
+  const FALLBACK_BANKS = [
+    { bin: '970422', code: 'MB', name: 'MB Bank (Quân Đội)' },
+    { bin: '970436', code: 'VCB', name: 'Vietcombank' },
+    { bin: '970407', code: 'TCB', name: 'Techcombank' },
+    { bin: '970415', code: 'ICB', name: 'VietinBank' },
+    { bin: '970418', code: 'BIDV', name: 'BIDV' },
+    { bin: '970405', code: 'AGR', name: 'Agribank' },
+    { bin: '970416', code: 'ACB', name: 'ACB' },
+    { bin: '970423', code: 'TPB', name: 'TPBank' },
+    { bin: '970432', code: 'VPB', name: 'VPBank' },
+    { bin: '970403', code: 'STB', name: 'Sacombank' }
+  ];
+
+  function getBankList() {
+    return (Array.isArray(window.VN_BANKS) && window.VN_BANKS.length) ? window.VN_BANKS : FALLBACK_BANKS;
+  }
+
+  function cleanAsciiUpper(str) {
+    return String(str || '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+      .replace(/[^a-zA-Z0-9\s\-]/g, ' ')
+      .replace(/\s+/g, ' ').trim().toUpperCase();
+  }
+
+  function resolveOrderAmount(ord) {
+    if (!ord) return 0;
+    if (typeof window.getOrderMoneyVND === 'function') {
+      const m = Number(window.getOrderMoneyVND(ord)) || 0;
+      if (m > 0) return m;
+    }
+    const direct = Number(ord.finalAmount ?? ord.totalAmount ?? ord.amount ?? 0) || 0;
+    if (direct > 0) return direct;
+    if (Array.isArray(ord.items)) {
+      const sum = ord.items.reduce((acc, it) => {
+        const up = Number(it.unitPrice ?? it.priceNum ?? it.price ?? 0) || 0;
+        const q = Math.max(1, Number(it.qty) || 1);
+        return acc + up * q;
+      }, 0);
+      if (sum > 0) return sum;
+    }
+    const txt = `${ord.itemsText || ''} ${ord.note || ''}`;
+    const matchK = txt.match(/(\d+(?:[.,]\d+)?)\s*(?:k|ngh[ìi]n)/i);
+    if (matchK) return Math.round(parseFloat(matchK[1].replace(',', '.')) * 1000);
+    const matchD = txt.match(/(\d{1,3}(?:[.,]\d{3})+|\d{5,})\s*(?:đ|vnd)?/i);
+    if (matchD) return Math.round(parseFloat(matchD[1].replace(/[.,]/g, '')));
+    return 0;
+  }
+
+  function resolveOrderBank(ord) {
+    const partnerObj = ord && typeof findPartnerById === 'function' ? findPartnerById(ord.partnerId) : null;
+    const rs = partnerObj?.item || (ui.merchantRestaurantId && typeof findPartnerById === 'function' ? findPartnerById(ui.merchantRestaurantId)?.item : null);
+    if (rs && rs.bank && rs.bank.accountNo) {
+      return Object.assign({}, rs.bank, { _partnerId: rs.id, _partnerName: rs.name });
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem(DEFAULT_BANK_KEY) || 'null');
+      if (saved && saved.accountNo) {
+        return Object.assign({}, saved, { _partnerId: rs?.id || ord?.partnerId || '', _partnerName: rs?.name || '' });
+      }
+    } catch (e) {}
+    const anyStore = (db.restaurants || []).find(r => r.bank && r.bank.accountNo)
+      || (db.specialties || []).find(s => s.bank && s.bank.accountNo);
+    if (anyStore) {
+      return Object.assign({}, anyStore.bank, { _partnerId: rs?.id || ord?.partnerId || '', _partnerName: rs?.name || '' });
+    }
+    return {
+      bin: '970422',
+      code: 'MB',
+      name: 'MB Bank (Quân Đội)',
+      accountNo: '',
+      accountName: cleanAsciiUpper(rs?.name || ord?.partnerName || 'NHA HANG'),
+      _partnerId: rs?.id || ord?.partnerId || '',
+      _partnerName: rs?.name || ''
+    };
+  }
+
+  function saveOrderBankQuick(ordId, bin, accountNo, accountName, amountOverride) {
+    const ord = (db.orders || []).find(o => o.id === ordId || o.code === ordId);
+    const cleanAcc = String(accountNo || '').replace(/\s+/g, '');
+    if (!cleanAcc) {
+      toast('Vui lòng nhập Số tài khoản để tạo mã QR thu tiền.', 'error');
+      return null;
+    }
+    const banks = getBankList();
+    const bObj = banks.find(b => b.bin === bin) || banks[0];
+    const accNameClean = cleanAsciiUpper(accountName || ord?.partnerName || 'NHA HANG');
+    const bankCfg = { bin: bObj.bin, code: bObj.code, name: bObj.name, accountNo: cleanAcc, accountName: accNameClean };
+
+    try { localStorage.setItem(DEFAULT_BANK_KEY, JSON.stringify(bankCfg)); } catch (e) {}
+
+    const targetPartnerId = ord?.partnerId || ui.merchantRestaurantId;
+    const pObj = targetPartnerId && typeof findPartnerById === 'function' ? findPartnerById(targetPartnerId) : null;
+    if (pObj?.item) {
+      pObj.item.bank = Object.assign({}, bankCfg);
+    }
+
+    if (ord && Number.isFinite(amountOverride) && amountOverride > 0) {
+      ord.finalAmount = Math.round(amountOverride);
+      ord.totalAmount = Math.round(amountOverride);
+    }
+
+    if (typeof saveDB === 'function') saveDB();
+    toast(`✅ Đã lưu STK ${bObj.code} (${cleanAcc}) & tạo mã QR thu tiền!`);
+    return bankCfg;
+  }
+
+  function buildVietQRImageUrl(bin, accountNo, amount, memo, accountName) {
+    const cleanAcc = String(accountNo || '').replace(/\s+/g, '');
+    const amt = Math.max(0, Math.round(Number(amount) || 0));
+    const addInfo = cleanAsciiUpper(memo).slice(0, 45);
+    const accName = cleanAsciiUpper(accountName).slice(0, 40);
+    return `https://img.vietqr.io/image/${encodeURIComponent(bin)}-${encodeURIComponent(cleanAcc)}-compact2.png?amount=${amt}&addInfo=${encodeURIComponent(addInfo)}&accountName=${encodeURIComponent(accName)}`;
+  }
+
+  function renderQRBoxIntoElement(boxEl, ord, overrideBank = null, overrideAmount = null) {
+    const bank = overrideBank || resolveOrderBank(ord);
+    const amount = overrideAmount !== null && Number.isFinite(overrideAmount) ? Math.max(0, Math.round(overrideAmount)) : resolveOrderAmount(ord);
+    const memo = `TT ${ord.code || ord.id} ${cleanAsciiUpper(ord.customerName || '')}`.trim();
+    const banks = getBankList();
+    const bObj = banks.find(b => b.bin === bank.bin) || banks[0];
+    const hasAcc = Boolean(String(bank.accountNo || '').replace(/\s+/g, ''));
+
+    boxEl.innerHTML = '';
+
+    if (hasAcc) {
+      const frame = document.createElement('div');
+      frame.className = 'v30-qr-frame';
+
+      const img = document.createElement('img');
+      img.alt = `QR thu tiền ${ord.code}`;
+      img.src = buildVietQRImageUrl(bObj.bin, bank.accountNo, amount, memo, bank.accountName);
+
+      const fallbackCv = document.createElement('canvas');
+      fallbackCv.width = 134;
+      fallbackCv.height = 134;
+      fallbackCv.style.display = 'none';
+      if (typeof drawPureQR === 'function') {
+        try {
+          drawPureQR(`${bObj.code}|${bank.accountNo}|${amount}|${memo}`, fallbackCv);
+        } catch (e) {}
+      }
+
+      img.onerror = () => {
+        img.style.display = 'none';
+        fallbackCv.style.display = 'block';
+      };
+
+      frame.appendChild(img);
+      frame.appendChild(fallbackCv);
+      boxEl.appendChild(frame);
+    }
+
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1; min-width:220px; font-size:12px;';
+    info.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+        <b style="color:#92400e; font-size:13px;">💳 QR Thu Tiền — Đơn ${esc(ord.code || ord.id)}</b>
+        <span style="font-size:15px; font-weight:900; color:#b45309;">${amount > 0 ? fmtVND(amount) : 'Chưa nhập số tiền'}</span>
+      </div>
+      ${hasAcc
+        ? `<div style="margin-top:3px; color:#1e293b;">🏦 <b>${esc(bObj.code)}</b> (${esc(bObj.name)}) • STK: <code><b>${esc(bank.accountNo)}</b></code>${bank.accountName ? ` • <b>${esc(bank.accountName)}</b>` : ''}</div>
+           <div style="color:#475569; font-size:11.5px; margin-top:2px;">📝 Nội dung CK: <code>${esc(memo)}</code></div>`
+        : `<div style="margin-top:4px; color:#b91c1c; font-weight:700;">⚠️ Nhập nhanh Ngân hàng &amp; Số tài khoản bên dưới để hiện QR thu tiền ngay trên đơn:</div>`}
+      <div class="v30-inline-setup">
+        <select class="v30-bank-sel" title="Chọn ngân hàng">
+          ${banks.map(b => `<option value="${b.bin}" ${b.bin === bObj.bin ? 'selected' : ''}>${b.code} - ${b.name}</option>`).join('')}
+        </select>
+        <input type="text" class="v30-acc-inp" style="width:130px;" placeholder="Số tài khoản *" value="${esc(bank.accountNo || '')}">
+        <input type="text" class="v30-name-inp" style="width:135px;" placeholder="Tên chủ TK" value="${esc(bank.accountName || '')}">
+        <input type="number" class="v30-amt-inp" style="width:110px; font-weight:800; color:#b45309;" placeholder="Số tiền (đ)" value="${amount > 0 ? amount : ''}">
+        <button type="button" class="btn btn-gold btn-xs v30-gen-btn">🔄 Tạo / Lưu QR</button>
+        <button type="button" class="btn btn-soft-fb btn-xs v30-copy-btn">📋 Copy STK</button>
+        <button type="button" class="btn btn-jade btn-xs v30-paid-btn">✅ Xác nhận đã thu</button>
+      </div>
+    `;
+
+    const selBank = info.querySelector('.v30-bank-sel');
+    const inpAcc = info.querySelector('.v30-acc-inp');
+    const inpName = info.querySelector('.v30-name-inp');
+    const inpAmt = info.querySelector('.v30-amt-inp');
+
+    info.querySelector('.v30-gen-btn').onclick = () => {
+      const amtVal = Math.max(0, Math.round(Number(inpAmt.value) || 0));
+      const savedBank = saveOrderBankQuick(ord.id, selBank.value, inpAcc.value, inpName.value, amtVal > 0 ? amtVal : null);
+      if (savedBank) {
+        renderQRBoxIntoElement(boxEl, ord, savedBank, amtVal > 0 ? amtVal : amount);
+      }
+    };
+
+    info.querySelector('.v30-copy-btn').onclick = () => {
+      const accNow = (inpAcc.value || bank.accountNo || '').trim();
+      if (!accNow) { toast('Chưa có Số tài khoản để sao chép.', 'error'); return; }
+      const bNow = banks.find(b => b.bin === selBank.value) || bObj;
+      copyText(`${bNow.code} - STK: ${accNow}${inpName.value ? ' - ' + cleanAsciiUpper(inpName.value) : ''} - Số tiền: ${fmtVND(Math.max(0, Number(inpAmt.value) || amount))} - ND: ${memo}`, 'Đã sao chép thông tin chuyển khoản!');
+    };
+
+    info.querySelector('.v30-paid-btn').onclick = () => {
+      const amtVal = Math.max(0, Math.round(Number(inpAmt.value) || amount));
+      if (amtVal > 0 && typeof ord === 'object') {
+        ord.finalAmount = amtVal;
+        ord.totalAmount = amtVal;
+      }
+      if (typeof window.confirmPaymentSuccessOnOrder === 'function') {
+        window.confirmPaymentSuccessOnOrder(ord.id);
+      } else if (typeof window.updateOnlineOrderStatus === 'function') {
+        window.updateOnlineOrderStatus(ord.id, 'Hoàn tất');
+      }
+    };
+
+    boxEl.appendChild(info);
+  }
+
+  window.toggleInlineOrderPaymentQR = function(ordId, cardEl) {
+    if (!cardEl) return;
+    let boxEl = cardEl.querySelector('.v30-qr-box');
+    if (boxEl) {
+      boxEl.classList.toggle('hidden');
+      return;
+    }
+    const ord = (db.orders || []).find(o => o.id === ordId || o.code === ordId);
+    if (!ord) { toast('Không tìm thấy đơn hàng.', 'error'); return; }
+
+    boxEl = document.createElement('div');
+    boxEl.className = 'v30-qr-box';
+    const actionRow = cardEl.querySelector('select[onchange*="updateOnlineOrderStatus("]')?.parentElement;
+    if (actionRow && actionRow.parentElement === cardEl) {
+      cardEl.insertBefore(boxEl, actionRow);
+    } else {
+      cardEl.appendChild(boxEl);
+    }
+    renderQRBoxIntoElement(boxEl, ord);
+  };
+
+  function attachCreateQRButtonToOrderCards(container) {
+    if (!container) return;
+    container.querySelectorAll('select[onchange*="updateOnlineOrderStatus("]').forEach(sel => {
+      const m = (sel.getAttribute('onchange') || '').match(/updateOnlineOrderStatus\('([^']+)'/);
+      if (!m) return;
+      const ordId = m[1];
+      const ord = (db.orders || []).find(o => o.id === ordId);
+      if (!ord) return;
+      const card = sel.closest('div[style*="border:1px solid"]');
+      if (!card) return;
+
+      const btnWrap = sel.parentElement?.querySelector('div:first-child') || sel.parentElement;
+      if (!btnWrap) return;
+
+      if (!btnWrap.querySelector('.v30-create-qr-btn')) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-gold btn-xs v30-create-qr-btn';
+        btn.textContent = '📲 Tạo QR thu tiền';
+        btn.onclick = (ev) => {
+          ev.stopPropagation();
+          window.toggleInlineOrderPaymentQR(ord.id, card);
+        };
+        btnWrap.appendChild(btn);
+      }
+    });
+  }
+
+  const obs30 = new MutationObserver(() => {
+    const mcPanel = document.getElementById('mc-online-orders-panel');
+    if (mcPanel) attachCreateQRButtonToOrderCards(mcPanel);
+    const admBody = document.getElementById('admin-orders-body');
+    if (admBody) attachCreateQRButtonToOrderCards(admBody);
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    obs30.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => {
+      const mcPanel = document.getElementById('mc-online-orders-panel');
+      if (mcPanel) attachCreateQRButtonToOrderCards(mcPanel);
+      const admBody = document.getElementById('admin-orders-body');
+      if (admBody) attachCreateQRButtonToOrderCards(admBody);
+    }, 600);
+  });
+})();
+</script>
 </body>
 </html>
