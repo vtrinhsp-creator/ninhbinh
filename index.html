@@ -11635,5 +11635,115 @@ service cloud.firestore {
   });
 })();
 </script>
+
+<!-- ==================== MÔ-ĐUN 24 (V29): TĂNG CƯỜNG XUẤT MÃ QR KHI THANH TOÁN ĐƠN HÀNG NHÀ HÀNG ==================== -->
+<script>
+(function initRestaurantOrderPaymentQREnhancement() {
+  // Đảm bảo luôn tìm được thông tin ngân hàng cho đơn hàng/nhà hàng (kể cả khi nhà hàng chưa cài riêng thì kế thừa cấu hình ngân hàng đã lưu của bất kỳ cơ sở/quản trị nào trên máy)
+  function resolveBankConfigForRestaurant(rs) {
+    if (rs && rs.bank && rs.bank.accountNo) {
+      return rs.bank;
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem('nb_default_merchant_bank_v1') || 'null');
+      if (saved && saved.accountNo) return saved;
+    } catch (e) {}
+    const anyWithBank = (db.restaurants || []).find(r => r.bank && r.bank.accountNo)
+      || (db.specialties || []).find(s => s.bank && s.bank.accountNo);
+    return anyWithBank ? anyWithBank.bank : null;
+  }
+
+  // Lưu ngân hàng mặc định dự phòng mỗi khi nhà hàng lưu tài khoản ngân hàng
+  if (typeof window.saveMerchantBankSettings === 'function') {
+    const _prevSaveBank29 = window.saveMerchantBankSettings;
+    window.saveMerchantBankSettings = function() {
+      _prevSaveBank29();
+      try {
+        const rs = typeof findPartnerById === 'function' ? findPartnerById(activePayPartnerId)?.item : null;
+        if (rs && rs.bank && rs.bank.accountNo) {
+          localStorage.setItem('nb_default_merchant_bank_v1', JSON.stringify(rs.bank));
+        }
+      } catch (e) {}
+    };
+  }
+
+  // Mở nhanh modal Xuất Mã QR thanh toán trực tiếp cho 1 đơn hàng cụ thể của nhà hàng
+  window.openRestaurantOrderPaymentQR = function(orderId) {
+    if (typeof window.normalizeAllOrdersCompat === 'function') window.normalizeAllOrdersCompat();
+    const ord = (db.orders || []).find(o => o.id === orderId || o.code === orderId);
+    if (!ord) {
+      toast('Không tìm thấy đơn hàng để xuất mã QR.', 'error');
+      return;
+    }
+    const partnerObj = typeof findPartnerById === 'function' ? findPartnerById(ord.partnerId) : null;
+    const rs = partnerObj?.item || (ui.merchantRestaurantId ? findPartnerById(ui.merchantRestaurantId)?.item : null) || db.restaurants[0];
+    if (rs) {
+      const fallbackBank = resolveBankConfigForRestaurant(rs);
+      if (!rs.bank && fallbackBank) {
+        rs.bank = Object.assign({}, fallbackBank);
+      }
+    }
+    if (typeof window.openMerchantPayQRModal === 'function') {
+      window.openMerchantPayQRModal(ord.id, ord.partnerId || rs?.id);
+    }
+  };
+
+  // Gắn trực tiếp nút "💳 Xuất QR thanh toán" lên các thẻ đơn hàng trong Cổng Nhà Hàng (#mc-online-orders-panel) & Admin (#admin-orders-body)
+  function attachPaymentQRButtonsToOrderCards(container) {
+    if (!container) return;
+    container.querySelectorAll('select[onchange*="updateOnlineOrderStatus("]').forEach(sel => {
+      const m = (sel.getAttribute('onchange') || '').match(/updateOnlineOrderStatus\('([^']+)'/);
+      if (!m) return;
+      const ordId = m[1];
+      const ord = (db.orders || []).find(o => o.id === ordId);
+      if (!ord) return;
+      const card = sel.closest('div[style*="border:1px solid"]');
+      if (!card || card.querySelector('.v29-payqr-btn')) return;
+
+      const btnWrap = sel.parentElement?.querySelector('div:first-child') || sel.parentElement;
+      if (!btnWrap) return;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-gold btn-xs v29-payqr-btn';
+      btn.textContent = '💳 Xuất QR thanh toán';
+      btn.onclick = (ev) => {
+        ev.stopPropagation();
+        window.openRestaurantOrderPaymentQR(ord.id);
+      };
+      btnWrap.appendChild(btn);
+    });
+  }
+
+  // Khi nhà hàng xác nhận đã thanh toán đơn hàng, tự động mở sẵn mã QR biên lai / hóa đơn thanh toán nếu cần xem lại
+  if (typeof window.confirmPaymentSuccessOnOrder === 'function') {
+    const _prevConfirmPay29 = window.confirmPaymentSuccessOnOrder;
+    window.confirmPaymentSuccessOnOrder = function(orderId) {
+      _prevConfirmPay29(orderId);
+      const ord = (db.orders || []).find(o => o.id === orderId);
+      if (ord) {
+        try { localStorage.setItem('nb_last_paid_order_id_v1', ord.id); } catch (e) {}
+      }
+    };
+  }
+
+  const obs29 = new MutationObserver(() => {
+    const mcPanel = document.getElementById('mc-online-orders-panel');
+    if (mcPanel) attachPaymentQRButtonsToOrderCards(mcPanel);
+    const admBody = document.getElementById('admin-orders-body');
+    if (admBody) attachPaymentQRButtonsToOrderCards(admBody);
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    obs29.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => {
+      const mcPanel = document.getElementById('mc-online-orders-panel');
+      if (mcPanel) attachPaymentQRButtonsToOrderCards(mcPanel);
+      const admBody = document.getElementById('admin-orders-body');
+      if (admBody) attachPaymentQRButtonsToOrderCards(admBody);
+    }, 600);
+  });
+})();
+</script>
 </body>
 </html>
