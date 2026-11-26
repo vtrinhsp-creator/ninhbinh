@@ -13496,5 +13496,737 @@ service cloud.firestore {
   });
 })();
 </script>
+<!-- ==================== MÔ-ĐUN 29 (V34): TÍCH HỢP THỰC ĐƠN ĐẦY ĐỦ, QUÁN ĂN & ĐỒ UỐNG V33, QUẢN LÝ MENU NHÀ HÀNG & TINH GỌN THẺ ĐƠN ==================== -->
+<style>
+  .v34-menu-picker {
+    background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%);
+    border: 1.5px solid #c4b5fd;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .v34-menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 210px;
+    overflow-y: auto;
+    margin-top: 7px;
+    padding-right: 2px;
+  }
+  .v34-menu-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    padding: 6px 9px;
+    font-size: 12.2px;
+  }
+  .v34-menu-row:hover {
+    border-color: #8b5cf6;
+  }
+  .v34-mc-menu-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) 130px auto;
+    gap: 8px;
+    align-items: center;
+    padding: 7px 9px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  @media (max-width: 640px) {
+    .v34-mc-menu-item {
+      grid-template-columns: 1fr 110px auto;
+      gap: 6px;
+    }
+  }
+  /* Ẩn các nút QR/Hóa đơn trùng lặp từ các bản vá cũ để thẻ đơn hàng gọn gàng trên mobile */
+  .v34-order-actions-clean .v30-inline-qr-btn,
+  .v34-order-actions-clean .v31-export-inv-btn,
+  .v34-order-actions-clean .v32-inv-qr-btn,
+  .v34-order-actions-clean .v29-pay-qr-btn {
+    display: none !important;
+  }
+</style>
+
+<!-- MODAL XEM THỰC ĐƠN & BẢNG GIÁ NHANH CỦA QUÁN -->
+<div id="v34-menu-modal" class="modal-bg" onclick="if(event.target===this)closeModal('v34-menu-modal')">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-head">
+      <div>
+        <div id="v34-mm-title" style="font-size:15.5px; font-weight:800;">📋 Thực Đơn &amp; Bảng Giá</div>
+        <div id="v34-mm-sub" style="font-size:11.5px; color:var(--muted);"></div>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('v34-menu-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="v34-mm-body" style="display:flex; flex-direction:column; gap:8px;"></div>
+    <div class="modal-foot">
+      <button type="button" id="v34-mm-order-btn" class="btn btn-quick-zalo btn-sm">⚡ Chọn món &amp; Đặt ngay</button>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('v34-menu-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initCompleteMenuAndV34Upgrade() {
+  // 1. Dữ liệu 7 quán ăn đặc sản & trà sữa/cà phê bổ sung từ gói V33 (tọa độ chuẩn Phường Hoa Lư)
+  const V34_EXTRA_VENUES = [
+    {
+      id: 'rs34',
+      name: 'Miến lươn Bà Phấn',
+      region: 'hoalu',
+      ward: 'Phường Hoa Lư',
+      address: 'Số 995 - 999 Trần Hưng Đạo, Phường Hoa Lư, Ninh Bình',
+      priceRange: '40.000đ - 55.000đ/người',
+      hours: '06:00 - 21:30 (Hằng ngày)',
+      signature: 'Miến lươn nước, Miến lươn trộn, Súp lươn, Cháo lươn',
+      fb: 'Miến Lươn Bà Phấn Ninh Bình',
+      phone: '02293871937',
+      website: '',
+      lat: 20.2546,
+      lng: 105.9748,
+      category: 'restaurant',
+      visible: true,
+      account: null,
+      menu: [
+        { item: 'Miến lươn nước', price: 45000 },
+        { item: 'Miến lươn trộn', price: 50000 },
+        { item: 'Súp lươn (kèm bánh mì / bánh đa)', price: 45000 },
+        { item: 'Cháo lươn', price: 40000 }
+      ],
+      desc: 'Thương hiệu miến lươn gia truyền lâu đời bậc nhất Ninh Bình, nước dùng ninh xương lươn đậm đà ngọt thanh, lươn đồng săn chắc.'
+    },
+    {
+      id: 'rs35',
+      name: 'Bún chả quạt Tình Mai',
+      region: 'hoalu',
+      ward: 'Phường Hoa Lư',
+      address: 'Số 7 Phạm Hồng Thái, Phường Hoa Lư, Ninh Bình',
+      priceRange: '35.000đ - 50.000đ/người',
+      hours: '06:30 - 14:00 (Hằng ngày)',
+      signature: 'Bún chả quạt than hoa, Nem cua bể / Nem rán',
+      fb: 'Bún Chả Quạt Tình Mai',
+      phone: '0915568123',
+      website: '',
+      lat: 20.2572,
+      lng: 105.9765,
+      category: 'restaurant',
+      visible: true,
+      account: null,
+      menu: [
+        { item: 'Bún chả quạt (suất thường)', price: 35000 },
+        { item: 'Bún chả quạt (suất đặc biệt)', price: 45000 },
+        { item: 'Nem cua bể / Nem rán (chiếc)', price: 10000 }
+      ],
+      desc: 'Quán bún chả quạt than hoa truyền thống nổi tiếng trung tâm Hoa Lư, chả nướng xém cạnh thơm lừng, nước chấm chua ngọt hài hòa.'
+    },
+    {
+      id: 'rs36',
+      name: 'Thạch dừa Nguyễn Công Trứ',
+      region: 'hoalu',
+      ward: 'Phường Hoa Lư',
+      address: 'Số 690 Nguyễn Công Trứ, Phường Hoa Lư, Ninh Bình',
+      priceRange: '25.000đ - 35.000đ/người',
+      hours: '08:30 - 22:30 (Hằng ngày)',
+      signature: 'Thạch dừa non nguyên trái, Kem dừa xôi lá nếp, Chè dừa dầm',
+      fb: 'Thạch Dừa 690 Nguyễn Công Trứ',
+      phone: '0976543210',
+      website: '',
+      lat: 20.2415,
+      lng: 105.9862,
+      category: 'drink',
+      visible: true,
+      account: null,
+      menu: [
+        { item: 'Thạch dừa non nguyên trái', price: 30000 },
+        { item: 'Kem dừa xôi lá nếp', price: 35000 },
+        { item: 'Chè dừa dầm Hải Phòng', price: 25000 }
+      ],
+      desc: 'Điểm giải nhiệt quen thuộc trên trục đường Nguyễn Công Trứ với thạch dừa xiêm thanh mát, béo ngậy tự nhiên.'
+    },
+    {
+      id: 'rs37',
+      name: 'Kem xôi Thanh Hằng',
+      region: 'hoalu',
+      ward: 'Phường Hoa Lư',
+      address: 'Số 36 Cù Chính Lan, Phường Hoa Lư, Ninh Bình',
+      priceRange: '18.000đ - 30.000đ/người',
+      hours: '09:00 - 22:30 (Hằng ngày)',
+      signature: 'Kem xôi dừa, Kem bơ sầu riêng, Chè thập cẩm truyền thống',
+      fb: 'Kem Xôi Thanh Hằng Ninh Bình',
+      phone: '0912345987',
+      website: '',
+      lat: 20.2618,
+      lng: 105.9721,
+      category: 'snack',
+      visible: true,
+      account: null,
+      menu: [
+        { item: 'Kem xôi dừa', price: 20000 },
+        { item: 'Kem bơ sầu riêng', price: 25000 },
+        { item: 'Chè thập cẩm truyền thống', price: 18000 }
+      ],
+      desc: 'Quán kem xôi và chè truyền thống lâu năm trên phố ăn vặt Cù Chính Lan, xôi vò dẻo thơm ăn kèm kem dừa mát lạnh.'
+    },
+    {
+      id: 'rs38',
+      name: 'Trà sữa Mama Sugar',
+      region: 'hoalu',
+      ward: 'Phường Hoa Lư',
+      address: 'Số 117 Lương Văn Tụy, Phường Hoa Lư & 02 Vĩnh Lợi, Ninh Bình',
+      priceRange: '25.000đ - 35.000đ/người',
+      hours: '08:00 - 23:00 (Hằng ngày)',
+      signature: 'Sữa tươi trân châu đường đen, Trà sữa nướng Mama, Trà đào cam sả',
+      fb: 'Mama Sugar Ninh Bình',
+      phone: '0962888117',
+      website: '',
+      lat: 20.2604,
+      lng: 105.9710,
+      category: 'drink',
+      visible: true,
+      account: null,
+      menu: [
+        { item: 'Sữa tươi trân châu đường đen', price: 28000 },
+        { item: 'Trà sữa nướng Mama', price: 30000 },
+        { item: 'Trà đào cam sả / Trà vải', price: 28000 }
+      ],
+      desc: 'Thương hiệu trà sữa được giới trẻ Ninh Bình yêu thích, trân châu nấu mới mỗi ngày, giá học sinh sinh viên.'
+    },
+    {
+      id: 'rs39',
+      name: 'ToCoToCo Ninh Bình',
+      region: 'hoalu',
+      ward: 'Phường Hoa Lư',
+      address: 'Số 1 Tây Thành, Phường Hoa Lư, Ninh Bình',
+      priceRange: '35.000đ - 48.000đ/người',
+      hours: '08:00 - 23:00 (Hằng ngày)',
+      signature: 'Trà sữa Ba Anh Em, Ô long xoài kem cà phê, Hồng trà ngũ cốc',
+      fb: 'ToCoToCo Ninh Bình',
+      phone: '1900636936',
+      website: '',
+      lat: 20.2632,
+      lng: 105.9698,
+      category: 'drink',
+      visible: true,
+      account: null,
+      menu: [
+        { item: 'Trà sữa Ba Anh Em (Size M)', price: 38000 },
+        { item: 'Ô long xoài kem cà phê', price: 42000 },
+        { item: 'Hồng trà ngũ cốc kem cà phê', price: 35000 }
+      ],
+      desc: 'Không gian hiện đại, rộng rãi ngay khu vực Tây Thành, phục vụ đầy đủ các dòng trà sữa và trà trái cây tươi.'
+    },
+    {
+      id: 'rs40',
+      name: 'Chago Tea & Café',
+      region: 'hoalu',
+      ward: 'Phường Hoa Lư',
+      address: 'Số 32 Đinh Tất Miễn, Phường Hoa Lư, Ninh Bình',
+      priceRange: '35.000đ - 50.000đ/người',
+      hours: '07:30 - 23:00 (Hằng ngày)',
+      signature: 'Trà sữa sợi QQ đặc biệt, Thiết Quan Âm Latte, Trà xanh chanh dây nha đam',
+      fb: 'Chago Tea & Café Ninh Bình',
+      phone: '02296288886',
+      website: '',
+      lat: 20.2661,
+      lng: 105.9675,
+      category: 'drink',
+      visible: true,
+      account: null,
+      menu: [
+        { item: 'Trà sữa sợi QQ đặc biệt', price: 42000 },
+        { item: 'Thiết Quan Âm Latte', price: 45000 },
+        { item: 'Trà xanh chanh dây nha đam', price: 38000 }
+      ],
+      desc: 'Quán trà sữa & cà phê nổi bật trên tuyến phố Đinh Tất Miễn với dòng trà sữa sợi QQ dai giòn đặc trưng.'
+    }
+  ];
+
+  // 2. Bảng thực đơn chi tiết bổ sung cho các cơ sở hiện có
+  const V34_DEFAULT_MENUS = {
+    rs01: [
+      { item: 'Dê tái chanh Hoa Lư (đĩa)', price: 180000 },
+      { item: 'Dê ủ trấu gia truyền (đĩa)', price: 195000 },
+      { item: 'Dê nướng tảng than hoa (đĩa)', price: 210000 },
+      { item: 'Cơm cháy sốt dê (đĩa)', price: 75000 },
+      { item: 'Lẩu dê thuốc bắc (nồi 4 người)', price: 420000 }
+    ],
+    rs06: [
+      { item: 'Gỏi cá nhệch Kim Sơn (suất 2 người)', price: 260000 },
+      { item: 'Cua đồng rang muối lá lốt (đĩa)', price: 185000 },
+      { item: 'Lẩu cua đồng đồng quê (nồi)', price: 380000 }
+    ],
+    rs09: [
+      { item: 'Mâm cơm chay Tam Chúc (suất)', price: 150000 },
+      { item: 'Cá kho niêu đất Làng Vũ Đại (niêu)', price: 450000 },
+      { item: 'Gà đồi Ba Sao hấp lá chanh (nửa con)', price: 220000 }
+    ],
+    rs10: [
+      { item: 'Bánh cuốn chả nướng than hoa (suất)', price: 45000 },
+      { item: 'Bún cá rô đồng Phủ Lý (bát)', price: 40000 }
+    ],
+    rs11: [
+      { item: 'Phở bò tái chín nạm gầu (bát)', price: 50000 },
+      { item: 'Phở bò sốt vang (bát)', price: 55000 },
+      { item: 'Quẩy nóng giòn (đĩa)', price: 10000 }
+    ],
+    rs25: [
+      { item: 'Bánh tôm chiên giòn (đĩa)', price: 30000 },
+      { item: 'Bánh mì kẹp thịt nướng', price: 20000 },
+      { item: 'Thịt xiên nướng (xiên)', price: 10000 },
+      { item: 'Nem chua rán (đĩa)', price: 35000 }
+    ],
+    rs26: [
+      { item: 'Chè bưởi cốt dừa', price: 20000 },
+      { item: 'Chè sầu Liên Đà Nẵng', price: 30000 },
+      { item: 'Tàu hũ trân châu đường đen', price: 20000 },
+      { item: 'Caramen thập cẩm', price: 22000 }
+    ],
+    rs31: [
+      { item: 'Bánh mì pate trứng xúc xích', price: 20000 },
+      { item: 'Bánh mì pate thập cẩm Hà Bơ', price: 25000 },
+      { item: 'Bánh mì chảo đầy đủ', price: 40000 }
+    ]
+  };
+
+  function isDrinkSpot(r) {
+    if (!r) return false;
+    if (r.category === 'drink') return true;
+    const txt = `${r.name || ''} ${r.signature || ''}`.toLowerCase();
+    return /trà sữa|cà phê|cafe|thạch dừa|giải khát|tocotoco|chago|mama sugar/.test(txt);
+  }
+
+  // 3. Hợp nhất an toàn dữ liệu V34 vào db.restaurants (tôn trọng _deletedIds)
+  function mergeV34VenuesAndMenus() {
+    if (!Array.isArray(db.restaurants)) return 0;
+    const deleted = Array.isArray(db._deletedIds) ? db._deletedIds : [];
+    const existingMap = new Map(db.restaurants.map(r => [r.id, r]));
+    let changed = false;
+
+    V34_EXTRA_VENUES.forEach(v => {
+      if (deleted.includes(v.id)) return;
+      if (!existingMap.has(v.id)) {
+        db.restaurants.push(JSON.parse(JSON.stringify(v)));
+        changed = true;
+      } else {
+        const cur = existingMap.get(v.id);
+        if (!Array.isArray(cur.menu) || !cur.menu.length) {
+          cur.menu = JSON.parse(JSON.stringify(v.menu));
+          changed = true;
+        }
+        if (!cur.category && v.category) {
+          cur.category = v.category;
+          changed = true;
+        }
+      }
+    });
+
+    Object.entries(V34_DEFAULT_MENUS).forEach(([rsId, menuArr]) => {
+      const cur = existingMap.get(rsId);
+      if (cur && (!Array.isArray(cur.menu) || !cur.menu.length)) {
+        cur.menu = JSON.parse(JSON.stringify(menuArr));
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); } catch (e) {}
+      if (typeof updateCounts === 'function') updateCounts();
+    }
+    return changed;
+  }
+
+  // 4. Modal Xem Thực Đơn & Bảng Giá Nhanh
+  window.openVenueMenuModal = function(rsId) {
+    const rs = (db.restaurants || []).find(r => r.id === rsId);
+    if (!rs) return;
+    const menu = Array.isArray(rs.menu) ? rs.menu : [];
+    document.getElementById('v34-mm-title').textContent = `📋 Thực Đơn — ${rs.name}`;
+    document.getElementById('v34-mm-sub').textContent = `📍 ${rs.ward || ''} • Khoảng giá: ${rs.priceRange || 'Liên hệ'}`;
+
+    const body = document.getElementById('v34-mm-body');
+    if (!menu.length) {
+      body.innerHTML = `
+        <div class="info-box">
+          <div><b>🍽️ Món đặc trưng:</b> ${esc(rs.signature || 'Đang cập nhật thực đơn chi tiết')}</div>
+          <div><b>💰 Khoảng giá tham khảo:</b> ${esc(rs.priceRange || 'Liên hệ trực tiếp')}</div>
+          <div style="font-size:11.5px; color:var(--muted);">Quán chưa niêm yết bảng giá từng món trên hệ thống. Bạn có thể bấm nút bên dưới để đặt bàn hoặc ghi chú món muốn gọi.</div>
+        </div>
+      `;
+    } else {
+      body.innerHTML = menu.map((m, i) => `
+        <div class="v34-menu-row">
+          <div>
+            <div style="font-weight:800; color:var(--text);">${i + 1}. ${esc(m.item)}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-weight:800; color:#b45309;">${Number(m.price) > 0 ? fmtVND(Number(m.price)) : 'Theo thời giá'}</span>
+            <button type="button" class="btn btn-soft-food btn-xs" onclick="closeModal('v34-menu-modal'); openQuickOrderModal('restaurant', '${rs.id}', { preselectMenuIndex: ${i} });">+ Đặt</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    const orderBtn = document.getElementById('v34-mm-order-btn');
+    if (orderBtn) {
+      orderBtn.onclick = () => {
+        closeModal('v34-menu-modal');
+        openQuickOrderModal('restaurant', rs.id);
+      };
+    }
+    document.getElementById('v34-menu-modal').classList.add('open');
+  };
+
+  // 5. Nâng cấp Modal Đặt Hàng Nhanh: Hiển thị Thực đơn quán để chạm chọn món ngay
+  window.v34AddMenuDishToQuickOrder = function(rsId, menuIdx) {
+    const rs = (db.restaurants || []).find(r => r.id === rsId);
+    if (!rs || !Array.isArray(rs.menu) || !rs.menu[menuIdx]) return;
+    const dish = rs.menu[menuIdx];
+    const itemsListEl = document.getElementById('qo-items-list');
+    // Tận dụng API thêm món ngoài nếu có, hoặc cập nhật trực tiếp
+    if (typeof window.addCustomQuickOrderItem === 'function') {
+      const nameInp = document.getElementById('qo-custom-name');
+      const priceInp = document.getElementById('qo-custom-price');
+      if (nameInp && priceInp) {
+        nameInp.value = dish.item;
+        priceInp.value = Number(dish.price) || 0;
+        window.addCustomQuickOrderItem();
+        toast(`✅ Đã thêm "${dish.item}" vào phiếu đặt!`);
+        return;
+      }
+    }
+    if (itemsListEl) {
+      toast(`Đã chọn: ${dish.item} (${fmtVND(Number(dish.price) || 0)})`);
+    }
+  };
+
+  if (typeof window.openQuickOrderModal === 'function') {
+    const _prevOpenQO34 = window.openQuickOrderModal;
+    window.openQuickOrderModal = function(type, id, extra = {}) {
+      _prevOpenQO34(type, id, extra);
+      const formEl = document.getElementById('qo-form');
+      if (!formEl) return;
+
+      let picker = document.getElementById('v34-qo-menu-picker');
+      if (!picker) {
+        picker = document.createElement('div');
+        picker.id = 'v34-qo-menu-picker';
+        const itemsList = document.getElementById('qo-items-list');
+        if (itemsList && itemsList.parentNode) {
+          itemsList.parentNode.insertBefore(picker, itemsList);
+        } else {
+          formEl.insertBefore(picker, formEl.firstChild);
+        }
+      }
+
+      const rs = type === 'restaurant' ? (db.restaurants || []).find(r => r.id === id) : null;
+      const menu = rs && Array.isArray(rs.menu) ? rs.menu : [];
+      if (!menu.length) {
+        picker.classList.add('hidden');
+        picker.innerHTML = '';
+        return;
+      }
+
+      picker.classList.remove('hidden');
+      picker.className = 'v34-menu-picker';
+      picker.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+          <b style="font-size:12.5px; color:#5b21b6;">📋 Thực đơn quán (${menu.length} món) — Chạm + để thêm</b>
+          <span style="font-size:11px; color:var(--muted);">Tự động tính tổng &amp; QR</span>
+        </div>
+        <div class="v34-menu-grid">
+          ${menu.map((m, idx) => `
+            <div class="v34-menu-row">
+              <span style="font-weight:700; color:var(--text);">${esc(m.item)}</span>
+              <div style="display:flex; align-items:center; gap:7px; flex-shrink:0;">
+                <b style="color:#b45309;">${Number(m.price) > 0 ? fmtVND(Number(m.price)) : 'Thời giá'}</b>
+                <button type="button" class="btn btn-food btn-xs" onclick="v34AddMenuDishToQuickOrder('${rs.id}', ${idx})">+ Chọn</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      if (typeof extra.preselectMenuIndex === 'number') {
+        setTimeout(() => window.v34AddMenuDishToQuickOrder(rs.id, extra.preselectMenuIndex), 40);
+      }
+    };
+  }
+
+  // 6. Gắn nút "📋 Thực đơn" vào Thẻ Tab 2 & Khung Chi tiết Bản đồ Tab 1
+  function enhanceMarketCardsWithMenuAndSearch() {
+    const grid = document.getElementById('market-grid');
+    if (!grid) return;
+    const q = (document.getElementById('mk-search')?.value || '').trim().toLowerCase();
+
+    grid.querySelectorAll('article.smart-card').forEach(card => {
+      const mapBtn = card.querySelector('button[onclick*="onPinClick("]');
+      if (!mapBtn) return;
+      const m = (mapBtn.getAttribute('onclick') || '').match(/onPinClick\('(specialty|restaurant)','([^']+)'/);
+      if (!m || m[1] !== 'restaurant') return;
+      const rsId = m[2];
+      const rs = (db.restaurants || []).find(r => r.id === rsId);
+      if (!rs) return;
+
+      const menu = Array.isArray(rs.menu) ? rs.menu : [];
+      if (menu.length && !card.querySelector('.v34-menu-card-btn')) {
+        const body = card.querySelector('.card-body');
+        if (body) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn btn-soft-food btn-sm v34-menu-card-btn';
+          btn.style.width = '100%';
+          btn.textContent = `📋 Xem Thực Đơn & Bảng Giá (${menu.length} món)`;
+          btn.onclick = () => window.openVenueMenuModal(rs.id);
+          const qoBtn = body.querySelector('.qo-card-btn');
+          if (qoBtn) body.insertBefore(btn, qoBtn);
+          else body.appendChild(btn);
+        }
+      }
+
+      // Lọc thêm theo chip "Trà sữa & Cà phê" nếu đang bật
+      if (ui.marketType === 'drink') {
+        card.style.display = isDrinkSpot(rs) ? '' : 'none';
+      } else if (q && menu.length) {
+        const matchMenu = menu.some(it => String(it.item || '').toLowerCase().includes(q));
+        if (matchMenu) card.style.display = '';
+      }
+    });
+  }
+
+  function injectMenuButtonIntoMapDetail() {
+    const box = document.getElementById('map-detail');
+    if (!box || ui.selected?.type !== 'restaurant') return;
+    const rs = (db.restaurants || []).find(r => r.id === ui.selected.id);
+    if (!rs || !Array.isArray(rs.menu) || !rs.menu.length) return;
+    if (box.querySelector('.v34-map-menu-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-soft-food btn-sm v34-map-menu-btn';
+    btn.style.width = '100%';
+    btn.textContent = `📋 Xem Thực Đơn & Bảng Giá (${rs.menu.length} món)`;
+    btn.onclick = () => window.openVenueMenuModal(rs.id);
+    box.appendChild(btn);
+  }
+
+  // 7. Chip lọc "🧋 Trà sữa & Cà phê" trên Tab 2
+  function updateDrinkChipCount() {
+    const el = document.getElementById('mk-cnt-dr');
+    if (el) {
+      el.textContent = (db.restaurants || []).filter(r => r.visible !== false && isDrinkSpot(r)).length;
+    }
+  }
+
+  window.setMarketDrinkFilter = function() {
+    ui.marketType = 'drink';
+    ['all', 'sp', 'rs', 'sn'].forEach(k => document.getElementById(`mk-t-${k}`)?.classList.remove('active'));
+    document.getElementById('mk-t-dr')?.classList.add('active');
+    if (typeof window.renderMarket === 'function') window.renderMarket();
+  };
+
+  if (typeof window.setMarketType === 'function') {
+    const _prevSetMT34 = window.setMarketType;
+    window.setMarketType = function(t) {
+      document.getElementById('mk-t-dr')?.classList.remove('active');
+      _prevSetMT34(t);
+    };
+  }
+
+  if (typeof window.renderMarket === 'function') {
+    const _prevRenderMarket34 = window.renderMarket;
+    window.renderMarket = function() {
+      const wantDrinkOnly = ui.marketType === 'drink';
+      if (wantDrinkOnly) ui.marketType = 'restaurant';
+      _prevRenderMarket34();
+      if (wantDrinkOnly) ui.marketType = 'drink';
+      enhanceMarketCardsWithMenuAndSearch();
+      updateDrinkChipCount();
+    };
+  }
+
+  if (typeof window.renderMapDetail === 'function') {
+    const _prevRenderMD34 = window.renderMapDetail;
+    window.renderMapDetail = function() {
+      _prevRenderMD34();
+      injectMenuButtonIntoMapDetail();
+    };
+  }
+
+  // 8. Quản lý Thực đơn & Bảng giá ngay trong Cổng Nhà Hàng (#merchant-dashboard)
+  function renderMerchantMenuManager() {
+    const dash = document.getElementById('merchant-dashboard');
+    if (!dash || !ui.merchantRestaurantId) return;
+    const rs = (db.restaurants || []).find(r => r.id === ui.merchantRestaurantId);
+    if (!rs) return;
+    if (!Array.isArray(rs.menu)) rs.menu = [];
+
+    let panel = document.getElementById('v34-mc-menu-panel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'v34-mc-menu-panel';
+      panel.className = 'panel';
+      const ordPanel = document.getElementById('mc-online-orders-panel');
+      if (ordPanel) dash.insertBefore(panel, ordPanel);
+      else dash.appendChild(panel);
+    }
+
+    panel.innerHTML = `
+      <div class="panel-head">
+        <div>
+          <div style="font-size:15.5px; font-weight:800;">📋 Quản Lý Thực Đơn &amp; Bảng Giá Của Quán (${rs.menu.length} món)</div>
+          <div style="font-size:12px; color:var(--muted);">Khách du lịch sẽ nhìn thấy bảng giá này và chạm chọn món trực tiếp khi đặt bàn / đặt mang về.</div>
+        </div>
+        <button type="button" class="btn btn-food btn-sm" onclick="v34SaveMerchantMenu()">💾 Lưu Thực Đơn &amp; Đồng Bộ</button>
+      </div>
+      <div id="v34-mc-menu-list" style="display:flex; flex-direction:column; gap:7px; margin-bottom:10px;">
+        ${rs.menu.length ? rs.menu.map((m, idx) => `
+          <div class="v34-mc-menu-item">
+            <input type="text" class="form-control v34-m-name" data-idx="${idx}" value="${esc(m.item)}" placeholder="Tên món ăn / đồ uống...">
+            <input type="number" class="form-control v34-m-price" data-idx="${idx}" value="${Number(m.price) || 0}" min="0" step="1000" placeholder="Giá (VNĐ)">
+            <button type="button" class="btn btn-soft btn-xs" style="color:var(--danger);" onclick="v34RemoveMerchantMenuRow(${idx})">🗑️ Xóa</button>
+          </div>
+        `).join('') : '<div style="font-size:12px; color:var(--muted); padding:8px;">Chưa có món nào trong thực đơn. Bấm "+ Thêm món mới" bên dưới để tạo bảng giá.</div>'}
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-soft-food btn-sm" onclick="v34AddMerchantMenuRow()">+ Thêm món mới</button>
+        <button type="button" class="btn btn-jade btn-sm" onclick="v34SaveMerchantMenu()">✅ Lưu &amp; Cập Nhật Lên Bản Đồ</button>
+      </div>
+    `;
+  }
+
+  function syncDraftMerchantMenuFromInputs(rs) {
+    const listEl = document.getElementById('v34-mc-menu-list');
+    if (!listEl || !rs) return;
+    const names = listEl.querySelectorAll('.v34-m-name');
+    const prices = listEl.querySelectorAll('.v34-m-price');
+    const updated = [];
+    names.forEach((nEl, i) => {
+      const item = (nEl.value || '').trim();
+      const price = Math.max(0, Number(prices[i]?.value) || 0);
+      if (item) updated.push({ item, price });
+    });
+    rs.menu = updated;
+  }
+
+  window.v34AddMerchantMenuRow = function() {
+    const rs = (db.restaurants || []).find(r => r.id === ui.merchantRestaurantId);
+    if (!rs) return;
+    syncDraftMerchantMenuFromInputs(rs);
+    rs.menu.push({ item: '', price: 35000 });
+    renderMerchantMenuManager();
+  };
+
+  window.v34RemoveMerchantMenuRow = function(idx) {
+    const rs = (db.restaurants || []).find(r => r.id === ui.merchantRestaurantId);
+    if (!rs) return;
+    syncDraftMerchantMenuFromInputs(rs);
+    rs.menu.splice(idx, 1);
+    renderMerchantMenuManager();
+  };
+
+  window.v34SaveMerchantMenu = function() {
+    const rs = (db.restaurants || []).find(r => r.id === ui.merchantRestaurantId);
+    if (!rs) return;
+    syncDraftMerchantMenuFromInputs(rs);
+    if (typeof saveDB === 'function') saveDB();
+    renderMerchantMenuManager();
+    if (typeof renderMarket === 'function') renderMarket();
+    toast(`✅ Đã lưu thực đơn ${rs.menu.length} món cho "${rs.name}"!`);
+  };
+
+  if (typeof window.renderMerchantPortal === 'function') {
+    const _prevRenderMP34 = window.renderMerchantPortal;
+    window.renderMerchantPortal = function() {
+      _prevRenderMP34();
+      renderMerchantMenuManager();
+      setTimeout(cleanDuplicateOrderCardButtons, 60);
+    };
+  }
+
+  // 9. Tinh gọn nút thao tác trên Thẻ Đơn Hàng (xóa trùng lặp QR/Hóa đơn & thêm lọc nhanh)
+  function cleanDuplicateOrderCardButtons() {
+    ['mc-online-orders-panel', 'admin-orders-body'].forEach(containerId => {
+      const root = document.getElementById(containerId);
+      if (!root) return;
+      root.classList.add('v34-order-actions-clean');
+
+      // Gắn thanh lọc nhanh đơn hàng cho Cổng Nhà Hàng nếu chưa có
+      if (containerId === 'mc-online-orders-panel' && !document.getElementById('v34-mc-ord-filter-bar')) {
+        const head = root.querySelector('.panel-head');
+        if (head) {
+          const bar = document.createElement('div');
+          bar.id = 'v34-mc-ord-filter-bar';
+          bar.style.cssText = 'display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;';
+          bar.innerHTML = `
+            <input type="text" id="v34-mc-ord-search" class="form-control" style="flex:1; min-width:190px; min-height:34px; font-size:12.5px;" placeholder="🔍 Tìm mã đơn, tên khách, SĐT..." oninput="v34FilterMerchantOrders()">
+            <select id="v34-mc-ord-status" class="form-control" style="width:165px; min-height:34px; font-size:12.5px;" onchange="v34FilterMerchantOrders()">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="Mới đặt">🟡 Mới đặt</option>
+              <option value="Đã xác nhận">🔵 Đã xác nhận</option>
+              <option value="Hoàn tất">🟢 Hoàn tất</option>
+              <option value="Đã hủy">🔴 Đã hủy</option>
+            </select>
+          `;
+          head.insertAdjacentElement('afterend', bar);
+        }
+      }
+    });
+  }
+
+  window.v34FilterMerchantOrders = function() {
+    const panel = document.getElementById('mc-online-orders-panel');
+    if (!panel) return;
+    const q = (document.getElementById('v34-mc-ord-search')?.value || '').trim().toLowerCase();
+    const st = document.getElementById('v34-mc-ord-status')?.value || 'all';
+    const cards = panel.querySelectorAll('div[style*="border-radius:12px"]');
+    cards.forEach(card => {
+      const txt = (card.textContent || '').toLowerCase();
+      const sel = card.querySelector('select');
+      const curSt = sel ? sel.value : '';
+      const okQ = !q || txt.includes(q);
+      const okSt = st === 'all' || curSt === st;
+      card.style.display = (okQ && okSt) ? '' : 'none';
+    });
+  };
+
+  // 10. Khởi chạy khi tải trang
+  window.addEventListener('DOMContentLoaded', () => {
+    mergeV34VenuesAndMenus();
+
+    // Chèn chip lọc "🧋 Trà sữa & Cà phê" vào Tab 2
+    const chipBar = document.querySelector('#tab-market .chip-bar');
+    if (chipBar && !document.getElementById('mk-t-dr')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'mk-t-dr';
+      btn.className = 'reg-chip';
+      btn.innerHTML = '🧋 Trà sữa &amp; Cà phê (<span id="mk-cnt-dr">0</span>)';
+      btn.onclick = window.setMarketDrinkFilter;
+      const snChip = document.getElementById('mk-t-sn') || document.getElementById('mk-t-rs');
+      if (snChip && snChip.nextSibling) chipBar.insertBefore(btn, snChip.nextSibling);
+      else chipBar.appendChild(btn);
+    }
+
+    updateDrinkChipCount();
+    if (typeof updateCounts === 'function') updateCounts();
+    if (typeof renderMap === 'function') renderMap();
+    if (ui.tab === 'market' && typeof renderMarket === 'function') renderMarket();
+
+    // Dọn dẹp nút trùng trên thẻ đơn hàng khi mở Modal Admin hoặc Cổng Nhà Hàng
+    let cleanTimer = null;
+    const obs34 = new MutationObserver(() => {
+      clearTimeout(cleanTimer);
+      cleanTimer = setTimeout(cleanDuplicateOrderCardButtons, 80);
+    });
+    obs34.observe(document.body, { childList: true, subtree: true });
+    setTimeout(cleanDuplicateOrderCardButtons, 350);
+  });
+})();
+</script>
 </body>
 </html>
