@@ -7139,7 +7139,785 @@ window.addEventListener('DOMContentLoaded', () => {
     if (docHtml.includes('id="embedded-seed-db"')) {
       docHtml = docHtml.replace(/<script id="embedded-seed-db" type="application\/json">[\s\S]*?<\/script>/i, seedTag);
     } else {
-      docHtml = docHtml.replace(/<\/body>/i, seedTag + '\n</body>');
+      docHtml = docHtml.replace(/<\/body>/i, seedTag + '\n
+<!-- ==================== MÔ-ĐUN 28 (V33): ĐỒNG BỘ TÀI KHOẢN FIREBASE ĐA THIẾT BỊ & XÁC THỰC CLOUD KHI ĐĂNG NHẬP ==================== -->
+<style>
+  .v33-cloud-bar {
+    border-radius: 11px;
+    padding: 8px 11px;
+    margin-bottom: 11px;
+    font-size: 11.8px;
+    border: 1.5px solid #cbd5e1;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .v33-cloud-bar.ok {
+    background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
+    border-color: #34d399;
+    color: #065f46;
+  }
+  .v33-cloud-bar.warn {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef2f2 100%);
+    border-color: #fbbf24;
+    color: #92400e;
+  }
+  .v33-cloud-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+</style>
+
+<script>
+(function initCrossDeviceFirebaseAuthSyncV33() {
+  const FB_CFG_KEY = 'nb_firebase_sync_cfg_v1';
+  const ACCOUNTS_DOC_ID = 'accounts_live';
+  const CLIENT_ID_33 = 'acccli_' + Math.random().toString(36).slice(2, 10);
+
+  let initialCloudPullDone = false;
+  let initialCloudPullPromise = null;
+  let accountsUnsub = null;
+  let accountsSyncTimer = null;
+
+  // 1. Mở rộng đọc cấu hình Firebase từ cả URL Search (?fb=), URL Hash (#fb=), localStorage và thẻ nhúng HTML
+  function decodeFbBase64(b64Str) {
+    if (!b64Str) return null;
+    try {
+      const clean = decodeURIComponent(String(b64Str).trim());
+      const jsonStr = decodeURIComponent(escape(atob(clean)));
+      const obj = JSON.parse(jsonStr);
+      if (obj && obj.apiKey && obj.projectId) {
+        return {
+          apiKey: String(obj.apiKey).trim(),
+          projectId: String(obj.projectId).trim(),
+          authDomain: String(obj.authDomain || `${obj.projectId}.firebaseapp.com`).trim(),
+          databaseURL: String(obj.databaseURL || '').trim(),
+          appId: String(obj.appId || '').trim(),
+          collection: String(obj.collection || 'nb_heritage_hub').trim(),
+          docId: String(obj.docId || 'main_db').trim(),
+          autoSync: true,
+          realtime: true
+        };
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function resolveFirebaseConfigEverywhere() {
+    // 1a. Kiểm tra query ?fb=...
+    try {
+      const sp = new URLSearchParams(window.location.search || '');
+      const fromQuery = decodeFbBase64(sp.get('fb'));
+      if (fromQuery) {
+        localStorage.setItem(FB_CFG_KEY, JSON.stringify(fromQuery));
+        return fromQuery;
+      }
+    } catch (e) {}
+
+    // 1b. Kiểm tra hash #fb=... (Zalo & Messenger không bao giờ cắt hash URL)
+    try {
+      const hash = String(window.location.hash || '');
+      const m = hash.match(/fb=([^&]+)/);
+      if (m && m[1]) {
+        const fromHash = decodeFbBase64(m[1]);
+        if (fromHash) {
+          localStorage.setItem(FB_CFG_KEY, JSON.stringify(fromHash));
+          return fromHash;
+        }
+      }
+    } catch (e) {}
+
+    // 1c. Kiểm tra localStorage
+    try {
+      const raw = localStorage.getItem(FB_CFG_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.apiKey && parsed.projectId) {
+          parsed.autoSync = true;
+          parsed.realtime = true;
+          return parsed;
+        }
+      }
+    } catch (e) {}
+
+    // 1d. Kiểm tra thẻ nhúng trong file HTML
+    try {
+      const embEl = document.getElementById('embedded-firebase-cfg');
+      if (embEl && embEl.textContent.trim()) {
+        const emb = JSON.parse(embEl.textContent.trim());
+        if (emb && emb.apiKey && emb.projectId) {
+          emb.autoSync = true;
+          emb.realtime = true;
+          localStorage.setItem(FB_CFG_KEY, JSON.stringify(emb));
+          return emb;
+        }
+      }
+    } catch (e) {}
+
+    return typeof _origGetActiveFbCfg === 'function' ? _origGetActiveFbCfg() : null;
+  }
+
+  const _origGetActiveFbCfg = window.getActiveFirebaseConfig;
+  window.getActiveFirebaseConfig = resolveFirebaseConfigEverywhere;
+
+  // Chạy đọc ngay lúc parse script để lưu sớm vào localStorage trước khi các mô-đun khác khởi tạo
+  resolveFirebaseConfigEverywhere();
+
+  // 2. Lấy tham chiếu Firestore (tự động nạp SDK nếu chưa có)
+  function loadScriptV33(src) {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('Không tải được Firebase SDK: ' + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function getFirestoreInstance(cfg) {
+    if (!cfg || !cfg.apiKey || !cfg.projectId) return null;
+    if (!window.firebase || !window.firebase.firestore) {
+      await loadScriptV33('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+      await loadScriptV33('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js');
+    }
+    const appName = 'nb_hub_sync_' + cfg.projectId;
+    let app = firebase.apps.find(a => a.name === appName);
+    if (!app) {
+      const initObj = {
+        apiKey: cfg.apiKey,
+        authDomain: cfg.authDomain || `${cfg.projectId}.firebaseapp.com`,
+        projectId: cfg.projectId,
+        appId: cfg.appId || ''
+      };
+      if (cfg.databaseURL) initObj.databaseURL = cfg.databaseURL;
+      app = firebase.initializeApp(initObj, appName);
+    }
+    const fs = firebase.firestore(app);
+    try {
+      fs.settings({ experimentalAutoDetectLongPolling: true, ignoreUndefinedProperties: true, merge: true });
+    } catch (e) {}
+    return fs;
+  }
+
+  // 3. Hợp nhất tài khoản nhà hàng, đặc sản & Admin từ Cloud vào local DB (không bao giờ làm mất tài khoản mới cấp)
+  function applyAccountDirectoryPayload(payload) {
+    if (!payload || typeof payload !== 'object') return false;
+    let changed = false;
+
+    if (payload.pin && String(payload.pin).trim()) {
+      if (db.pin !== String(payload.pin).trim()) {
+        db.pin = String(payload.pin).trim();
+        changed = true;
+      }
+    }
+
+    if (Array.isArray(payload.adminAccounts) && payload.adminAccounts.length) {
+      db.adminAccounts = payload.adminAccounts.map(a => Object.assign({}, a, {
+        username: String(a.username || '').trim(),
+        password: String(a.password ?? '').trim()
+      }));
+      changed = true;
+    }
+
+    if (Array.isArray(payload.partnerAccounts)) {
+      const accMap = new Map();
+      payload.partnerAccounts.forEach(item => {
+        if (item && item.id) accMap.set(String(item.id), item);
+      });
+
+      const applyToCollection = (list, defaultType) => {
+        if (!Array.isArray(list)) return;
+        const existingIds = new Set(list.map(x => String(x.id)));
+        list.forEach(entry => {
+          const rec = accMap.get(String(entry.id));
+          if (!rec) return;
+          if (rec.account && rec.account.username) {
+            entry.account = {
+              username: String(rec.account.username).trim(),
+              password: String(rec.account.password ?? '').trim(),
+              active: rec.account.active !== false
+            };
+          } else if (rec.account === null) {
+            entry.account = null;
+          }
+          if (rec.name && !entry.name) entry.name = rec.name;
+          changed = true;
+        });
+
+        // Nếu Admin tạo mới hoàn toàn một nhà hàng trên máy A mà máy B chưa có trong danh sách
+        payload.partnerAccounts.forEach(rec => {
+          if (!rec || !rec.id || existingIds.has(String(rec.id))) return;
+          if ((rec.type || 'restaurant') !== defaultType) return;
+          if (!rec.account || !rec.account.username) return;
+          list.push({
+            id: rec.id,
+            name: rec.name || rec.account.username,
+            region: rec.region || 'hoalu',
+            ward: rec.ward || 'Phường Hoa Lư',
+            address: rec.address || '',
+            phone: rec.phone || '',
+            fb: rec.fb || '',
+            lat: Number(rec.lat) || 20.2539,
+            lng: Number(rec.lng) || 105.9750,
+            visible: true,
+            account: {
+              username: String(rec.account.username).trim(),
+              password: String(rec.account.password ?? '').trim(),
+              active: rec.account.active !== false
+            }
+          });
+          changed = true;
+        });
+      };
+
+      applyToCollection(db.restaurants, 'restaurant');
+      applyToCollection(db.specialties, 'specialty');
+    }
+
+    if (changed) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        localStorage.setItem('nb_heritage_persistent_vault_v1', JSON.stringify(Object.assign({}, db, { _lastModified: Date.now() })));
+      } catch (e) {}
+    }
+    return changed;
+  }
+
+  function buildAccountDirectoryPayload() {
+    const partnerAccounts = [];
+    (db.restaurants || []).forEach(r => {
+      if (r && r.account && r.account.username) {
+        partnerAccounts.push({
+          id: r.id,
+          type: 'restaurant',
+          name: r.name || '',
+          region: r.region || 'hoalu',
+          ward: r.ward || '',
+          address: r.address || '',
+          phone: r.phone || '',
+          fb: r.fb || '',
+          lat: r.lat || 20.2539,
+          lng: r.lng || 105.9750,
+          account: {
+            username: String(r.account.username).trim(),
+            password: String(r.account.password ?? '').trim(),
+            active: r.account.active !== false
+          }
+        });
+      }
+    });
+    (db.specialties || []).forEach(s => {
+      if (s && s.account && s.account.username) {
+        partnerAccounts.push({
+          id: s.id,
+          type: 'specialty',
+          name: s.name || '',
+          region: s.region || 'hoalu',
+          ward: s.ward || '',
+          phone: s.phone || '',
+          fb: s.fb || '',
+          account: {
+            username: String(s.account.username).trim(),
+            password: String(s.account.password ?? '').trim(),
+            active: s.account.active !== false
+          }
+        });
+      }
+    });
+
+    return {
+      pin: String(db.pin || '2026').trim(),
+      adminAccounts: (db.adminAccounts || []).map(a => ({
+        id: a.id,
+        fullName: a.fullName || a.username,
+        username: String(a.username || '').trim(),
+        password: String(a.password ?? '').trim(),
+        role: a.role || 'Super Admin',
+        active: a.active !== false,
+        note: a.note || ''
+      })),
+      partnerAccounts,
+      updatedAt: Date.now(),
+      updatedAtVN: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN'),
+      clientId: CLIENT_ID_33
+    };
+  }
+
+  // 4. Đẩy ngay danh sách tài khoản lên document siêu nhẹ accounts_live
+  window.pushAccountsLiveToFirebase = async function(showToast = false) {
+    const cfg = resolveFirebaseConfigEverywhere();
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      if (showToast) toast('⚠️ Máy này chưa kết nối Firebase nên tài khoản mới chỉ lưu cục bộ trên máy này!', 'error');
+      return false;
+    }
+    try {
+      const fs = await getFirestoreInstance(cfg);
+      if (!fs) return false;
+      const col = cfg.collection || 'nb_heritage_hub';
+      const payload = buildAccountDirectoryPayload();
+      await fs.collection(col).doc(ACCOUNTS_DOC_ID).set(payload, { merge: false });
+      updateAllLoginCloudBars();
+      if (showToast) {
+        toast(`☁️ Đã đồng bộ ${payload.partnerAccounts.length} tài khoản cơ sở & ${payload.adminAccounts.length} tài khoản Admin lên Firebase!`);
+      }
+      return true;
+    } catch (err) {
+      console.error('pushAccountsLiveToFirebase error:', err);
+      if (showToast) {
+        toast('⚠️ Lỗi đẩy tài khoản lên Firebase: ' + (err.message || 'Kiểm tra Firestore Rules'), 'error');
+      }
+      return false;
+    }
+  };
+
+  // 5. Kéo ngay danh sách tài khoản + dữ liệu mới nhất từ Firebase Cloud về máy hiện tại
+  window.pullAccountsAndDataFromCloud = async function(showToast = false) {
+    const cfg = resolveFirebaseConfigEverywhere();
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      if (showToast) toast('Thiết bị này chưa nhập cấu hình Firebase Cloud.', 'error');
+      return false;
+    }
+    try {
+      const fs = await getFirestoreInstance(cfg);
+      if (!fs) return false;
+      const col = cfg.collection || 'nb_heritage_hub';
+      const docId = cfg.docId || 'main_db';
+
+      // Tải song song cả accounts_live (siêu nhanh ~3KB) và main_db
+      const [accSnap, mainSnap] = await Promise.all([
+        fs.collection(col).doc(ACCOUNTS_DOC_ID).get().catch(() => null),
+        fs.collection(col).doc(docId).get().catch(() => null)
+      ]);
+
+      let gotAny = false;
+      if (mainSnap && mainSnap.exists) {
+        const mData = mainSnap.data();
+        if (mData && (mData.restaurants || mData.specialties || mData.landmarks)) {
+          if (Array.isArray(mData.adminAccounts) && mData.adminAccounts.length) db.adminAccounts = mData.adminAccounts;
+          if (mData.pin) db.pin = mData.pin;
+          if (Array.isArray(mData.restaurants) && mData.restaurants.length) db.restaurants = mData.restaurants;
+          if (Array.isArray(mData.specialties) && mData.specialties.length) db.specialties = mData.specialties;
+          if (Array.isArray(mData.landmarks) && mData.landmarks.length) db.landmarks = mData.landmarks;
+          if (Array.isArray(mData.restaurantPosts)) db.restaurantPosts = mData.restaurantPosts;
+          if (Array.isArray(mData.wards) && mData.wards.length) db.wards = mData.wards;
+          if (Array.isArray(mData.reviews)) db.reviews = mData.reviews;
+          if (Array.isArray(mData.orders)) {
+            db.orders = typeof window.mergeCompatibleOrders === 'function'
+              ? window.mergeCompatibleOrders(db.orders || [], mData.orders)
+              : mData.orders;
+          }
+          gotAny = true;
+        }
+      }
+
+      if (accSnap && accSnap.exists) {
+        applyAccountDirectoryPayload(accSnap.data());
+        gotAny = true;
+      }
+
+      if (gotAny) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); } catch (e) {}
+        if (typeof updateCounts === 'function') updateCounts();
+        if (typeof renderLiveNewItemsBanner === 'function') renderLiveNewItemsBanner();
+        if (typeof renderMap === 'function') renderMap();
+        if (ui.tab === 'market' && typeof renderMarket === 'function') renderMarket();
+        if (ui.tab === 'admin' && ui.adminLoggedIn && typeof renderAdminView === 'function') renderAdminView();
+      }
+
+      initialCloudPullDone = true;
+      updateAllLoginCloudBars();
+      if (showToast) {
+        toast(gotAny
+          ? '☁️ Đã đồng bộ tài khoản & dữ liệu mới nhất từ Firebase Cloud!'
+          : '🟢 Đã kết nối Firebase Cloud (chưa có dữ liệu mới trên mây).');
+      }
+      return true;
+    } catch (err) {
+      console.error('pullAccountsAndDataFromCloud error:', err);
+      initialCloudPullDone = true;
+      updateAllLoginCloudBars();
+      if (showToast) toast('⚠️ Không tải được từ Firebase: ' + (err.message || 'Kiểm tra kết nối mạng'), 'error');
+      return false;
+    }
+  };
+
+  // Lắng nghe thời gian thực trên accounts_live
+  async function startAccountsLiveRealtimeListener() {
+    const cfg = resolveFirebaseConfigEverywhere();
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      initialCloudPullDone = true;
+      updateAllLoginCloudBars();
+      return;
+    }
+    try {
+      const fs = await getFirestoreInstance(cfg);
+      if (!fs) return;
+      const col = cfg.collection || 'nb_heritage_hub';
+      if (accountsUnsub) { accountsUnsub(); accountsUnsub = null; }
+      accountsUnsub = fs.collection(col).doc(ACCOUNTS_DOC_ID).onSnapshot(
+        snap => {
+          initialCloudPullDone = true;
+          if (snap.exists) {
+            const d = snap.data();
+            if (d && d.clientId !== CLIENT_ID_33) {
+              applyAccountDirectoryPayload(d);
+              if (ui.tab === 'admin' && ui.adminLoggedIn && ui.adminTab === 'accounts' && typeof renderAdminAccountsManager === 'function') {
+                renderAdminAccountsManager();
+              }
+            }
+          }
+          updateAllLoginCloudBars();
+        },
+        err => {
+          initialCloudPullDone = true;
+          console.warn('accounts_live onSnapshot:', err);
+          updateAllLoginCloudBars();
+        }
+      );
+    } catch (e) {
+      initialCloudPullDone = true;
+    }
+  }
+
+  // 6. Chống ghi đè ngược: Chặn pushAllToFirebase tự động trong 2.5s đầu tiên trước khi hoàn tất lần tải từ Firebase
+  if (typeof window.pushAllToFirebase === 'function') {
+    const _prevPushAll33 = window.pushAllToFirebase;
+    window.pushAllToFirebase = async function(showToast = false) {
+      const cfg = resolveFirebaseConfigEverywhere();
+      if (!cfg || !cfg.apiKey || !cfg.projectId) {
+        return _prevPushAll33(showToast);
+      }
+      if (!showToast && !initialCloudPullDone) {
+        if (!initialCloudPullPromise) {
+          initialCloudPullPromise = window.pullAccountsAndDataFromCloud(false);
+        }
+        await initialCloudPullPromise;
+      }
+      const res = await _prevPushAll33(showToast);
+      await window.pushAccountsLiveToFirebase(false);
+      return res;
+    };
+  }
+
+  // 7. Bọc tất cả các hàm cấp/sửa/xóa tài khoản của Admin & Nhà hàng để đẩy ngay lên Cloud
+  function triggerImmediateAccountSync() {
+    clearTimeout(accountsSyncTimer);
+    accountsSyncTimer = setTimeout(async () => {
+      await window.pushAccountsLiveToFirebase(false);
+      if (typeof window.pushAllToFirebase === 'function') {
+        await window.pushAllToFirebase(false);
+      }
+    }, 80);
+  }
+
+  ['saveRestaurantAccount', 'revokeRestaurantAccount', 'bulkIssueRestaurantAccounts', 'saveAdminAccountForm', 'toggleAdminAccountActive', 'deleteAdminAccount', 'saveNewPin', 'saveMerchantNewPassword'].forEach(fnName => {
+    if (typeof window[fnName] === 'function') {
+      const _origFn = window[fnName];
+      window[fnName] = function(...args) {
+        const out = _origFn.apply(this, args);
+        triggerImmediateAccountSync();
+        return out;
+      };
+    }
+  });
+
+  // 8. Nâng cấp loginMerchant & loginAdmin: Tự động kéo Cloud trước khi từ chối đăng nhập trên điện thoại / máy tính khác!
+  function matchMerchantInLocalDB(u, p) {
+    if (typeof getAllPartners !== 'function') return null;
+    const found = getAllPartners().find(pt =>
+      pt.item && pt.item.account &&
+      String(pt.item.account.username || '').trim().toLowerCase() === u &&
+      String(pt.item.account.password ?? '').trim() === p
+    );
+    return found ? found.item : null;
+  }
+
+  window.loginMerchant = async function() {
+    const u = String(document.getElementById('mc-user-inp')?.value || '').trim().toLowerCase();
+    const p = String(document.getElementById('mc-pass-inp')?.value || '').trim();
+    if (!u || !p) {
+      toast('Vui lòng nhập tên đăng nhập và mật khẩu.', 'error');
+      return;
+    }
+
+    let rs = matchMerchantInLocalDB(u, p);
+    const cfg = resolveFirebaseConfigEverywhere();
+
+    // Nếu chưa khớp trên máy hiện tại (do vừa cấp tài khoản trên máy khác hoặc vừa đổi mật khẩu), tự động đồng bộ từ Firebase Cloud ngay!
+    if (!rs && cfg && cfg.apiKey && cfg.projectId) {
+      const btn = document.querySelector('#merchant-login-box button[onclick*="loginMerchant"]');
+      const oldTxt = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang đồng bộ tài khoản từ Cloud...'; }
+      try {
+        await window.pullAccountsAndDataFromCloud(false);
+        rs = matchMerchantInLocalDB(u, p);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = oldTxt || '🔓 Đăng Nhập Cổng Nhà Hàng'; }
+      }
+    }
+
+    if (!rs) {
+      if (!cfg || !cfg.apiKey || !cfg.projectId) {
+        toast('⚠️ Thiết bị này chưa kết nối Firebase Cloud nên chưa nhận được tài khoản mới cấp! Hãy bấm "⚙️ Kết nối Firebase ngay" ở khung phía trên.', 'error');
+      } else {
+        toast('Sai tên đăng nhập hoặc mật khẩu cơ sở! Hãy bấm 👁️ để kiểm tra lại hoặc bấm "🔄 Đồng bộ tài khoản".', 'error');
+      }
+      return;
+    }
+
+    if (rs.account.active === false) {
+      toast('Tài khoản này đang bị Admin tạm khóa.', 'error');
+      return;
+    }
+
+    ui.merchantRestaurantId = rs.id;
+    try {
+      localStorage.setItem('nb_merchant_active_session_v1', JSON.stringify({
+        restaurantId: rs.id,
+        username: rs.account.username,
+        loggedInAt: Date.now()
+      }));
+      const remember = document.getElementById('mc-remember-chk')?.checked !== false;
+      if (remember) {
+        localStorage.setItem('nb_saved_merchant_login_v2', JSON.stringify({
+          username: rs.account.username,
+          password: p,
+          partnerId: rs.id,
+          savedAt: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN')
+        }));
+      }
+    } catch (e) {}
+
+    const passInp = document.getElementById('mc-pass-inp');
+    if (passInp) { passInp.value = ''; passInp.type = 'password'; }
+    if (typeof renderMerchantPortal === 'function') renderMerchantPortal();
+    toast(`✅ Chào mừng ${rs.name} đăng nhập thành công!`);
+  };
+
+  function matchAdminInLocalDB(uInp, pInp) {
+    if (!Array.isArray(db.adminAccounts) || !db.adminAccounts.length) {
+      db.adminAccounts = JSON.parse(JSON.stringify(DEFAULT_ADMIN_ACCOUNTS));
+    }
+    let acc = db.adminAccounts.find(a =>
+      String(a.username || '').trim().toLowerCase() === uInp &&
+      String(a.password ?? '').trim() === pInp
+    );
+    if (!acc && (uInp === 'admin' || !uInp) && String(db.pin ?? '2026').trim() === pInp) {
+      acc = db.adminAccounts[0];
+    }
+    return acc || null;
+  }
+
+  window.loginAdmin = async function() {
+    const uInp = String(document.getElementById('admin-user-input')?.value || 'admin').trim().toLowerCase();
+    const pInp = String(document.getElementById('admin-pin-input')?.value || '').trim();
+    if (!pInp) {
+      toast('Vui lòng nhập mật khẩu hoặc mã PIN quản trị.', 'error');
+      return;
+    }
+
+    let acc = matchAdminInLocalDB(uInp, pInp);
+    const cfg = resolveFirebaseConfigEverywhere();
+
+    if (!acc && cfg && cfg.apiKey && cfg.projectId) {
+      const btn = document.querySelector('#admin-login-box button[onclick*="loginAdmin"]');
+      const oldTxt = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang kiểm tra tài khoản trên Cloud...'; }
+      try {
+        await window.pullAccountsAndDataFromCloud(false);
+        acc = matchAdminInLocalDB(uInp, pInp);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = oldTxt || '🔓 Đăng Nhập Quản Trị'; }
+      }
+    }
+
+    if (!acc) {
+      toast('Sai tên đăng nhập hoặc mật khẩu Admin! Hãy bấm 👁️ để kiểm tra lại.', 'error');
+      return;
+    }
+    if (acc.active === false) {
+      toast(`Tài khoản "${acc.username}" đang bị tạm khóa!`, 'error');
+      return;
+    }
+
+    ui.adminLoggedIn = true;
+    ui.currentAdminId = acc.id;
+    acc.lastLogin = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+    if (typeof logAdminActivity === 'function') {
+      logAdminActivity(`${acc.fullName} (${acc.username})`, 'Đăng nhập Cổng Quản Trị Admin');
+    }
+    try {
+      const remember = document.getElementById('adm-remember-chk')?.checked !== false;
+      if (remember) {
+        localStorage.setItem('nb_saved_admin_login_v2', JSON.stringify({
+          username: acc.username,
+          password: pInp
+        }));
+      }
+    } catch (e) {}
+    saveDB();
+
+    const pinInp = document.getElementById('admin-pin-input');
+    if (pinInp) { pinInp.value = ''; pinInp.type = 'password'; }
+    if (typeof renderAdminView === 'function') renderAdminView();
+    toast(`✅ Chào mừng ${acc.fullName} đăng nhập Quản Trị!`);
+  };
+
+  // 9. Hỗ trợ dán cả Mã Kết Nối Nhanh (Base64) lẫn đoạn mã firebaseConfig chuẩn vào ô cấu hình
+  if (typeof window.saveAndConnectFirebase === 'function') {
+    const _prevSaveConn33 = window.saveAndConnectFirebase;
+    window.saveAndConnectFirebase = async function() {
+      const codeBox = document.getElementById('fbs-config-code');
+      const raw = (codeBox?.value || '').trim();
+      const decodedShort = decodeFbBase64(raw);
+      if (decodedShort && codeBox) {
+        codeBox.value = JSON.stringify({
+          apiKey: decodedShort.apiKey,
+          authDomain: decodedShort.authDomain,
+          projectId: decodedShort.projectId,
+          appId: decodedShort.appId
+        }, null, 2);
+      }
+      const res = await _prevSaveConn33();
+      initialCloudPullDone = false;
+      await window.pullAccountsAndDataFromCloud(false);
+      await window.pushAccountsLiveToFirebase(false);
+      updateAllLoginCloudBars();
+      return res;
+    };
+  }
+
+  window.copyFirebaseShortConnectCode = function() {
+    const cfg = resolveFirebaseConfigEverywhere();
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      toast('Vui lòng kết nối Firebase trước khi sao chép mã kết nối.', 'error');
+      return;
+    }
+    const clean = {
+      apiKey: cfg.apiKey,
+      authDomain: cfg.authDomain || `${cfg.projectId}.firebaseapp.com`,
+      projectId: cfg.projectId,
+      appId: cfg.appId || '',
+      collection: cfg.collection || 'nb_heritage_hub',
+      docId: cfg.docId || 'main_db'
+    };
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(clean))));
+    copyText(b64, '✅ Đã sao chép MÃ KẾT NỐI NHANH! Gửi qua Zalo cho điện thoại/máy tính khác dán vào ô Firebase là kết nối ngay.');
+  };
+
+  window.copyFirebaseHashShareLink = function() {
+    const cfg = resolveFirebaseConfigEverywhere();
+    if (!cfg || !cfg.apiKey || !cfg.projectId) {
+      toast('Vui lòng kết nối Firebase trên máy này trước.', 'error');
+      return;
+    }
+    const clean = {
+      apiKey: cfg.apiKey,
+      authDomain: cfg.authDomain || `${cfg.projectId}.firebaseapp.com`,
+      projectId: cfg.projectId,
+      appId: cfg.appId || '',
+      collection: cfg.collection || 'nb_heritage_hub',
+      docId: cfg.docId || 'main_db'
+    };
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(clean))));
+    const base = window.location.href.split('?')[0].split('#')[0];
+    const url = `${base}#fb=${b64}`;
+    copyText(url, '✅ Đã sao chép LINK CHỐNG CẮT (#fb=)! Gửi qua Zalo/Messenger để mở trên điện thoại & máy tính khác.');
+  };
+
+  // 10. Thanh trạng thái & nút đồng bộ Firebase trực tiếp trên Cổng Nhà Hàng & Màn hình Đăng nhập
+  function buildCloudStatusHTML(cfg) {
+    if (cfg && cfg.apiKey && cfg.projectId) {
+      return `
+        <div class="v33-cloud-row">
+          <span>🟢 <b>Đã kết nối Firebase Cloud</b> (<code>${esc(cfg.projectId)}</code>)</span>
+          <div style="display:flex; gap:5px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-jade btn-xs" onclick="pullAccountsAndDataFromCloud(true)">🔄 Đồng bộ tài khoản</button>
+            <button type="button" class="btn btn-soft-fb btn-xs" onclick="openFirebaseSyncModal()">⚙️ Cấu hình</button>
+          </div>
+        </div>
+        <div style="font-size:11px; opacity:0.9;">
+          Tự động đồng bộ tài khoản đã cấp từ máy chủ. Nếu vừa được cấp tài khoản mới, bấm <b>Đồng bộ tài khoản</b> hoặc bấm Đăng nhập ngay.
+        </div>
+      `;
+    }
+    return `
+      <div class="v33-cloud-row">
+        <span>⚠️ <b>Thiết bị chưa kết nối Firebase Cloud</b></span>
+        <button type="button" class="btn btn-fb btn-xs" onclick="openFirebaseSyncModal()">⚙️ Kết nối Firebase ngay</button>
+      </div>
+      <div style="font-size:11px;">
+        Thiết bị này đang chạy dữ liệu cục bộ nên chưa thấy tài khoản mới do Admin cấp. Hãy mở bằng <b>Link chia sẻ từ Admin</b> hoặc bấm <b>Kết nối Firebase ngay</b> để dán cấu hình/mã kết nối.
+      </div>
+    `;
+  }
+
+  function updateAllLoginCloudBars() {
+    const cfg = resolveFirebaseConfigEverywhere();
+    const isOk = Boolean(cfg && cfg.apiKey && cfg.projectId);
+
+    [
+      { boxId: 'merchant-login-box', barId: 'v33-mc-cloud-bar' },
+      { boxId: 'admin-login-box', barId: 'v33-adm-cloud-bar' }
+    ].forEach(({ boxId, barId }) => {
+      const box = document.getElementById(boxId);
+      if (!box) return;
+      let bar = document.getElementById(barId);
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.id = barId;
+        const firstGroup = box.querySelector('.form-group');
+        if (firstGroup) box.insertBefore(bar, firstGroup);
+        else box.appendChild(bar);
+      }
+      bar.className = 'v33-cloud-bar ' + (isOk ? 'ok' : 'warn');
+      bar.innerHTML = buildCloudStatusHTML(cfg);
+    });
+
+    // Hiển thị thêm nút đồng bộ tài khoản trong Bảng điều khiển Nhà hàng sau khi đăng nhập
+    const mcBannerBtns = document.querySelector('#merchant-dashboard .merchant-banner > div:last-child');
+    if (mcBannerBtns && !document.getElementById('v33-mc-dash-sync-btn')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'v33-mc-dash-sync-btn';
+      btn.className = 'btn btn-jade btn-sm';
+      btn.textContent = '☁️ Đồng bộ Cloud';
+      btn.onclick = () => window.pullAccountsAndDataFromCloud(true);
+      mcBannerBtns.insertBefore(btn, mcBannerBtns.firstChild);
+    }
+  }
+
+  function enhanceFirebaseModalButtons() {
+    const crossBox = document.getElementById('fbs-cross-device-box');
+    if (crossBox && !document.getElementById('v33-extra-share-row')) {
+      const row = document.createElement('div');
+      row.id = 'v33-extra-share-row';
+      row.style.cssText = 'display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;';
+      row.innerHTML = `
+        <button type="button" class="btn btn-jade btn-xs" style="flex:1;" onclick="copyFirebaseHashShareLink()">🔗 Copy Link chống cắt (#fb=)</button>
+        <button type="button" class="btn btn-soft-gold btn-xs" style="flex:1;" onclick="copyFirebaseShortConnectCode()">🔑 Copy Mã kết nối ngắn</button>
+        <button type="button" class="btn btn-soft-fb btn-xs" style="flex:1;" onclick="pushAccountsLiveToFirebase(true)">👤 Đồng bộ ngay DS Tài khoản</button>
+      `;
+      crossBox.appendChild(row);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    updateAllLoginCloudBars();
+    enhanceFirebaseModalButtons();
+    startAccountsLiveRealtimeListener();
+    window.pullAccountsAndDataFromCloud(false);
+  });
+})();
+</script>
+
+</body>');
     }
 
     // Nhúng kèm cấu hình Firebase (nếu máy hiện tại đã kết nối) để mọi điện thoại/máy tính tự động đồng bộ
