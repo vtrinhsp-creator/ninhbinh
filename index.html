@@ -17562,9 +17562,9 @@ service cloud.firestore {
 </script>
 
 
-<!-- ==================== MÔ-ĐUN v45: GIAO DIỆN ĐẶT HÀNG RIÊNG (NHÀ HÀNG / ĐẶC SẢN / NGHỈ DƯỠNG) & THỰC ĐƠN HÀNG NGÀY TỰ ĐỘNG ẨN KHI HẾT ==================== -->
+<!-- ==================== MÔ-ĐUN v46: DANH MỤC THỰC ĐƠN NHÀ HÀNG (SỐ LƯỢNG KHÔNG GIỚI HẠN / CỤ THỂ, ĐƠN GIÁ, MÓN THƯỜNG NGÀY / ĐẶC BIỆT) & ĐẶT HÀNG RIÊNG ==================== -->
 <style>
-  /* Modal đặt hàng đa giao diện v45 */
+  /* Modal đặt hàng đa giao diện */
   .v45-head-restaurant { background: linear-gradient(135deg, #5b21b6 0%, #9333ea 100%); color: #fff; }
   .v45-head-specialty  { background: linear-gradient(135deg, #065f46 0%, #0d9488 100%); color: #fff; }
   .v45-head-hotel      { background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%); color: #fff; }
@@ -17584,6 +17584,10 @@ service cloud.firestore {
     gap: 6px;
     transition: all 0.15s ease;
   }
+  .v45-item-card.is-special {
+    border-color: #fcd34d;
+    background: linear-gradient(180deg, #fffdf5 0%, #ffffff 100%);
+  }
   .v45-item-card.picked {
     border-color: var(--fb);
     background: #f0f7ff;
@@ -17600,11 +17604,36 @@ service cloud.firestore {
     padding: 2px 7px;
     border-radius: 999px;
   }
+  .v45-type-special {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #92400e;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+  .v45-type-daily {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #475569;
+    background: #eef2f6;
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
   .v45-stock-pill {
     font-size: 10.5px;
     font-weight: 700;
     color: #047857;
     background: #d1fae5;
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+  .v45-stock-unlim {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #1d4ed8;
+    background: #dbeafe;
     padding: 2px 7px;
     border-radius: 999px;
   }
@@ -17647,32 +17676,43 @@ service cloud.firestore {
     gap: 8px;
   }
 
-  /* Bảng quản lý thực đơn hàng ngày trong Cổng Đối Tác */
-  .v45-dm-row {
-    display: grid;
-    grid-template-columns: minmax(150px, 1.8fr) 110px minmax(110px, 1fr) 82px 115px 34px;
-    gap: 6px;
-    align-items: center;
-    padding: 7px 8px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: #fff;
-  }
-  .v45-dm-row.out-of-stock {
+  /* Bảng danh mục thực đơn nhà hàng trong Cổng Đối Tác */
+  #v45-dm-table tr.out-of-stock td {
     background: #fef2f2;
-    border-color: #fca5a5;
+  }
+  .v46-qty-cell {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 185px;
+  }
+  .v46-qty-cell select {
+    flex: 1;
+    min-width: 112px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  .v46-qty-cell input {
+    width: 72px;
+    padding: 6px 7px;
+    font-size: 12.5px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .v46-filter-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
   }
   @media (max-width: 820px) {
     .v45-item-grid { grid-template-columns: 1fr; }
-    .v45-dm-row {
-      grid-template-columns: 1fr 1fr;
-    }
   }
 </style>
 
 <!-- MODAL ĐẶT HÀNG RIÊNG BIỆT THEO LOẠI HÌNH (NHÀ HÀNG / ĐẶC SẢN / NGHỈ DƯỠNG) -->
 <div id="v45-order-modal" class="modal-bg" onclick="if(event.target===this)closeModal('v45-order-modal')">
-  <div class="modal-box" style="max-width:680px;">
+  <div class="modal-box" style="max-width:700px;">
     <div id="v45-ord-head" class="modal-head v45-head-restaurant">
       <div>
         <div id="v45-ord-title" style="font-size:16px; font-weight:800;">🍽️ Đặt Món Trực Tuyến</div>
@@ -17687,9 +17727,14 @@ service cloud.firestore {
 
       <!-- Danh sách món / loại đặc sản / hạng phòng (chỉ hiện mục còn hàng) -->
       <div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
           <b id="v45-list-heading" style="font-size:13.5px;">📋 Danh sách lựa chọn hôm nay</b>
           <span id="v45-avail-badge" class="tag tag-jade">Còn hàng</span>
+        </div>
+        <div id="v46-cust-filter-bar" class="v46-filter-bar">
+          <button type="button" class="reg-chip active" id="v46-cf-all" onclick="setV46CustDishFilter('all')">✨ Tất cả</button>
+          <button type="button" class="reg-chip" id="v46-cf-special" onclick="setV46CustDishFilter('special')">⭐ Món đặc biệt</button>
+          <button type="button" class="reg-chip" id="v46-cf-daily" onclick="setV46CustDishFilter('daily')">🍲 Món thường ngày</button>
         </div>
         <div id="v45-items-grid" class="v45-item-grid"></div>
       </div>
@@ -17737,7 +17782,7 @@ service cloud.firestore {
       <div class="v45-total-bar">
         <div>
           <div style="font-size:11.5px; color:var(--muted); font-weight:700;" id="v45-picked-summary">Chưa chọn mục nào</div>
-          <div style="font-size:11px; color:var(--jade-dark);">Tự động tạo hóa đơn VietQR &amp; trừ tồn kho hàng ngày</div>
+          <div style="font-size:11px; color:var(--jade-dark);">Tự động tạo hóa đơn VietQR &amp; cập nhật thực đơn hàng ngày</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:11px; color:var(--muted); font-weight:700;">TỔNG TẠM TÍNH</div>
@@ -17754,17 +17799,25 @@ service cloud.firestore {
 </div>
 
 <script>
-(function initV45AdaptiveOrderingAndDailyMenu() {
+(function initV46AdaptiveOrderingAndMenuCatalog() {
   let activeOrderState = {
     type: 'restaurant', // 'restaurant' | 'specialty' | 'hotel'
     partnerId: null,
     partner: null,
-    qtyMap: {} // itemId -> qty
+    qtyMap: {},
+    dishFilter: 'all'
   };
+  let merchantMenuFilter = 'all'; // 'all' | 'daily' | 'special'
 
   function todayStrVN() {
     const d = new Date();
     return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  }
+
+  function isItemAvailableV46(it) {
+    if (!it || it.available === false) return false;
+    if (it.unlimited === true) return true;
+    return Number(it.stock) > 0;
   }
 
   function findAnyPartnerV45(type, id) {
@@ -17778,7 +17831,6 @@ service cloud.firestore {
     }
     const r = (db.restaurants || []).find(x => x.id === id);
     if (r) return { type: 'restaurant', item: r };
-    // Fallback search all
     const s2 = (db.specialties || []).find(x => x.id === id);
     if (s2) return { type: 'specialty', item: s2 };
     const h2 = (db.hotels || []).find(x => x.id === id);
@@ -17786,10 +17838,14 @@ service cloud.firestore {
     return null;
   }
 
-  // Tạo thực đơn / danh mục hàng ngày mặc định nếu đối tác chưa nhập
+  // Tạo thực đơn / danh mục hàng ngày mặc định (chuẩn hóa trường unlimited & dishType)
   function ensurePartnerDailyMenu(partner, type) {
     if (!partner) return [];
     if (Array.isArray(partner.dailyMenu) && partner.dailyMenu.length) {
+      partner.dailyMenu.forEach((it, i) => {
+        if (typeof it.unlimited !== 'boolean') it.unlimited = false;
+        if (!it.dishType) it.dishType = (i === 0 ? 'special' : 'daily');
+      });
       return partner.dailyMenu;
     }
 
@@ -17805,10 +17861,12 @@ service cloud.firestore {
         items.push({
           id: `dm_${partner.id}_${i+1}`,
           name: nm,
-          desc: `Món ${i + 1} trong thực đơn hôm nay`,
+          desc: `Món ${i + 1} trong thực đơn`,
           price: p,
           unit: partner.category === 'snack' ? 'Phần' : 'Đĩa / Nồi',
+          unlimited: i > 0, // Món đầu giới hạn suất đặc biệt, các món thường mặc định không giới hạn
           stock: 20,
+          dishType: i === 0 ? 'special' : 'daily',
           available: true
         });
       });
@@ -17816,12 +17874,11 @@ service cloud.firestore {
       const baseP = Number(partner.priceNum) || 85000;
       const baseU = partner.unit || 'Gói tiêu chuẩn';
       items.push(
-        { id: `dm_${partner.id}_1`, name: `${partner.name} — Loại Tiêu Chuẩn`, desc: baseU, price: baseP, unit: baseU, stock: 30, available: true },
-        { id: `dm_${partner.id}_2`, name: `${partner.name} — Loại Đặc Biệt (Hộp lớn)`, desc: 'Tuyển chọn loại 1, đóng gói đẹp', price: Math.round(baseP * 1.45 / 5000) * 5000, unit: 'Hộp đặc biệt', stock: 20, available: true },
-        { id: `dm_${partner.id}_3`, name: `${partner.name} — Set Quà Biếu`, desc: 'Kèm túi quà sang trọng làm quà tặng', price: Math.round(baseP * 2.2 / 5000) * 5000, unit: 'Set quà', stock: 15, available: true }
+        { id: `dm_${partner.id}_1`, name: `${partner.name} — Loại Tiêu Chuẩn`, desc: baseU, price: baseP, unit: baseU, unlimited: true, stock: 30, dishType: 'daily', available: true },
+        { id: `dm_${partner.id}_2`, name: `${partner.name} — Loại Đặc Biệt (Hộp lớn)`, desc: 'Tuyển chọn loại 1, đóng gói đẹp', price: Math.round(baseP * 1.45 / 5000) * 5000, unit: 'Hộp đặc biệt', unlimited: false, stock: 20, dishType: 'special', available: true },
+        { id: `dm_${partner.id}_3`, name: `${partner.name} — Set Quà Biếu`, desc: 'Kèm túi quà sang trọng làm quà tặng', price: Math.round(baseP * 2.2 / 5000) * 5000, unit: 'Set quà', unlimited: false, stock: 15, dishType: 'special', available: true }
       );
     } else {
-      // Hotel / Resort
       if (Array.isArray(partner.rooms) && partner.rooms.length) {
         partner.rooms.forEach((rm, i) => {
           items.push({
@@ -17830,17 +17887,19 @@ service cloud.firestore {
             desc: rm.capacity || '2 người lớn • Bao gồm ăn sáng',
             price: Number(rm.price) || 950000,
             unit: 'Phòng / Đêm',
+            unlimited: false,
             stock: 5,
+            dishType: i >= 2 ? 'special' : 'daily',
             available: true
           });
         });
       } else {
         const baseRoom = Number(partner.priceNum) || 850000;
         items.push(
-          { id: `dm_${partner.id}_1`, name: 'Phòng Đơn (Standard Single)', desc: '1 giường đơn • 1-2 khách', price: Math.round(baseRoom * 0.85 / 10000) * 10000, unit: 'Phòng / Đêm', stock: 6, available: true },
-          { id: `dm_${partner.id}_2`, name: 'Phòng Đôi (Deluxe Double)', desc: '1 giường đôi lớn • 2 khách • View đẹp', price: baseRoom, unit: 'Phòng / Đêm', stock: 8, available: true },
-          { id: `dm_${partner.id}_3`, name: 'Phòng Gia Đình (Family Suite)', desc: '2 giường đôi • 4 khách • Rộng rãi', price: Math.round(baseRoom * 1.65 / 10000) * 10000, unit: 'Phòng / Đêm', stock: 4, available: true },
-          { id: `dm_${partner.id}_4`, name: 'Bungalow / Villa Nghỉ Dưỡng', desc: 'Riêng tư • Sân vườn / Hồ bơi', price: Math.round(baseRoom * 2.4 / 10000) * 10000, unit: 'Căn / Đêm', stock: 2, available: true }
+          { id: `dm_${partner.id}_1`, name: 'Phòng Đơn (Standard Single)', desc: '1 giường đơn • 1-2 khách', price: Math.round(baseRoom * 0.85 / 10000) * 10000, unit: 'Phòng / Đêm', unlimited: false, stock: 6, dishType: 'daily', available: true },
+          { id: `dm_${partner.id}_2`, name: 'Phòng Đôi (Deluxe Double)', desc: '1 giường đôi lớn • 2 khách • View đẹp', price: baseRoom, unit: 'Phòng / Đêm', unlimited: false, stock: 8, dishType: 'daily', available: true },
+          { id: `dm_${partner.id}_3`, name: 'Phòng Gia Đình (Family Suite)', desc: '2 giường đôi • 4 khách • Rộng rãi', price: Math.round(baseRoom * 1.65 / 10000) * 10000, unit: 'Phòng / Đêm', unlimited: false, stock: 4, dishType: 'special', available: true },
+          { id: `dm_${partner.id}_4`, name: 'Bungalow / Villa Nghỉ Dưỡng', desc: 'Riêng tư • Sân vườn / Hồ bơi', price: Math.round(baseRoom * 2.4 / 10000) * 10000, unit: 'Căn / Đêm', unlimited: false, stock: 2, dishType: 'special', available: true }
         );
       }
     }
@@ -17854,6 +17913,14 @@ service cloud.firestore {
   // =========================================================================
   // PHẦN 1: GIAO DIỆN ĐẶT HÀNG RIÊNG BIỆT CHO KHÁCH (NHÀ HÀNG / ĐẶC SẢN / NGHỈ DƯỠNG)
   // =========================================================================
+  window.setV46CustDishFilter = function(flt) {
+    activeOrderState.dishFilter = flt;
+    ['all', 'special', 'daily'].forEach(k => {
+      document.getElementById(`v46-cf-${k}`)?.classList.toggle('active', k === flt);
+    });
+    renderV45ItemsGrid();
+  };
+
   window.openV45OrderModal = function(type, id) {
     const found = findAnyPartnerV45(type, id);
     if (!found) { toast('Không tìm thấy thông tin cơ sở.', 'error'); return; }
@@ -17861,14 +17928,14 @@ service cloud.firestore {
     const pType = found.type;
     const partner = found.item;
     const menu = ensurePartnerDailyMenu(partner, pType);
-    // TỰ ĐỘNG ẨN MÓN / LOẠI / PHÒNG ĐÃ HẾT (available === false hoặc stock <= 0)
-    const availItems = menu.filter(it => it.available !== false && Number(it.stock) > 0);
+    const availItems = menu.filter(isItemAvailableV46);
 
     activeOrderState = {
       type: pType,
       partnerId: partner.id,
       partner,
-      qtyMap: {}
+      qtyMap: {},
+      dishFilter: 'all'
     };
 
     const head = document.getElementById('v45-ord-head');
@@ -17887,13 +17954,19 @@ service cloud.firestore {
     const inp2 = document.getElementById('v45-extra-inp2');
     const submitBtn = document.getElementById('v45-submit-btn');
 
+    const cfSpec = document.getElementById('v46-cf-special');
+    const cfDaily = document.getElementById('v46-cf-daily');
+    ['all', 'special', 'daily'].forEach(k => document.getElementById(`v46-cf-${k}`)?.classList.toggle('active', k === 'all'));
+
     subEl.textContent = `📍 ${partner.ward || ''} • Cập nhật thực đơn ngày ${partner.dailyMenuDate || todayStrVN()}`;
 
     if (pType === 'restaurant') {
       titleEl.textContent = `🍽️ Đặt Món Theo Thực Đơn — ${partner.name}`;
-      guideEl.innerHTML = `🍽️ <b>Thực đơn phục vụ hôm nay:</b> Chọn trực tiếp <b>Món 1, Món 2...</b> và số lượng bạn muốn đặt. Các món đã hết trong ngày được hệ thống tự động ẩn.`;
-      listHeadEl.textContent = `🍽️ Thực đơn nhà hàng hôm nay`;
+      guideEl.innerHTML = `🍽️ <b>Thực đơn nhà hàng hôm nay:</b> Chọn trực tiếp <b>Món 1, Món 2...</b> (gồm <b>Món ăn thường ngày</b> &amp; <b>Món ăn đặc biệt</b>). Các món đã hết tự động ẩn.`;
+      listHeadEl.textContent = `🍽️ Danh mục thực đơn nhà hàng`;
       availBadge.textContent = `Còn ${availItems.length} món`;
+      if (cfSpec) cfSpec.textContent = '⭐ Món ăn đặc biệt';
+      if (cfDaily) cfDaily.textContent = '🍲 Món ăn thường ngày';
       hotelDates.classList.add('hidden');
       extraRow.classList.remove('hidden');
       lbl1.textContent = '👥 Số lượng khách ăn';
@@ -17907,6 +17980,8 @@ service cloud.firestore {
       guideEl.innerHTML = `🎁 <b>Gian hàng đặc sản:</b> Chọn đúng <b>loại / quy cách đóng gói</b> và số lượng bên dưới. Sản phẩm hết hàng trong ngày sẽ tự động ẩn.`;
       listHeadEl.textContent = `🎁 Các loại đặc sản hiện còn hôm nay`;
       availBadge.textContent = `Còn ${availItems.length} loại`;
+      if (cfSpec) cfSpec.textContent = '⭐ Loại đặc biệt / Quà biếu';
+      if (cfDaily) cfDaily.textContent = '📦 Loại tiêu chuẩn';
       hotelDates.classList.add('hidden');
       extraRow.classList.remove('hidden');
       lbl1.textContent = '🏠 Địa chỉ nhận hàng / Giao tận nơi';
@@ -17920,6 +17995,8 @@ service cloud.firestore {
       guideEl.innerHTML = `🏨 <b>Phòng trống hôm nay:</b> Chọn loại phòng (<b>Phòng đơn, Phòng đôi, Gia đình, Villa...</b>) và số đêm lưu trú. Hạng phòng đã hết sẽ tự động ẩn.`;
       listHeadEl.textContent = `🛏️ Hạng phòng còn trống hôm nay`;
       availBadge.textContent = `Còn ${availItems.length} hạng phòng`;
+      if (cfSpec) cfSpec.textContent = '⭐ Phòng VIP / Villa';
+      if (cfDaily) cfDaily.textContent = '🛏️ Phòng tiêu chuẩn';
       hotelDates.classList.remove('hidden');
       extraRow.classList.remove('hidden');
       const todayIso = new Date().toISOString().slice(0, 10);
@@ -17933,7 +18010,6 @@ service cloud.firestore {
       submitBtn.textContent = '🏨 Xác Nhận Đặt Phòng & Xem Hóa Đơn';
     }
 
-    // Tự điền thông tin khách từ lần đặt trước nếu có
     try {
       const prof = JSON.parse(localStorage.getItem('nb_customer_order_profile_v1') || '{}');
       if (prof.name && !document.getElementById('v45-cust-name').value) document.getElementById('v45-cust-name').value = prof.name;
@@ -17949,11 +18025,17 @@ service cloud.firestore {
     if (!grid || !activeOrderState.partner) return;
     const pType = activeOrderState.type;
     const menu = ensurePartnerDailyMenu(activeOrderState.partner, pType);
-    const availItems = menu.filter(it => it.available !== false && Number(it.stock) > 0);
+    const flt = activeOrderState.dishFilter || 'all';
+    const availItems = menu.filter(it => {
+      if (!isItemAvailableV46(it)) return false;
+      if (flt === 'special' && it.dishType !== 'special') return false;
+      if (flt === 'daily' && it.dishType === 'special') return false;
+      return true;
+    });
 
     if (!availItems.length) {
       grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:24px 12px; background:#fef2f2; border:1px dashed #fca5a5; border-radius:12px; color:#991b1b; font-size:13px;">
-        ⛔ Hiện tại tất cả ${pType === 'hotel' ? 'hạng phòng' : (pType === 'specialty' ? 'loại đặc sản' : 'món ăn')} hôm nay đã hết hàng. Vui lòng liên hệ trực tiếp cơ sở hoặc quay lại sau!
+        ⛔ Hiện chưa có ${pType === 'hotel' ? 'hạng phòng' : (pType === 'specialty' ? 'loại đặc sản' : 'món ăn')} nào còn trống trong nhóm này.
       </div>`;
       renderV45Total();
       return;
@@ -17961,13 +18043,26 @@ service cloud.firestore {
 
     grid.innerHTML = availItems.map((it, idx) => {
       const qty = activeOrderState.qtyMap[it.id] || 0;
+      const isSpecial = it.dishType === 'special';
       const badgeLabel = pType === 'restaurant' ? `Món ${idx + 1}` : (pType === 'specialty' ? `Loại ${idx + 1}` : `Phòng ${idx + 1}`);
+      const typeLabel = pType === 'restaurant'
+        ? (isSpecial ? '⭐ Món đặc biệt' : '🍲 Thường ngày')
+        : (pType === 'specialty'
+          ? (isSpecial ? '⭐ Đặc biệt' : '📦 Tiêu chuẩn')
+          : (isSpecial ? '⭐ VIP / Đặc biệt' : '🛏️ Tiêu chuẩn'));
       const stockUnit = pType === 'hotel' ? 'phòng' : (pType === 'specialty' ? 'sp' : 'suất');
+      const stockHtml = it.unlimited === true
+        ? `<span class="v45-stock-unlim">♾️ Không giới hạn</span>`
+        : `<span class="v45-stock-pill">Còn ${it.stock} ${stockUnit}</span>`;
+
       return `
-        <div class="v45-item-card ${qty > 0 ? 'picked' : ''}">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
-            <span class="v45-item-num">${badgeLabel}</span>
-            <span class="v45-stock-pill">Còn ${it.stock} ${stockUnit}</span>
+        <div class="v45-item-card ${isSpecial ? 'is-special' : ''} ${qty > 0 ? 'picked' : ''}">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:5px; flex-wrap:wrap;">
+            <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">
+              <span class="v45-item-num">${badgeLabel}</span>
+              <span class="${isSpecial ? 'v45-type-special' : 'v45-type-daily'}">${typeLabel}</span>
+            </div>
+            ${stockHtml}
           </div>
           <div style="font-size:13.5px; font-weight:800; color:var(--text); line-height:1.3;">${esc(it.name)}</div>
           ${it.desc ? `<div style="font-size:11.5px; color:var(--muted);">${esc(it.desc)}</div>` : ''}
@@ -17994,8 +18089,9 @@ service cloud.firestore {
     const it = menu.find(x => x.id === itemId);
     if (!it) return;
     const cur = activeOrderState.qtyMap[itemId] || 0;
-    const next = Math.max(0, Math.min(Number(it.stock) || 0, cur + delta));
-    if (cur + delta > Number(it.stock)) {
+    const maxCap = it.unlimited === true ? 999 : (Number(it.stock) || 0);
+    const next = Math.max(0, Math.min(maxCap, cur + delta));
+    if (it.unlimited !== true && cur + delta > maxCap) {
       toast(`Chỉ còn tối đa ${it.stock} cho mục "${it.name}" hôm nay.`, 'info');
     }
     if (next <= 0) delete activeOrderState.qtyMap[itemId];
@@ -18028,7 +18124,7 @@ service cloud.firestore {
 
   window.submitV45Order = function(e) {
     e.preventDefault();
-    const { type, partnerId, partner, qtyMap } = activeOrderState;
+    const { type, partner, qtyMap } = activeOrderState;
     if (!partner) return;
 
     const menu = ensurePartnerDailyMenu(partner, type);
@@ -18069,17 +18165,18 @@ service cloud.firestore {
         unitPrice: unitP * nights,
         lineTotal
       });
-      // TRỪ TỒN KHO HÀNG NGÀY -> NẾU VỀ 0 TỰ ĐỘNG ẨN KHỎI GIAO DIỆN KHÁCH
-      it.stock = Math.max(0, (Number(it.stock) || 0) - qty);
-      if (it.stock <= 0) it.available = false;
+      // CHỈ TRỪ TỒN KHO VỚI MỤC CÓ SỐ LƯỢNG CỤ THỂ (KHÔNG TRỪ VỚI MỤC KHÔNG GIỚI HẠN)
+      if (it.unlimited !== true) {
+        it.stock = Math.max(0, (Number(it.stock) || 0) - qty);
+        if (it.stock <= 0) it.available = false;
+      }
     });
 
     const itemsSummary = orderItems.map(i => `${i.name} x${i.qty}`).join(', ');
     const noteParts = [];
     if (type === 'hotel' && checkin) noteParts.push(`Nhận phòng: ${checkin} (${nights} đêm, ${extra1})`);
     if (type === 'specialty' && extra1) noteParts.push(`Giao tới: ${extra1}`);
-    if (type === 'restaurant' && extra2) noteParts.push(extra2);
-    else if (extra2) noteParts.push(extra2);
+    if (extra2) noteParts.push(extra2);
 
     const code = (type === 'hotel' ? 'DP-' : 'DH-') + Math.floor(100000 + Math.random() * 900000);
     const newOrder = {
@@ -18114,14 +18211,13 @@ service cloud.firestore {
     if (typeof updateCounts === 'function') updateCounts();
     if (typeof renderMerchantDailyMenuPanel === 'function') renderMerchantDailyMenuPanel();
     closeModal('v45-order-modal');
-    toast(`✅ Đặt thành công mã đơn #${code}! Tồn kho hôm nay đã tự động cập nhật.`);
+    toast(`✅ Đặt thành công mã đơn #${code}!`);
 
     if (typeof openExistingOrderInvoiceModal === 'function') {
       openExistingOrderInvoiceModal(newOrder.id);
     }
   };
 
-  // Hook vào openQuickOrderModal và openRoomBookingModal để dùng giao diện đặt hàng mới
   window.openQuickOrderModal = function(type, id) {
     window.openV45OrderModal(type, id);
   };
@@ -18130,8 +18226,25 @@ service cloud.firestore {
   };
 
   // =========================================================================
-  // PHẦN 2: QUẢN LÝ THỰC ĐƠN / LOẠI ĐẶC SẢN / HẠNG PHÒNG HÀNG NGÀY CHO ĐỐI TÁC
+  // PHẦN 2: DANH MỤC THỰC ĐƠN NHÀ HÀNG TRONG TÀI KHOẢN ĐỐI TÁC
+  // (Tên món ăn | Số lượng: Không giới hạn hoặc Cụ thể | Đơn giá | Món thường ngày / Đặc biệt)
   // =========================================================================
+  window.setV46MerchantMenuFilter = function(flt) {
+    merchantMenuFilter = flt;
+    renderMerchantDailyMenuPanel();
+  };
+
+  window.v46OnQtyModeChange = function(selEl) {
+    const tr = selEl.closest('tr');
+    const stockInp = tr?.querySelector('.v45-dm-stock');
+    if (!stockInp) return;
+    const isUnlim = selEl.value === 'unlimited';
+    stockInp.classList.toggle('hidden', isUnlim);
+    if (!isUnlim && (!stockInp.value || Number(stockInp.value) <= 0)) {
+      stockInp.value = 20;
+    }
+  };
+
   window.renderMerchantDailyMenuPanel = function() {
     const dash = document.getElementById('merchant-dashboard');
     if (!dash) return;
@@ -18156,97 +18269,176 @@ service cloud.firestore {
       else dash.insertBefore(panel, dash.children[1] || null);
     }
 
-    const activeCount = menu.filter(x => x.available !== false && Number(x.stock) > 0).length;
+    const activeCount = menu.filter(isItemAvailableV46).length;
     const hiddenCount = menu.length - activeCount;
+    const specialCount = menu.filter(x => x.dishType === 'special').length;
+    const dailyCount = menu.length - specialCount;
 
     const cfg = type === 'restaurant'
-      ? { icon: '🍽️', title: 'Thực Đơn Phục Vụ Hàng Ngày (Nhà Hàng)', itemLbl: 'Tên món ăn', unitPh: 'Đĩa / Nồi / Suất', addLbl: '+ Thêm món mới' }
+      ? {
+          icon: '🍽️',
+          title: 'Danh Mục Thực Đơn Nhà Hàng',
+          colName: 'Tên món ăn',
+          colType: 'Loại món ăn',
+          optDaily: '🍲 Món ăn thường ngày',
+          optSpecial: '⭐ Món ăn đặc biệt',
+          addLbl: '+ Thêm món ăn'
+        }
       : type === 'specialty'
-      ? { icon: '🎁', title: 'Danh Mục Loại Đặc Sản Hàng Ngày (Cửa Hàng Đặc Sản)', itemLbl: 'Tên loại đặc sản', unitPh: 'Gói / Hộp / Chai', addLbl: '+ Thêm loại đặc sản' }
-      : { icon: '🏨', title: 'Bảng Hạng Phòng Trống Hàng Ngày (Khách Sạn / Nghỉ Dưỡng)', itemLbl: 'Tên hạng phòng (Đơn, Đôi...)', unitPh: 'Phòng / Đêm', addLbl: '+ Thêm hạng phòng' };
+      ? {
+          icon: '🎁',
+          title: 'Danh Mục Loại Đặc Sản Hàng Ngày',
+          colName: 'Tên loại đặc sản',
+          colType: 'Phân loại hàng',
+          optDaily: '📦 Hàng thường ngày',
+          optSpecial: '⭐ Hàng đặc biệt / Quà biếu',
+          addLbl: '+ Thêm loại đặc sản'
+        }
+      : {
+          icon: '🏨',
+          title: 'Danh Mục Hạng Phòng Nghỉ Dưỡng Hàng Ngày',
+          colName: 'Tên hạng phòng',
+          colType: 'Phân loại phòng',
+          optDaily: '🛏️ Phòng tiêu chuẩn',
+          optSpecial: '⭐ Phòng đặc biệt / VIP',
+          addLbl: '+ Thêm hạng phòng'
+        };
+
+    const visibleRows = menu.filter(it => {
+      if (merchantMenuFilter === 'special') return it.dishType === 'special';
+      if (merchantMenuFilter === 'daily') return it.dishType !== 'special';
+      return true;
+    });
 
     panel.innerHTML = `
       <div class="panel-head">
         <div>
-          <div style="font-size:15.5px; font-weight:800;">${cfg.icon} ${cfg.title}</div>
+          <div style="font-size:16px; font-weight:800;">${cfg.icon} ${cfg.title} (${menu.length} mục)</div>
           <div style="font-size:12px; color:var(--muted);">
             📅 Ngày: <b>${esc(partner.dailyMenuDate || todayStrVN())}</b> •
-            <span style="color:var(--success); font-weight:700;">✅ Đang hiện: ${activeCount}</span> •
-            <span style="color:var(--danger); font-weight:700;">⛔ Hết (tự động ẩn): ${hiddenCount}</span>
+            <span style="color:var(--success); font-weight:700;">✅ Đang bán: ${activeCount}</span> •
+            <span style="color:var(--danger); font-weight:700;">⛔ Hết (tự ẩn): ${hiddenCount}</span> •
+            <span>⭐ Đặc biệt: <b>${specialCount}</b></span> •
+            <span>🍲 Thường ngày: <b>${dailyCount}</b></span>
           </div>
         </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap;">
           <button type="button" class="btn btn-soft-jade btn-sm" onclick="v45ResetDailyStock()">🔄 Mở bán ngày mới</button>
           <button type="button" class="btn btn-soft-fb btn-sm" onclick="v45AddDailyMenuRow()">${cfg.addLbl}</button>
-          <button type="button" class="btn btn-fb btn-sm" onclick="v45SaveDailyMenu()">💾 Lưu Thực Đơn Hôm Nay</button>
+          <button type="button" class="btn btn-fb btn-sm" onclick="v45SaveDailyMenu()">💾 Lưu Danh Mục Thực Đơn</button>
         </div>
       </div>
 
-      <div id="v45-dm-list" style="display:flex; flex-direction:column; gap:7px;">
-        ${menu.map((it, idx) => {
-          const isOut = it.available === false || Number(it.stock) <= 0;
-          return `
-            <div class="v45-dm-row ${isOut ? 'out-of-stock' : ''}" data-id="${esc(it.id)}">
-              <input type="text" class="form-control v45-dm-name" value="${esc(it.name)}" placeholder="${cfg.itemLbl} ${idx + 1}">
-              <input type="number" class="form-control v45-dm-price" value="${Number(it.price) || 0}" min="0" step="5000" placeholder="Giá VNĐ">
-              <input type="text" class="form-control v45-dm-unit" value="${esc(it.unit || '')}" placeholder="${cfg.unitPh}">
-              <input type="number" class="form-control v45-dm-stock" value="${Number(it.stock) || 0}" min="0" title="Số lượng còn hôm nay (0 = tự động ẩn)" placeholder="SL">
-              <button type="button" class="btn btn-xs ${isOut ? 'btn-danger' : 'btn-jade'}" onclick="v45ToggleDailyItem('${esc(it.id)}')">
-                ${isOut ? '⛔ Hết (Đang ẩn)' : '✅ Còn hàng'}
-              </button>
-              <button type="button" class="btn btn-xs btn-soft" style="color:var(--danger);" title="Xóa mục" onclick="v45RemoveDailyItem('${esc(it.id)}')">✕</button>
-            </div>`;
-        }).join('')}
+      <div class="v46-filter-bar">
+        <button type="button" class="reg-chip ${merchantMenuFilter === 'all' ? 'active' : ''}" onclick="setV46MerchantMenuFilter('all')">📋 Tất cả (${menu.length})</button>
+        <button type="button" class="reg-chip ${merchantMenuFilter === 'daily' ? 'active' : ''}" onclick="setV46MerchantMenuFilter('daily')">${cfg.optDaily} (${dailyCount})</button>
+        <button type="button" class="reg-chip ${merchantMenuFilter === 'special' ? 'active' : ''}" onclick="setV46MerchantMenuFilter('special')">${cfg.optSpecial} (${specialCount})</button>
+      </div>
+
+      <div class="table-wrap" style="max-height:420px;">
+        <table class="data-table" id="v45-dm-table">
+          <thead>
+            <tr>
+              <th style="min-width:190px;">${cfg.colName}</th>
+              <th style="min-width:190px;">Số lượng (Không giới hạn / Cụ thể)</th>
+              <th style="min-width:120px;">Đơn giá (VNĐ)</th>
+              <th style="min-width:165px;">${cfg.colType}</th>
+              <th style="min-width:140px;">Trạng thái &amp; Xóa</th>
+            </tr>
+          </thead>
+          <tbody id="v45-dm-list">
+            ${visibleRows.map((it, idx) => {
+              const isOut = !isItemAvailableV46(it);
+              const isUnlim = it.unlimited === true;
+              const isSpecial = it.dishType === 'special';
+              return `
+                <tr class="v45-dm-row-tr ${isOut ? 'out-of-stock' : ''}" data-id="${esc(it.id)}">
+                  <td>
+                    <input type="text" class="form-control v45-dm-name" style="padding:6px 8px; font-weight:700;" value="${esc(it.name)}" placeholder="${cfg.colName} ${idx + 1}">
+                  </td>
+                  <td>
+                    <div class="v46-qty-cell">
+                      <select class="form-control v45-dm-qtymode" onchange="v46OnQtyModeChange(this)">
+                        <option value="unlimited" ${isUnlim ? 'selected' : ''}>♾️ Không giới hạn</option>
+                        <option value="specific" ${!isUnlim ? 'selected' : ''}>🔢 Số lượng cụ thể</option>
+                      </select>
+                      <input type="number" class="form-control v45-dm-stock ${isUnlim ? 'hidden' : ''}" value="${Number(it.stock) || 0}" min="0" placeholder="SL">
+                    </div>
+                  </td>
+                  <td>
+                    <input type="number" class="form-control v45-dm-price" style="padding:6px 8px; font-weight:800; color:#b45309;" value="${Number(it.price) || 0}" min="0" step="5000" placeholder="Đơn giá">
+                  </td>
+                  <td>
+                    <select class="form-control v45-dm-dishtype" style="padding:6px 8px; font-size:12px; font-weight:700;">
+                      <option value="daily" ${!isSpecial ? 'selected' : ''}>${cfg.optDaily}</option>
+                      <option value="special" ${isSpecial ? 'selected' : ''}>${cfg.optSpecial}</option>
+                    </select>
+                  </td>
+                  <td style="white-space:nowrap;">
+                    <button type="button" class="btn btn-xs ${isOut ? 'btn-danger' : 'btn-jade'}" onclick="v45ToggleDailyItem('${esc(it.id)}')">
+                      ${isOut ? '⛔ Hết (Ẩn)' : '✅ Còn bán'}
+                    </button>
+                    <button type="button" class="btn btn-xs btn-soft" style="color:var(--danger);" title="Xóa món" onclick="v45RemoveDailyItem('${esc(it.id)}')">✕</button>
+                  </td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="5" style="text-align:center; padding:18px; color:var(--muted);">Chưa có mục nào trong phân loại này. Bấm nút <b>Thêm</b> để tạo mới.</td></tr>'}
+          </tbody>
+        </table>
       </div>
       <div style="font-size:11.5px; color:var(--muted); margin-top:8px;">
-        💡 <b>Cơ chế tự động ẩn:</b> Khi số lượng tồn kho về <b>0</b> (hoặc bấm nút chuyển sang <b>⛔ Hết</b>), mục đó sẽ <b>tự động ẩn hoàn toàn</b> trên giao diện đặt hàng của khách.
+        💡 <b>Ghi chú:</b> Chọn <b>♾️ Không giới hạn</b> nếu bán không giới hạn số suất trong ngày; chọn <b>🔢 Số lượng cụ thể</b> để hệ thống tự động trừ tồn kho khi khách đặt và <b>tự động ẩn</b> khi số lượng về 0.
       </div>
     `;
   };
 
-  function collectDailyMenuFromDOM(partner) {
-    const rows = document.querySelectorAll('#v45-dm-list .v45-dm-row');
-    if (!rows.length) return partner.dailyMenu || [];
-    const oldMap = new Map((partner.dailyMenu || []).map(x => [x.id, x]));
-    const updated = [];
-    rows.forEach((row, i) => {
-      const id = row.dataset.id || `dm_${partner.id}_${Date.now()}_${i}`;
-      const old = oldMap.get(id) || {};
+  function syncVisibleRowsIntoMenu(partner) {
+    const full = Array.isArray(partner.dailyMenu) ? [...partner.dailyMenu] : [];
+    const rows = document.querySelectorAll('#v45-dm-list tr.v45-dm-row-tr');
+    if (!rows.length) return full;
+
+    rows.forEach((row) => {
+      const id = row.dataset.id;
+      const item = full.find(x => x.id === id);
+      if (!item) return;
       const name = row.querySelector('.v45-dm-name')?.value.trim();
-      if (!name) return;
-      const price = Math.max(0, Number(row.querySelector('.v45-dm-price')?.value) || 0);
-      const unit = row.querySelector('.v45-dm-unit')?.value.trim() || old.unit || '';
-      const stock = Math.max(0, Number(row.querySelector('.v45-dm-stock')?.value) || 0);
-      const isOutClass = row.classList.contains('out-of-stock');
-      const available = stock > 0 && !isOutClass;
-      updated.push({ id, name, desc: old.desc || '', price, unit, stock, available });
+      if (name) item.name = name;
+      const qtyMode = row.querySelector('.v45-dm-qtymode')?.value || 'specific';
+      item.unlimited = qtyMode === 'unlimited';
+      item.stock = item.unlimited ? Math.max(1, Number(item.stock) || 20) : Math.max(0, Number(row.querySelector('.v45-dm-stock')?.value) || 0);
+      item.price = Math.max(0, Number(row.querySelector('.v45-dm-price')?.value) || 0);
+      item.dishType = row.querySelector('.v45-dm-dishtype')?.value === 'special' ? 'special' : 'daily';
+      const isOutRow = row.classList.contains('out-of-stock');
+      if (!item.unlimited && item.stock <= 0) item.available = false;
+      else if (!isOutRow) item.available = true;
     });
-    return updated;
+    return full;
   }
 
   window.v45SaveDailyMenu = function() {
     const found = findAnyPartnerV45(null, ui.merchantRestaurantId);
     if (!found) return;
-    found.item.dailyMenu = collectDailyMenuFromDOM(found.item);
+    found.item.dailyMenu = syncVisibleRowsIntoMenu(found.item);
     found.item.dailyMenuDate = todayStrVN();
     saveDB();
     renderMerchantDailyMenuPanel();
-    toast('✅ Đã lưu thực đơn / danh mục hàng ngày thành công!');
+    toast('✅ Đã lưu Danh mục thực đơn nhà hàng thành công!');
   };
 
   window.v45AddDailyMenuRow = function() {
     const found = findAnyPartnerV45(null, ui.merchantRestaurantId);
     if (!found) return;
-    const list = collectDailyMenuFromDOM(found.item);
+    const list = syncVisibleRowsIntoMenu(found.item);
     const idx = list.length + 1;
-    const defName = found.type === 'hotel' ? `Hạng phòng mới ${idx}` : (found.type === 'specialty' ? `Loại đặc sản ${idx}` : `Món ${idx}`);
+    const defName = found.type === 'hotel' ? `Hạng phòng mới ${idx}` : (found.type === 'specialty' ? `Loại đặc sản ${idx}` : `Món ăn mới ${idx}`);
     list.push({
       id: `dm_${found.item.id}_${Date.now().toString(36)}`,
       name: defName,
       desc: '',
-      price: found.type === 'hotel' ? 850000 : 100000,
-      unit: found.type === 'hotel' ? 'Phòng / Đêm' : (found.type === 'specialty' ? 'Gói / Hộp' : 'Suất'),
+      price: found.type === 'hotel' ? 850000 : 120000,
+      unit: found.type === 'hotel' ? 'Phòng / Đêm' : (found.type === 'specialty' ? 'Gói / Hộp' : 'Đĩa / Suất'),
+      unlimited: found.type !== 'hotel',
       stock: found.type === 'hotel' ? 5 : 20,
+      dishType: merchantMenuFilter === 'special' ? 'special' : 'daily',
       available: true
     });
     found.item.dailyMenu = list;
@@ -18258,15 +18450,15 @@ service cloud.firestore {
   window.v45ToggleDailyItem = function(itemId) {
     const found = findAnyPartnerV45(null, ui.merchantRestaurantId);
     if (!found) return;
-    const list = collectDailyMenuFromDOM(found.item);
+    const list = syncVisibleRowsIntoMenu(found.item);
     const it = list.find(x => x.id === itemId);
     if (!it) return;
-    if (it.available && it.stock > 0) {
+    if (isItemAvailableV46(it)) {
       it.available = false;
-      it.stock = 0;
+      if (!it.unlimited) it.stock = 0;
     } else {
       it.available = true;
-      if (it.stock <= 0) it.stock = found.type === 'hotel' ? 5 : 20;
+      if (!it.unlimited && Number(it.stock) <= 0) it.stock = found.type === 'hotel' ? 5 : 20;
     }
     found.item.dailyMenu = list;
     found.item.dailyMenuDate = todayStrVN();
@@ -18278,7 +18470,7 @@ service cloud.firestore {
   window.v45RemoveDailyItem = function(itemId) {
     const found = findAnyPartnerV45(null, ui.merchantRestaurantId);
     if (!found) return;
-    const list = collectDailyMenuFromDOM(found.item).filter(x => x.id !== itemId);
+    const list = syncVisibleRowsIntoMenu(found.item).filter(x => x.id !== itemId);
     found.item.dailyMenu = list;
     saveDB();
     renderMerchantDailyMenuPanel();
@@ -18291,15 +18483,14 @@ service cloud.firestore {
     const defStock = found.type === 'hotel' ? 5 : (found.type === 'specialty' ? 30 : 20);
     list.forEach(it => {
       it.available = true;
-      it.stock = defStock;
+      if (!it.unlimited) it.stock = defStock;
     });
     found.item.dailyMenuDate = todayStrVN();
     saveDB();
     renderMerchantDailyMenuPanel();
-    toast(`🔄 Đã làm mới tồn kho ngày ${todayStrVN()} (tất cả mục đã mở bán lại)!`);
+    toast(`🔄 Đã mở bán ngày mới ${todayStrVN()} (tất cả mục đã mở bán lại)!`);
   };
 
-  // Hook vào renderMerchantPortal & mountOrUpdateMerchantOrdersCartDock
   ['renderMerchantPortal', 'loginMerchant', 'logoutMerchant', 'mountOrUpdateMerchantOrdersCartDock'].forEach(fnName => {
     if (typeof window[fnName] === 'function') {
       const _orig = window[fnName];
