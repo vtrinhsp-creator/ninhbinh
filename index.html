@@ -1913,18 +1913,18 @@
         <div class="kpi-card"><div class="kpi-ic" style="background:var(--fb-light);">📍</div><div><div style="font-size:21px; font-weight:800;" id="kpi-wd">129</div><div style="font-size:12px; color:var(--muted);">Phường / Xã (32P, 97X)</div></div></div>
       </div>
 
-      <div class="panel" style="padding:12px 16px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; background:linear-gradient(90deg,#f0f7ff,#ffffff);">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div style="width:40px;height:40px;border-radius:11px;background:var(--fb);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;">🛡️</div>
+      <div class="panel" id="adm-status-bar" style="padding:14px 18px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; background:linear-gradient(90deg,#f0f7ff,#ffffff);">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:44px;height:44px;border-radius:12px;background:var(--fb);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🛡️</div>
           <div>
-            <div style="font-size:14px; font-weight:800; color:var(--text);" id="adm-current-name">Quản trị viên Hệ thống</div>
-            <div style="font-size:11.5px; color:var(--muted);" id="adm-current-meta">Tài khoản: admin • Toàn quyền quản trị</div>
+            <div style="font-size:16.5px; font-weight:800; color:var(--text); line-height:1.3;" id="adm-current-name">Quản trị viên Hệ thống</div>
+            <div style="font-size:13.5px; color:var(--muted); margin-top:2px;" id="adm-current-meta">Tài khoản: admin • Toàn quyền quản trị</div>
           </div>
         </div>
-        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-          <button class="btn btn-soft-fb btn-xs" onclick="setAdminTab('accounts')">👤 Quản trị Tài khoản</button>
-          <button class="btn btn-outline btn-xs" onclick="openChangePinModal()">🔑 Đổi mật khẩu / PIN</button>
-          <button class="btn btn-soft btn-xs" style="color:var(--danger);" onclick="logoutAdmin()">🔒 Đăng xuất</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-soft-fb btn-sm" style="font-size:13.5px;" onclick="setAdminTab('accounts')">👤 Quản trị Tài khoản</button>
+          <button class="btn btn-outline btn-sm" style="font-size:13.5px;" onclick="openChangePinModal()">🔑 Đổi mật khẩu / PIN</button>
+          <button class="btn btn-soft btn-sm" style="font-size:13.5px; color:var(--danger);" onclick="logoutAdmin()">🔒 Đăng xuất</button>
         </div>
       </div>
 
@@ -2822,7 +2822,7 @@ const DEFAULT_ADMIN_ACCOUNTS = [
     id: 'adm01',
     username: 'admin',
     password: '2026',
-    fullName: 'Quản trị viên Chính (Super Admin)',
+    fullName: 'Quản trị viên Chính',
     role: 'Super Admin',
     active: true,
     note: 'Tài khoản quản trị gốc toàn hệ thống',
@@ -4744,7 +4744,10 @@ function renderAdminView() {
   if (ui.adminLoggedIn) {
     const acc = getCurrentAdminAccount();
     if (acc) {
-      document.getElementById('adm-current-name').textContent = `${acc.fullName} (${acc.role})`;
+      const _fn = String(acc.fullName || '').trim();
+      const _rl = String(acc.role || '').trim();
+      const _hasRole = _rl && _fn.toLowerCase().includes(_rl.toLowerCase());
+      document.getElementById('adm-current-name').textContent = (_rl && !_hasRole) ? `${_fn} (${_rl})` : _fn;
       document.getElementById('adm-current-meta').textContent = `👤 Tài khoản: ${acc.username} • 🕒 Đăng nhập gần nhất: ${acc.lastLogin || formatNowVN()}`;
     }
     updateCounts();
@@ -16387,8 +16390,8 @@ service cloud.firestore {
 <script>
 (function initV39HideAdminNav() {
   function syncAdminNavVisibility() {
-    const isAdmin = Boolean(window.ui && ui.adminLoggedIn);
-    const isMerchant = Boolean(window.ui && ui.merchantRestaurantId);
+    const isAdmin = Boolean(typeof ui !== 'undefined' && ui.adminLoggedIn);
+    const isMerchant = Boolean(typeof ui !== 'undefined' && ui.merchantRestaurantId);
     // Chỉ hiển thị nút Admin trên thanh công cụ khi Admin đã đăng nhập (ẩn hoàn toàn với khách và tài khoản nhà hàng)
     const showAdminBtn = isAdmin && !isMerchant;
     document.body.classList.toggle('nb-admin-visible', showAdminBtn);
@@ -16404,7 +16407,7 @@ service cloud.firestore {
 
   // Mở Cổng Quản trị Admin bí mật (dành riêng cho Quản trị viên)
   window.openSecretAdminPortal = function() {
-    if (window.ui && ui.merchantRestaurantId) {
+    if (typeof ui !== 'undefined' && ui.merchantRestaurantId) {
       if (typeof toast === 'function') {
         toast('🔒 Vui lòng đăng xuất tài khoản Đối tác trước khi mở Cổng Quản trị Admin.', 'info');
       }
@@ -16565,24 +16568,32 @@ service cloud.firestore {
 
   // 1. Đồng bộ trạng thái ẩn/hiện nút "Đơn của tôi" (chỉ hiện khi đăng nhập Admin hoặc Tài khoản Nhà hàng)
   function syncOrdersCartVisibility() {
-    const isAdmin = Boolean(window.ui && ui.adminLoggedIn);
-    const isMerchant = Boolean(window.ui && ui.merchantRestaurantId);
+    const isAdmin = Boolean(typeof ui !== 'undefined' && ui.adminLoggedIn);
+    const isMerchant = Boolean(typeof ui !== 'undefined' && ui.merchantRestaurantId);
     const isStaff = isAdmin || isMerchant;
     document.body.classList.toggle('nb-staff-logged-in', isStaff);
 
     // Cập nhật badge số lượng giỏ gom đơn trên nút "Đơn của tôi"
-    const cartQty = (window.db && Array.isArray(db.cart)) ? db.cart.reduce((a, b) => a + (Number(b.qty) || 0), 0) : 0;
+    const cartQty = (typeof db !== 'undefined' && Array.isArray(db.cart)) ? db.cart.reduce((a, b) => a + (Number(b.qty) || 0), 0) : 0;
     const hdrBtn = document.getElementById('hdr-my-orders-btn');
     if (hdrBtn) {
+      if (!hdrBtn.dataset.v41Labeled) {
+        hdrBtn.innerHTML = '🧾 <span>Đơn &amp; Giỏ</span>';
+        hdrBtn.dataset.v41Labeled = '1';
+      }
       let badge = document.getElementById('hdr-orders-cart-badge');
       if (!badge) {
         badge = document.createElement('span');
         badge.id = 'hdr-orders-cart-badge';
         hdrBtn.appendChild(badge);
       }
-      badge.textContent = cartQty;
-      badge.style.display = cartQty > 0 ? 'inline-flex' : 'none';
-      hdrBtn.title = 'Đơn của tôi & Giỏ gom đơn (Dành cho Admin và Tài khoản Nhà hàng)';
+      const unpaidOrdCnt = (typeof db !== 'undefined' && Array.isArray(db.orders))
+        ? db.orders.filter(o => !(o.paymentStatus === 'Đã thanh toán' || o.status === 'Hoàn tất' || Boolean(o.paidAt))).length
+        : 0;
+      const totalBadge = cartQty > 0 ? cartQty : unpaidOrdCnt;
+      badge.textContent = totalBadge;
+      badge.style.display = totalBadge > 0 ? 'inline-flex' : 'none';
+      hdrBtn.title = `Đơn chưa thanh toán (${unpaidOrdCnt} đơn) & Giỏ gom đơn (${cartQty} món)`;
     }
 
     const mobCartCnt = document.getElementById('mob-cart-cnt');
@@ -16646,7 +16657,7 @@ service cloud.firestore {
       dstBody.innerHTML = srcBody.innerHTML;
     }
     if (dstFoot) {
-      const hasItems = Boolean(window.db && Array.isArray(db.cart) && db.cart.length > 0);
+      const hasItems = Boolean(typeof db !== 'undefined' && Array.isArray(db.cart) && db.cart.length > 0);
       dstFoot.classList.toggle('hidden', !hasItems);
     }
     syncOrdersCartVisibility();
@@ -16729,6 +16740,824 @@ service cloud.firestore {
       syncOrdersCartVisibility();
     }, 450);
   });
+})();
+</script>
+
+
+<!-- ==================== MÔ-ĐUN v42: CHUYỂN GIỎ & ĐƠN VỀ DƯỚI THANH CÔNG CỤ QUẢN LÝ RIÊNG CỦA NHÀ HÀNG ==================== -->
+<style>
+  /* Khi đang đăng nhập tài khoản Nhà hàng (không phải Admin), ẩn nút Đơn & Giỏ trên Header vì đã chuyển về dưới thanh công cụ quản lý riêng của nhà hàng */
+  body.nb-merchant-logged-in:not(.nb-admin-visible) #hdr-my-orders-btn {
+    display: none !important;
+  }
+
+  /* Thanh Giỏ & Đơn đặt ngay dưới thanh công cụ quản lý riêng của nhà hàng */
+  #mc-orders-cart-dock {
+    background: linear-gradient(90deg, #eff6ff 0%, #f0fdfa 55%, #faf5ff 100%);
+    border: 1.5px solid #93c5fd;
+    border-radius: 15px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .mc-dock-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .mc-dock-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .mc-dock-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .mc-dock-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 800;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mc-dock-badge-dark {
+    background: var(--fb);
+    color: #fff;
+  }
+  @media (max-width: 820px) {
+    #mc-orders-cart-dock {
+      padding: 11px 12px;
+    }
+    .mc-dock-actions {
+      width: 100%;
+    }
+    .mc-dock-actions .btn {
+      flex: 1 1 auto;
+    }
+  }
+</style>
+
+<script>
+(function initV42MerchantOrdersCartDock() {
+  function mountOrUpdateMerchantOrdersCartDock() {
+    const isMerchant = Boolean(typeof ui !== 'undefined' && ui.merchantRestaurantId);
+    document.body.classList.toggle('nb-merchant-logged-in', isMerchant);
+
+    const dash = document.getElementById('merchant-dashboard');
+    if (!dash) return;
+    const banner = dash.querySelector('.merchant-banner');
+    if (!banner) return;
+
+    let dock = document.getElementById('mc-orders-cart-dock');
+    if (!isMerchant) {
+      if (dock) dock.classList.add('hidden');
+      return;
+    }
+
+    if (!dock) {
+      dock = document.createElement('div');
+      dock.id = 'mc-orders-cart-dock';
+      banner.insertAdjacentElement('afterend', dock);
+    }
+    dock.classList.remove('hidden');
+
+    const cartQty = (typeof db !== 'undefined' && Array.isArray(db.cart))
+      ? db.cart.reduce((a, b) => a + (Number(b.qty) || 0), 0)
+      : 0;
+    const isPaidOrd = o => Boolean(o && (o.paymentStatus === 'Đã thanh toán' || o.status === 'Hoàn tất' || o.paidAt));
+    const allOrders = (typeof db !== 'undefined' && Array.isArray(db.orders)) ? db.orders : [];
+    const unpaidAll = allOrders.filter(o => !isPaidOrd(o));
+    const unpaidMy = allOrders.filter(o => o.partnerId === ui.merchantRestaurantId && !isPaidOrd(o));
+
+    dock.innerHTML = `
+      <div>
+        <div class="mc-dock-title">🧾 Đơn Hàng, 🛒 Giỏ Gom Đơn &amp; 📊 Báo Cáo Nhà Hàng</div>
+        <div class="mc-dock-sub">Chỉ hiển thị số lượng đơn chưa thanh toán. Các đơn đã thanh toán được lưu vào mục Xuất Báo Cáo.</div>
+      </div>
+      <div class="mc-dock-actions">
+        <button type="button" class="btn btn-jade btn-sm" style="font-size:13px;" onclick="scrollToMerchantOnlineOrders()">
+          📦 Đơn đặt tại quán ${unpaidMy.length > 0 ? `<span class="mc-dock-badge">${unpaidMy.length}</span>` : ''}
+        </button>
+        <button type="button" class="btn btn-fb btn-sm" style="font-size:13px;" onclick="if(typeof openMyOrdersBridgeModal==='function') openMyOrdersBridgeModal('orders')">
+          🧾 Đơn của tôi ${unpaidAll.length > 0 ? `<span class="mc-dock-badge">${unpaidAll.length}</span>` : ''}
+        </button>
+        <button type="button" class="btn btn-soft-fb btn-sm" style="font-size:13px;" onclick="if(typeof openMyOrdersBridgeModal==='function') openMyOrdersBridgeModal('cart')">
+          🛒 Giỏ gom đơn ${cartQty > 0 ? `<span class="mc-dock-badge mc-dock-badge-dark">${cartQty}</span>` : ''}
+        </button>
+        <button type="button" class="btn btn-gold btn-sm" style="font-size:13px;" onclick="openMerchantReportModal()">
+          📊 Xuất Báo Cáo
+        </button>
+      </div>
+    `;
+  }
+
+  window.scrollToMerchantOnlineOrders = function() {
+    const panel = document.getElementById('mc-online-orders-panel');
+    if (panel) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (typeof openMyOrdersBridgeModal === 'function') {
+      openMyOrdersBridgeModal('orders');
+    }
+  };
+
+  window.mountOrUpdateMerchantOrdersCartDock = mountOrUpdateMerchantOrdersCartDock;
+
+  // Hook vào các hàm đồng bộ & đăng nhập/đăng xuất để luôn cập nhật tức thì
+  ['syncOrdersCartVisibility', 'renderMerchantPortal', 'loginMerchant', 'logoutMerchant', 'renderAdminView', 'logoutAdmin', 'updateCounts', 'renderCart'].forEach(fnName => {
+    if (typeof window[fnName] === 'function') {
+      const _orig = window[fnName];
+      window[fnName] = function() {
+        const res = _orig.apply(this, arguments);
+        mountOrUpdateMerchantOrdersCartDock();
+        return res;
+      };
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    mountOrUpdateMerchantOrdersCartDock();
+    setTimeout(mountOrUpdateMerchantOrdersCartDock, 480);
+  });
+})();
+</script>
+
+
+<!-- ==================== MÔ-ĐUN v44: BÁO CÁO NHÀ HÀNG CHUYÊN SÂU (THEO THÁNG, MÓN ĂN, TÀI CHÍNH TỪNG MÓN, THỜI GIAN ĐẶT) ==================== -->
+<style>
+  .mcr-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    background: #eaf0f6;
+    padding: 4px;
+    border-radius: 12px;
+  }
+  .mcr-tab-btn {
+    padding: 7.5px 8px;
+    border-radius: 9px;
+    font-size: 12.2px;
+    font-weight: 800;
+    color: var(--muted);
+    background: transparent;
+    transition: all 0.16s ease;
+    text-align: center;
+  }
+  .mcr-tab-btn.active {
+    background: #fff;
+    color: var(--fb);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  .mcr-bar-bg {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .mcr-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1877f2, #0d9488);
+  }
+  @media (max-width: 720px) {
+    .mcr-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
+
+<div id="mc-report-modal" class="modal-bg" onclick="if(event.target===this)closeModal('mc-report-modal')">
+  <div class="modal-box" style="max-width:860px;">
+    <div class="modal-head" style="background:linear-gradient(135deg,#0f766e 0%,#1877f2 100%); color:#fff;">
+      <div>
+        <div id="mcr-title" style="font-size:16px; font-weight:800;">📊 Báo Cáo Tổng Hợp &amp; Tài Chính Nhà Hàng</div>
+        <div id="mcr-sub" style="font-size:12px; opacity:0.92;">Thống kê theo tháng, món ăn ưa chuộng, tài chính từng món &amp; khung giờ khách đặt</div>
+      </div>
+      <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,0.22); color:#fff;" onclick="closeModal('mc-report-modal')">✕</button>
+    </div>
+
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+      <!-- Bộ lọc báo cáo -->
+      <div class="row-3">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">📅 Lọc theo tháng</label>
+          <select id="mcr-month-filter" class="form-control" onchange="renderMerchantReportModal()">
+            <option value="all">📅 Tất cả các tháng</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">💳 Trạng thái thanh toán</label>
+          <select id="mcr-pay-filter" class="form-control" onchange="renderMerchantReportModal()">
+            <option value="all">📋 Tất cả đơn hàng</option>
+            <option value="paid">✅ Chỉ đơn đã thanh toán</option>
+            <option value="unpaid">🔴 Chỉ đơn chưa thanh toán</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">🔍 Tìm khách / mã đơn / món</label>
+          <input id="mcr-search" class="form-control" placeholder="Tên khách, SĐT, mã đơn, tên món..." oninput="renderMerchantReportModal()">
+        </div>
+      </div>
+
+      <!-- KPI Tổng hợp -->
+      <div id="mcr-kpi-grid" class="rpt-kpi-grid"></div>
+
+      <!-- Thanh chuyển 4 tab báo cáo -->
+      <div class="mcr-tabs">
+        <button type="button" id="mcr-t-monthly" class="mcr-tab-btn active" onclick="switchMerchantReportTab('monthly')">📅 Theo Tháng</button>
+        <button type="button" id="mcr-t-dishes" class="mcr-tab-btn" onclick="switchMerchantReportTab('dishes')">🍽️ Món Ăn &amp; Tài Chính</button>
+        <button type="button" id="mcr-t-time" class="mcr-tab-btn" onclick="switchMerchantReportTab('time')">🕒 Thời Gian Đặt</button>
+        <button type="button" id="mcr-t-orders" class="mcr-tab-btn" onclick="switchMerchantReportTab('orders')">📋 Chi Tiết Đơn</button>
+      </div>
+
+      <!-- PANE 1: THỐNG KÊ THEO THÁNG -->
+      <div id="mcr-pane-monthly">
+        <div class="table-wrap" style="max-height:310px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tháng</th>
+                <th>Tổng đơn</th>
+                <th>Đã thanh toán</th>
+                <th>Chưa thanh toán</th>
+                <th>Lượt khách</th>
+                <th>Đã thu</th>
+                <th>Chưa thu</th>
+                <th>Tổng doanh thu</th>
+              </tr>
+            </thead>
+            <tbody id="mcr-monthly-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PANE 2: THỐNG KÊ MÓN ĂN & TÀI CHÍNH THEO TỪNG MÓN -->
+      <div id="mcr-pane-dishes" class="hidden">
+        <div id="mcr-dish-highlight" class="info-box" style="margin-bottom:8px; background:#f0fdfa; border-color:#99f6e4; font-size:12.2px;"></div>
+        <div class="table-wrap" style="max-height:290px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tên món ăn / Dịch vụ</th>
+                <th>Số đơn chọn</th>
+                <th>Tổng SL</th>
+                <th>Đơn giá TB</th>
+                <th>Doanh thu đã thu</th>
+                <th>Chưa thu</th>
+                <th>Tổng tài chính (% tỷ trọng)</th>
+              </tr>
+            </thead>
+            <tbody id="mcr-dishes-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PANE 3: THỐNG KÊ THỜI GIAN KHÁCH ĐẶT -->
+      <div id="mcr-pane-time" class="hidden">
+        <div id="mcr-time-highlight" class="info-box" style="margin-bottom:10px; background:#fffbeb; border-color:#fcd34d; font-size:12.2px;"></div>
+        <div class="row-2">
+          <div class="info-box" style="background:#fff;">
+            <div style="font-weight:800; color:var(--fb); margin-bottom:6px;">⏰ Phân Bố Theo Khung Giờ Đặt</div>
+            <div id="mcr-time-slots"></div>
+          </div>
+          <div class="info-box" style="background:#fff;">
+            <div style="font-weight:800; color:var(--jade-dark); margin-bottom:6px;">📆 Phân Bố Theo Thứ Trong Tuần</div>
+            <div id="mcr-time-weekdays"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANE 4: DANH SÁCH CHI TIẾT ĐƠN HÀNG -->
+      <div id="mcr-pane-orders" class="hidden">
+        <div class="table-wrap" style="max-height:310px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Mã đơn &amp; Thời gian</th>
+                <th>Khách hàng</th>
+                <th>Chi tiết món / dịch vụ</th>
+                <th>Thành tiền</th>
+                <th>Thanh toán</th>
+              </tr>
+            </thead>
+            <tbody id="mcr-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot" style="justify-content:space-between;">
+      <div style="display:flex; gap:7px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-jade btn-sm" onclick="exportMerchantReportCSV()">📥 Tải Báo Cáo Excel (CSV Đầy Đủ)</button>
+        <button type="button" class="btn btn-fb btn-sm" onclick="printMerchantReport()">🖨️ In / Lưu PDF Báo Cáo Đầy Đủ</button>
+      </div>
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('mc-report-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initV44MerchantReport() {
+  let mcrActiveTab = 'monthly';
+
+  function isPaid(o) {
+    return Boolean(o && (o.paymentStatus === 'Đã thanh toán' || o.status === 'Hoàn tất' || o.paidAt));
+  }
+
+  function getOrderAmount(o) {
+    return Number(o.finalAmount) || Number(o.totalAmount) || 0;
+  }
+
+  // Tách ngày/tháng/năm & giờ từ chuỗi DD/MM/YYYY HH:mm hoặc ISO
+  function parseOrderDateInfo(o) {
+    const raw = String(o?.createdAt || o?.paidAt || '').trim();
+    let day = 1, month = 1, year = 2026, hour = 12, minute = 0, valid = false;
+    const mVN = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{1,2}))?/);
+    if (mVN) {
+      day = Number(mVN[1]); month = Number(mVN[2]); year = Number(mVN[3]);
+      if (mVN[4] !== undefined) { hour = Number(mVN[4]); minute = Number(mVN[5] || 0); }
+      valid = true;
+    } else if (raw) {
+      const d = new Date(raw);
+      if (!isNaN(d.getTime())) {
+        day = d.getDate(); month = d.getMonth() + 1; year = d.getFullYear();
+        hour = d.getHours(); minute = d.getMinutes(); valid = true;
+      }
+    }
+    const monthKey = valid ? `${String(month).padStart(2, '0')}/${year}` : 'Không rõ';
+    const sortMonth = valid ? (year * 100 + month) : 0;
+    const jsDate = valid ? new Date(year, month - 1, day, hour, minute) : null;
+    const weekdayIdx = jsDate ? jsDate.getDay() : -1; // 0=CN, 1=T2...
+    return { day, month, year, hour, minute, monthKey, sortMonth, weekdayIdx, valid };
+  }
+
+  // Trích xuất danh sách món ăn & tài chính từng món từ đơn hàng
+  function extractOrderDishes(o) {
+    const orderAmt = getOrderAmount(o);
+    if (Array.isArray(o.items) && o.items.length) {
+      const rawLines = o.items.map(it => {
+        const name = String(it.name || it.title || 'Món ăn').trim();
+        const qty = Math.max(1, Number(it.qty) || 1);
+        const unitPrice = Number(it.unitPrice ?? it.price ?? it.priceNum) || 0;
+        const lineTotal = Number(it.lineTotal ?? it.subtotal) || (unitPrice * qty);
+        return { name, qty, unitPrice, lineTotal };
+      });
+      const sumLine = rawLines.reduce((s, x) => s + x.lineTotal, 0);
+      if (sumLine <= 0 && orderAmt > 0) {
+        const totalQty = rawLines.reduce((s, x) => s + x.qty, 0) || 1;
+        rawLines.forEach(x => {
+          x.lineTotal = Math.round(orderAmt * (x.qty / totalQty));
+          x.unitPrice = Math.round(x.lineTotal / x.qty);
+        });
+      }
+      return rawLines;
+    }
+
+    // Nếu đơn không có mảng items chi tiết -> phân tích từ itemsSummary hoặc gom vào Đặt bàn / Dịch vụ
+    const summary = String(o.itemsSummary || '').trim();
+    if (summary && !/^đặt bàn/i.test(summary)) {
+      const parts = summary.split(/[,;
+]+/).map(s => s.trim()).filter(Boolean);
+      if (parts.length) {
+        const parsed = parts.map(p => {
+          const m = p.match(/^(.+?)\s*[x×]\s*(\d+)$/i);
+          return { name: m ? m[1].trim() : p, qty: m ? Math.max(1, Number(m[2])) : 1, unitPrice: 0, lineTotal: 0 };
+        });
+        const totalQty = parsed.reduce((s, x) => s + x.qty, 0) || 1;
+        parsed.forEach(x => {
+          x.lineTotal = orderAmt > 0 ? Math.round(orderAmt * (x.qty / totalQty)) : 0;
+          x.unitPrice = x.qty > 0 ? Math.round(x.lineTotal / x.qty) : 0;
+        });
+        return parsed;
+      }
+    }
+
+    const fallbackName = summary || `Đặt bàn / Dịch vụ (${o.partySize || 1} khách)`;
+    return [{ name: fallbackName, qty: 1, unitPrice: orderAmt, lineTotal: orderAmt }];
+  }
+
+  function populateMonthFilterOptions() {
+    const sel = document.getElementById('mcr-month-filter');
+    if (!sel || typeof ui === 'undefined' || !ui.merchantRestaurantId) return;
+    const prev = sel.value || 'all';
+    const all = (typeof db !== 'undefined' && Array.isArray(db.orders)) ? db.orders : [];
+    const monthMap = new Map();
+    all.filter(o => o.partnerId === ui.merchantRestaurantId).forEach(o => {
+      const d = parseOrderDateInfo(o);
+      if (!monthMap.has(d.monthKey)) monthMap.set(d.monthKey, d.sortMonth);
+    });
+    const sortedMonths = [...monthMap.entries()].sort((a, b) => b[1] - a[1]);
+    sel.innerHTML = `<option value="all">📅 Tất cả các tháng (${sortedMonths.length} tháng)</option>` +
+      sortedMonths.map(([mk]) => `<option value="${esc(mk)}">📅 Tháng ${esc(mk)}</option>`).join('');
+    if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+  }
+
+  function getMerchantFilteredOrders() {
+    if (typeof ui === 'undefined' || !ui.merchantRestaurantId) return [];
+    const all = (typeof db !== 'undefined' && Array.isArray(db.orders)) ? db.orders : [];
+    const monthFlt = document.getElementById('mcr-month-filter')?.value || 'all';
+    const payFlt = document.getElementById('mcr-pay-filter')?.value || 'all';
+    const q = (document.getElementById('mcr-search')?.value || '').trim().toLowerCase();
+
+    return all.filter(o => {
+      if (o.partnerId !== ui.merchantRestaurantId) return false;
+      if (monthFlt !== 'all' && parseOrderDateInfo(o).monthKey !== monthFlt) return false;
+      const paid = isPaid(o);
+      if (payFlt === 'paid' && !paid) return false;
+      if (payFlt === 'unpaid' && paid) return false;
+      if (q) {
+        const itemsTxt = Array.isArray(o.items) ? o.items.map(i => i.name).join(' ') : '';
+        const hay = `${o.code || ''} ${o.customerName || ''} ${o.customerPhone || ''} ${o.itemsSummary || ''} ${itemsTxt}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function buildAnalytics(list) {
+    // 1. Theo tháng
+    const mMap = new Map();
+    // 2. Theo món ăn & tài chính từng món
+    const dMap = new Map();
+    // 3. Theo khung giờ & thứ trong tuần
+    const slots = [
+      { key: 'morning',   label: '🌅 Sáng (06:00 - 11:00)',  orders: 0, rev: 0 },
+      { key: 'noon',      label: '☀️ Trưa (11:00 - 14:00)',  orders: 0, rev: 0 },
+      { key: 'afternoon', label: '🌤️ Chiều (14:00 - 17:00)', orders: 0, rev: 0 },
+      { key: 'evening',   label: '🌙 Tối (17:00 - 22:00)',   orders: 0, rev: 0 },
+      { key: 'night',     label: '🌌 Đêm (22:00 - 06:00)',   orders: 0, rev: 0 }
+    ];
+    const hourCounts = new Array(24).fill(0);
+    const weekdays = [
+      { idx: 1, label: 'Thứ 2', orders: 0, rev: 0 },
+      { idx: 2, label: 'Thứ 3', orders: 0, rev: 0 },
+      { idx: 3, label: 'Thứ 4', orders: 0, rev: 0 },
+      { idx: 4, label: 'Thứ 5', orders: 0, rev: 0 },
+      { idx: 5, label: 'Thứ 6', orders: 0, rev: 0 },
+      { idx: 6, label: 'Thứ 7', orders: 0, rev: 0 },
+      { idx: 0, label: 'Chủ nhật', orders: 0, rev: 0 }
+    ];
+
+    let totalRev = 0, revPaid = 0, revUnpaid = 0, paidCnt = 0, unpaidCnt = 0, totalGuests = 0;
+
+    list.forEach(o => {
+      const paid = isPaid(o);
+      const amt = getOrderAmount(o);
+      const guests = Number(o.partySize) || 1;
+      const dt = parseOrderDateInfo(o);
+
+      totalRev += amt;
+      totalGuests += guests;
+      if (paid) { paidCnt++; revPaid += amt; } else { unpaidCnt++; revUnpaid += amt; }
+
+      // Monthly
+      if (!mMap.has(dt.monthKey)) {
+        mMap.set(dt.monthKey, { monthKey: dt.monthKey, sortMonth: dt.sortMonth, total: 0, paid: 0, unpaid: 0, guests: 0, revPaid: 0, revUnpaid: 0, revTotal: 0 });
+      }
+      const mr = mMap.get(dt.monthKey);
+      mr.total++; mr.guests += guests; mr.revTotal += amt;
+      if (paid) { mr.paid++; mr.revPaid += amt; } else { mr.unpaid++; mr.revUnpaid += amt; }
+
+      // Dishes
+      const seenInOrder = new Set();
+      extractOrderDishes(o).forEach(it => {
+        const key = it.name.toLowerCase();
+        if (!dMap.has(key)) {
+          dMap.set(key, { name: it.name, orderCount: 0, qty: 0, revPaid: 0, revUnpaid: 0, revTotal: 0 });
+        }
+        const dr = dMap.get(key);
+        if (!seenInOrder.has(key)) { dr.orderCount++; seenInOrder.add(key); }
+        dr.qty += it.qty;
+        dr.revTotal += it.lineTotal;
+        if (paid) dr.revPaid += it.lineTotal; else dr.revUnpaid += it.lineTotal;
+      });
+
+      // Time slots & hours
+      const h = dt.hour;
+      if (h >= 0 && h < 24) hourCounts[h]++;
+      const slotIdx = (h >= 6 && h < 11) ? 0 : (h >= 11 && h < 14) ? 1 : (h >= 14 && h < 17) ? 2 : (h >= 17 && h < 22) ? 3 : 4;
+      slots[slotIdx].orders++;
+      slots[slotIdx].rev += amt;
+
+      const wd = weekdays.find(w => w.idx === dt.weekdayIdx);
+      if (wd) { wd.orders++; wd.rev += amt; }
+    });
+
+    const monthly = [...mMap.values()].sort((a, b) => b.sortMonth - a.sortMonth);
+    const dishes = [...dMap.values()].sort((a, b) => b.qty - a.qty || b.revTotal - a.revTotal);
+    const totalDishRev = dishes.reduce((s, d) => s + d.revTotal, 0) || 1;
+    dishes.forEach(d => {
+      d.avgPrice = d.qty > 0 ? Math.round(d.revTotal / d.qty) : 0;
+      d.sharePct = Number(((d.revTotal / totalDishRev) * 100).toFixed(1));
+    });
+
+    const peakSlot = [...slots].sort((a, b) => b.orders - a.orders)[0];
+    let peakHour = 12, peakHourCnt = 0;
+    hourCounts.forEach((c, h) => { if (c > peakHourCnt) { peakHourCnt = c; peakHour = h; } });
+
+    return {
+      totalOrders: list.length, paidCnt, unpaidCnt, totalGuests, totalRev, revPaid, revUnpaid,
+      monthly, dishes, slots, weekdays, peakSlot, peakHour, peakHourCnt
+    };
+  }
+
+  window.switchMerchantReportTab = function(tab) {
+    mcrActiveTab = tab;
+    ['monthly', 'dishes', 'time', 'orders'].forEach(k => {
+      document.getElementById(`mcr-t-${k}`)?.classList.toggle('active', k === tab);
+      document.getElementById(`mcr-pane-${k}`)?.classList.toggle('hidden', k !== tab);
+    });
+  };
+
+  window.openMerchantReportModal = function() {
+    const partner = typeof findPartnerById === 'function' ? findPartnerById(ui.merchantRestaurantId) : null;
+    if (!partner || !partner.item) {
+      toast('Vui lòng đăng nhập tài khoản nhà hàng trước.', 'error');
+      return;
+    }
+    const rs = partner.item;
+    document.getElementById('mcr-title').textContent = `📊 Báo Cáo Tổng Hợp: ${rs.name}`;
+    document.getElementById('mcr-sub').textContent = `📍 ${rs.ward || ''} • Tài khoản: ${rs.account?.username || ''} • Cập nhật ${typeof formatNowVN === 'function' ? formatNowVN() : ''}`;
+    populateMonthFilterOptions();
+    renderMerchantReportModal();
+    window.switchMerchantReportTab(mcrActiveTab || 'monthly');
+    document.getElementById('mc-report-modal').classList.add('open');
+  };
+
+  window.renderMerchantReportModal = function() {
+    const list = getMerchantFilteredOrders();
+    const an = buildAnalytics(list);
+
+    // 1. KPI
+    const kpiEl = document.getElementById('mcr-kpi-grid');
+    if (kpiEl) {
+      kpiEl.innerHTML = `
+        <div class="rpt-kpi">
+          <div class="rk-lbl">📦 Tổng đơn hàng</div>
+          <div class="rk-val" style="color:var(--fb);">${an.totalOrders} đơn</div>
+          <div class="rk-sub">👥 ${an.totalGuests} lượt khách • ${an.monthly.length} tháng</div>
+        </div>
+        <div class="rpt-kpi">
+          <div class="rk-lbl">✅ Doanh thu đã thu</div>
+          <div class="rk-val" style="color:var(--success);">${fmtVND(an.revPaid)}</div>
+          <div class="rk-sub">${an.paidCnt} đơn đã thanh toán</div>
+        </div>
+        <div class="rpt-kpi">
+          <div class="rk-lbl">🔴 Đơn chưa thanh toán</div>
+          <div class="rk-val" style="color:var(--danger);">${fmtVND(an.revUnpaid)}</div>
+          <div class="rk-sub">${an.unpaidCnt} đơn đang chờ</div>
+        </div>
+      `;
+    }
+
+    // 2. Pane Theo tháng
+    const mTb = document.getElementById('mcr-monthly-tbody');
+    if (mTb) {
+      mTb.innerHTML = an.monthly.length ? an.monthly.map(m => `
+        <tr>
+          <td><b>📅 Tháng ${esc(m.monthKey)}</b></td>
+          <td><b>${m.total}</b></td>
+          <td><span class="tag tag-jade">${m.paid}</span></td>
+          <td><span class="tag ${m.unpaid > 0 ? 'tag-red' : 'tag-slate'}">${m.unpaid}</span></td>
+          <td>👥 ${m.guests}</td>
+          <td style="color:var(--success); font-weight:700;">${fmtVND(m.revPaid)}</td>
+          <td style="color:var(--danger); font-weight:700;">${fmtVND(m.revUnpaid)}</td>
+          <td style="font-weight:900; color:#b45309;">${fmtVND(m.revTotal)}</td>
+        </tr>`).join('')
+        : '<tr><td colspan="8" style="text-align:center; padding:22px; color:var(--muted);">Chưa có dữ liệu đơn hàng theo tháng.</td></tr>';
+    }
+
+    // 3. Pane Món ăn & Tài chính từng món
+    const dHi = document.getElementById('mcr-dish-highlight');
+    if (dHi) {
+      if (an.dishes.length) {
+        const topQty = an.dishes[0];
+        const topRev = [...an.dishes].sort((a, b) => b.revTotal - a.revTotal)[0];
+        dHi.innerHTML = `🏆 <b>Món khách chọn nhiều nhất:</b> <b style="color:var(--jade-dark);">${esc(topQty.name)}</b> (${topQty.qty} phần / ${topQty.orderCount} đơn) &nbsp;•&nbsp; 💰 <b>Món doanh thu cao nhất:</b> <b style="color:#b45309;">${esc(topRev.name)}</b> (${fmtVND(topRev.revTotal)} — ${topRev.sharePct}%)`;
+      } else {
+        dHi.textContent = 'Chưa có dữ liệu món ăn trong kỳ lọc.';
+      }
+    }
+    const dTb = document.getElementById('mcr-dishes-tbody');
+    if (dTb) {
+      dTb.innerHTML = an.dishes.length ? an.dishes.map((d, i) => `
+        <tr>
+          <td><b>${i + 1}</b></td>
+          <td><b>${esc(d.name)}</b></td>
+          <td>${d.orderCount} đơn</td>
+          <td><span class="tag tag-fb">x${d.qty}</span></td>
+          <td>${d.avgPrice > 0 ? fmtVND(d.avgPrice) : '—'}</td>
+          <td style="color:var(--success); font-weight:700;">${fmtVND(d.revPaid)}</td>
+          <td style="color:var(--danger); font-weight:700;">${fmtVND(d.revUnpaid)}</td>
+          <td style="min-width:140px;">
+            <b style="color:#b45309;">${fmtVND(d.revTotal)}</b> <span style="font-size:11px; color:var(--muted);">(${d.sharePct}%)</span>
+            <div class="mcr-bar-bg"><div class="mcr-bar-fill" style="width:${Math.min(100, d.sharePct)}%;"></div></div>
+          </td>
+        </tr>`).join('')
+        : '<tr><td colspan="8" style="text-align:center; padding:22px; color:var(--muted);">Chưa có dữ liệu món ăn.</td></tr>';
+    }
+
+    // 4. Pane Thời gian khách đặt
+    const tHi = document.getElementById('mcr-time-highlight');
+    if (tHi) {
+      tHi.innerHTML = an.totalOrders > 0
+        ? `⏰ <b>Khung giờ vàng:</b> <b style="color:#b45309;">${esc(an.peakSlot.label)}</b> (${an.peakSlot.orders} đơn — ${fmtVND(an.peakSlot.rev)}) &nbsp;•&nbsp; 🔥 <b>Giờ cao điểm nhất:</b> <b>${String(an.peakHour).padStart(2, '0')}:00 - ${String((an.peakHour + 1) % 24).padStart(2, '0')}:00</b> (${an.peakHourCnt} đơn)`
+        : 'Chưa có dữ liệu thời gian đặt hàng trong kỳ lọc.';
+    }
+    const maxSlot = Math.max(1, ...an.slots.map(s => s.orders));
+    const slotEl = document.getElementById('mcr-time-slots');
+    if (slotEl) {
+      slotEl.innerHTML = an.slots.map(s => {
+        const pct = Math.round((s.orders / maxSlot) * 100);
+        return `
+          <div style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+              <span><b>${esc(s.label)}</b></span>
+              <span><b>${s.orders} đơn</b> • <span style="color:#b45309;">${fmtVND(s.rev)}</span></span>
+            </div>
+            <div class="mcr-bar-bg"><div class="mcr-bar-fill" style="width:${pct}%;"></div></div>
+          </div>`;
+      }).join('');
+    }
+    const maxWd = Math.max(1, ...an.weekdays.map(w => w.orders));
+    const wdEl = document.getElementById('mcr-time-weekdays');
+    if (wdEl) {
+      wdEl.innerHTML = an.weekdays.map(w => {
+        const pct = Math.round((w.orders / maxWd) * 100);
+        return `
+          <div style="margin-bottom:7px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px;">
+              <span><b>${esc(w.label)}</b></span>
+              <span><b>${w.orders} đơn</b> • <span style="color:var(--jade-dark);">${fmtVND(w.rev)}</span></span>
+            </div>
+            <div class="mcr-bar-bg"><div class="mcr-bar-fill" style="width:${pct}%; background:linear-gradient(90deg,#0d9488,#10b981);"></div></div>
+          </div>`;
+      }).join('');
+    }
+
+    // 5. Pane Chi tiết đơn hàng
+    const tb = document.getElementById('mcr-tbody');
+    if (tb) {
+      if (!list.length) {
+        tb.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:22px; color:var(--muted);">Chưa có đơn hàng nào khớp bộ lọc báo cáo.</td></tr>';
+      } else {
+        tb.innerHTML = list.map(o => {
+          const paid = isPaid(o);
+          const amt = getOrderAmount(o);
+          const itemsTxt = Array.isArray(o.items) && o.items.length
+            ? o.items.map(i => `${i.name} x${i.qty}`).join(', ')
+            : (o.itemsSummary || o.note || 'Đặt bàn / dịch vụ');
+          return `
+            <tr>
+              <td>
+                <b style="color:var(--fb);">#${esc(o.code || o.id)}</b>
+                <div style="font-size:11px; color:var(--muted);">🕒 ${esc(o.createdAt || '')}</div>
+              </td>
+              <td>
+                <b>${esc(o.customerName || 'Khách lẻ')}</b>
+                <div style="font-size:11px; color:var(--muted);">📞 ${esc(formatPhoneDisplay(o.customerPhone || ''))} • 👥 ${o.partySize || 1} khách</div>
+              </td>
+              <td style="font-size:11.5px; max-width:240px;">${esc(itemsTxt)}</td>
+              <td style="font-weight:800; color:#b45309; white-space:nowrap;">${amt > 0 ? fmtVND(amt) : esc(o.totalText || 'Theo thời giá')}</td>
+              <td>
+                <span class="pay-pill ${paid ? 'pay-paid' : 'pay-unpaid'}">${paid ? '✅ Đã thanh toán' : '🔴 Chưa thanh toán'}</span>
+              </td>
+            </tr>`;
+        }).join('');
+      }
+    }
+  };
+
+  window.exportMerchantReportCSV = function() {
+    const partner = typeof findPartnerById === 'function' ? findPartnerById(ui.merchantRestaurantId) : null;
+    const rs = partner?.item;
+    if (!rs) return;
+    const list = getMerchantFilteredOrders();
+    const an = buildAnalytics(list);
+    const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const row = arr => arr.map(q).join(',');
+    const lines = [];
+
+    // PHẦN 1: TỔNG HỢP
+    lines.push(row(['BÁO CÁO TỔNG HỢP NHÀ HÀNG', rs.name, `Ngày xuất: ${typeof formatNowVN === 'function' ? formatNowVN() : ''}`]));
+    lines.push(row(['Tổng đơn', an.totalOrders, 'Đã thanh toán', an.paidCnt, 'Chưa thanh toán', an.unpaidCnt, 'Tổng doanh thu (VNĐ)', an.totalRev, 'Đã thu (VNĐ)', an.revPaid, 'Chưa thu (VNĐ)', an.revUnpaid]));
+    lines.push('');
+
+    // PHẦN 2: THỐNG KÊ THEO THÁNG
+    lines.push(row(['=== 1. THỐNG KÊ ĐƠN HÀNG & DOANH THU THEO THÁNG ===']));
+    lines.push(row(['Tháng', 'Tổng đơn', 'Đơn đã thanh toán', 'Đơn chưa thanh toán', 'Tổng lượt khách', 'Doanh thu đã thu (VNĐ)', 'Doanh thu chưa thu (VNĐ)', 'Tổng doanh thu (VNĐ)']));
+    an.monthly.forEach(m => lines.push(row([m.monthKey, m.total, m.paid, m.unpaid, m.guests, m.revPaid, m.revUnpaid, m.revTotal])));
+    lines.push('');
+
+    // PHẦN 3: THỐNG KÊ MÓN ĂN & TÀI CHÍNH THEO TỪNG MÓN
+    lines.push(row(['=== 2. THỐNG KÊ MÓN ĂN KHÁCH THƯỜNG CHỌN & TÀI CHÍNH TỪNG MÓN ===']));
+    lines.push(row(['STT', 'Tên món ăn / Dịch vụ', 'Số đơn chọn', 'Tổng số lượng', 'Đơn giá TB (VNĐ)', 'Đã thu (VNĐ)', 'Chưa thu (VNĐ)', 'Tổng doanh thu (VNĐ)', 'Tỷ trọng (%)']));
+    an.dishes.forEach((d, i) => lines.push(row([i + 1, d.name, d.orderCount, d.qty, d.avgPrice, d.revPaid, d.revUnpaid, d.revTotal, d.sharePct + '%'])));
+    lines.push('');
+
+    // PHẦN 4: THỐNG KÊ THỜI GIAN KHÁCH ĐẶT
+    lines.push(row(['=== 3. THỐNG KÊ THỜI GIAN KHÁCH ĐẶT ===']));
+    lines.push(row(['Khung giờ', 'Số đơn đặt', 'Doanh thu (VNĐ)']));
+    an.slots.forEach(s => lines.push(row([s.label, s.orders, s.rev])));
+    lines.push(row(['Thứ trong tuần', 'Số đơn đặt', 'Doanh thu (VNĐ)']));
+    an.weekdays.forEach(w => lines.push(row([w.label, w.orders, w.rev])));
+    lines.push('');
+
+    // PHẦN 5: CHI TIẾT ĐƠN HÀNG
+    lines.push(row(['=== 4. DANH SÁCH CHI TIẾT ĐƠN HÀNG ===']));
+    lines.push(row(['Mã đơn', 'Ngày giờ đặt', 'Tháng', 'Khách hàng', 'SĐT', 'Số khách', 'Chi tiết món / dịch vụ', 'Thành tiền (VNĐ)', 'Trạng thái thanh toán', 'Ghi chú']));
+    list.forEach(o => {
+      const itemsTxt = Array.isArray(o.items) && o.items.length ? o.items.map(i => `${i.name} x${i.qty}`).join(', ') : (o.itemsSummary || '');
+      lines.push(row([o.code || o.id, o.createdAt || '', parseOrderDateInfo(o).monthKey, o.customerName || '', o.customerPhone || '', o.partySize || 1, itemsTxt, getOrderAmount(o), isPaid(o) ? 'Đã thanh toán' : 'Chưa thanh toán', o.note || '']));
+    });
+
+    const blob = new Blob(['﻿' + lines.join('
+')], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    const safeName = (rs.account?.username || rs.id || 'nha-hang').replace(/[^a-z0-9_-]/gi, '');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Bao-Cao-Day-Du-${safeName}.csv`;
+    a.click();
+    toast(`📥 Đã xuất báo cáo Excel (CSV) đầy đủ gồm 4 bảng thống kê!`);
+  };
+
+  window.printMerchantReport = function() {
+    const partner = typeof findPartnerById === 'function' ? findPartnerById(ui.merchantRestaurantId) : null;
+    const rs = partner?.item;
+    if (!rs) return;
+    const list = getMerchantFilteredOrders();
+    const an = buildAnalytics(list);
+    const nowTxt = typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN');
+
+    const win = window.open('', '_blank', 'width=960,height=760');
+    if (!win) { toast('Trình duyệt đang chặn cửa sổ in.', 'error'); return; }
+    win.document.write(`<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>Báo Cáo Đầy Đủ - ${esc(rs.name)}</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:22px;color:#14222b;font-size:12.5px;}
+        h2{margin:0 0 4px;} h3{margin:16px 0 6px;color:#0f766e;border-bottom:1.5px solid #cbd5e1;padding-bottom:3px;}
+        .sub{color:#5a6b77;margin-bottom:14px;}
+        .kpi{display:flex;gap:10px;margin-bottom:14px;}
+        .kbox{flex:1;border:1px solid #cbd5e1;border-radius:10px;padding:9px 11px;}
+        table{width:100%;border-collapse:collapse;margin-top:6px;margin-bottom:10px;}
+        th,td{border:1px solid #cbd5e1;padding:6px 8px;text-align:left;font-size:11.8px;}
+        th{background:#f1f5f9;}
+      </style></head><body>
+      <h2>BÁO CÁO TỔNG HỢP &amp; TÀI CHÍNH — ${esc(rs.name)}</h2>
+      <div class="sub">Địa chỉ: ${esc(rs.address || rs.ward || '')} • Ngày xuất: ${esc(nowTxt)}</div>
+      <div class="kpi">
+        <div class="kbox"><b>Tổng đơn hàng:</b><div style="font-size:17px;font-weight:800;margin-top:3px;">${an.totalOrders} đơn (${an.totalGuests} khách)</div></div>
+        <div class="kbox"><b>Đã thanh toán (${an.paidCnt} đơn):</b><div style="font-size:17px;font-weight:800;color:#059669;margin-top:3px;">${fmtVND(an.revPaid)}</div></div>
+        <div class="kbox"><b>Chưa thanh toán (${an.unpaidCnt} đơn):</b><div style="font-size:17px;font-weight:800;color:#dc2626;margin-top:3px;">${fmtVND(an.revUnpaid)}</div></div>
+      </div>
+
+      <h3>1. Thống kê đơn hàng &amp; doanh thu theo tháng</h3>
+      <table>
+        <thead><tr><th>Tháng</th><th>Tổng đơn</th><th>Đã TT</th><th>Chưa TT</th><th>Lượt khách</th><th>Đã thu</th><th>Chưa thu</th><th>Tổng doanh thu</th></tr></thead>
+        <tbody>${an.monthly.map(m => `<tr><td><b>${esc(m.monthKey)}</b></td><td>${m.total}</td><td>${m.paid}</td><td>${m.unpaid}</td><td>${m.guests}</td><td>${fmtVND(m.revPaid)}</td><td>${fmtVND(m.revUnpaid)}</td><td><b>${fmtVND(m.revTotal)}</b></td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;">Không có dữ liệu</td></tr>'}</tbody>
+      </table>
+
+      <h3>2. Thống kê món ăn khách thường chọn &amp; tài chính theo từng món</h3>
+      <table>
+        <thead><tr><th>STT</th><th>Tên món ăn / Dịch vụ</th><th>Số đơn</th><th>Tổng SL</th><th>Đơn giá TB</th><th>Đã thu</th><th>Chưa thu</th><th>Tổng doanh thu (%)</th></tr></thead>
+        <tbody>${an.dishes.map((d, i) => `<tr><td>${i + 1}</td><td><b>${esc(d.name)}</b></td><td>${d.orderCount}</td><td>${d.qty}</td><td>${fmtVND(d.avgPrice)}</td><td>${fmtVND(d.revPaid)}</td><td>${fmtVND(d.revUnpaid)}</td><td><b>${fmtVND(d.revTotal)}</b> (${d.sharePct}%)</td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;">Không có dữ liệu</td></tr>'}</tbody>
+      </table>
+
+      <h3>3. Thống kê thời gian khách đặt</h3>
+      <p><b>Khung giờ vàng:</b> ${esc(an.peakSlot?.label || '')} (${an.peakSlot?.orders || 0} đơn) • <b>Giờ cao điểm:</b> ${String(an.peakHour).padStart(2, '0')}:00 - ${String((an.peakHour + 1) % 24).padStart(2, '0')}:00 (${an.peakHourCnt} đơn)</p>
+      <table>
+        <thead><tr><th>Khung giờ đặt</th><th>Số đơn</th><th>Doanh thu</th></tr></thead>
+        <tbody>${an.slots.map(s => `<tr><td>${esc(s.label)}</td><td><b>${s.orders}</b></td><td>${fmtVND(s.rev)}</td></tr>`).join('')}</tbody>
+      </table>
+
+      <h3>4. Danh sách chi tiết đơn hàng (${list.length} đơn)</h3>
+      <table>
+        <thead><tr><th>STT</th><th>Mã đơn</th><th>Thời gian</th><th>Khách hàng &amp; SĐT</th><th>Chi tiết món</th><th>Thành tiền</th><th>Thanh toán</th></tr></thead>
+        <tbody>${list.map((o, i) => {
+          const itemsTxt = Array.isArray(o.items) && o.items.length ? o.items.map(it => `${it.name} x${it.qty}`).join(', ') : (o.itemsSummary || '');
+          return `<tr><td>${i + 1}</td><td>#${esc(o.code || o.id)}</td><td>${esc(o.createdAt || '')}</td><td>${esc(o.customerName || '')} (${esc(o.customerPhone || '')})</td><td>${esc(itemsTxt)}</td><td><b>${fmtVND(getOrderAmount(o))}</b></td><td>${isPaid(o) ? 'Đã thanh toán' : 'Chưa thanh toán'}</td></tr>`;
+        }).join('') || '<tr><td colspan="7" style="text-align:center;">Không có đơn hàng nào.</td></tr>'}</tbody>
+      </table>
+      <script>window.onload=function(){window.print();};<\/script>
+    </body></html>`);
+    win.document.close();
+  };
 })();
 </script>
 
