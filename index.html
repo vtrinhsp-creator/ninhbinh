@@ -19780,5 +19780,661 @@ service cloud.firestore {
 })();
 </script>
 
+
+<!-- ==================== MÔ-ĐUN v49: MENU TOUR DU LỊCH (1 NGÀY, 2 NGÀY, 3 NGÀY...) & BỘ LẬP LỊCH TOUR KHOA HỌC ==================== -->
+<style>
+  #v49-tour-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .v49-hero {
+    background: linear-gradient(128deg, #075985 0%, #0d9488 55%, #d97706 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 20px 22px;
+    box-shadow: 0 12px 28px rgba(7, 89, 133, 0.2);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .v49-dur-pills {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+  .v49-dur-btn {
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 800;
+    background: #eef3f8;
+    color: #334155;
+    border: 1.5px solid #cbd5e1;
+    transition: all 0.16s ease;
+  }
+  .v49-dur-btn.active {
+    background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+  }
+  .v49-day-card {
+    border: 1.5px solid #cbd5e1;
+    border-radius: 16px;
+    background: #ffffff;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    margin-bottom: 12px;
+  }
+  .v49-day-head {
+    background: linear-gradient(90deg, #eff6ff 0%, #ecfdf5 100%);
+    padding: 11px 15px;
+    border-bottom: 1px solid #dbeafe;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .v49-slot-list {
+    padding: 12px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .v49-slot-item {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: start;
+    padding: 9px 11px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+  .v49-slot-time {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #0369a1;
+    background: #e0f2fe;
+    padding: 4px 7px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .v49-cat-play { background: #fef3c7; color: #92400e; }
+  .v49-cat-eat  { background: #f3e8ff; color: #6b21a8; }
+  .v49-cat-stay { background: #dcfce7; color: #166534; }
+  .v49-cat-move { background: #e0f2fe; color: #075985; }
+
+  .v49-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  @media (max-width: 820px) {
+    .v49-slot-item { grid-template-columns: 1fr; }
+    .v49-summary-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<!-- SECTION TAB TOUR DU LỊCH -->
+<section id="tab-tour" class="tab-panel">
+  <div id="v49-tour-panel">
+    <div class="v49-hero">
+      <div>
+        <div style="font-size:11.5px; font-weight:800; opacity:0.92; letter-spacing:0.3px;">🧭 LẬP LỊCH TRÌNH DU LỊCH THÔNG MINH</div>
+        <h2 style="font-size:20.5px; font-weight:800; margin-top:2px;">Tour Du Lịch Khoa Học — Cung Đường, Vui Chơi, Ăn Uống &amp; Nghỉ Dưỡng</h2>
+        <p style="font-size:12.5px; opacity:0.94; margin-top:4px; max-width:740px;">
+          Chọn thời lượng (<b>1 ngày, 2 ngày, 3 ngày...</b>), <b>địa điểm chính</b> và <b>vị trí hiện tại</b> — hệ thống tự động sắp xếp lộ trình tối ưu khoảng cách, gợi ý quán ăn gần nhất, điểm vui chơi và chỗ nghỉ dưỡng phù hợp.
+        </p>
+      </div>
+      <div style="display:flex; gap:7px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-jade btn-sm" onclick="v49LocateCurrentGPS()">🎯 Vị trí GPS của tôi</button>
+        <button type="button" class="btn btn-gold btn-sm" onclick="v49CopyTourPlan()">📋 Sao chép lịch trình</button>
+      </div>
+    </div>
+
+    <!-- BỘ CHỌN THỜI LƯỢNG, ĐỊA ĐIỂM CHÍNH & VỊ TRÍ HIỆN TẠI -->
+    <div class="panel">
+      <div class="form-group">
+        <label class="form-label">⏱️ Chọn số ngày đi tour</label>
+        <div class="v49-dur-pills" id="v49-dur-pills">
+          <button type="button" class="v49-dur-btn active" data-days="1" onclick="v49SelectDays(1)">1 Ngày</button>
+          <button type="button" class="v49-dur-btn" data-days="2" onclick="v49SelectDays(2)">2 Ngày 1 Đêm</button>
+          <button type="button" class="v49-dur-btn" data-days="3" onclick="v49SelectDays(3)">3 Ngày 2 Đêm</button>
+          <button type="button" class="v49-dur-btn" data-days="4" onclick="v49SelectDays(4)">4 Ngày 3 Đêm</button>
+          <button type="button" class="v49-dur-btn" data-days="5" onclick="v49SelectDays(5)">5 Ngày 4 Đêm</button>
+        </div>
+      </div>
+
+      <div class="row-3">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">🏛️ Địa điểm tham quan chính</label>
+          <select id="v49-main-landmark" class="form-control" onchange="v49GeneratePlan()"></select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">📍 Vị trí hiện tại / Điểm xuất phát</label>
+          <select id="v49-origin-select" class="form-control" onchange="v49OnOriginChange()"></select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">🚗 Nhịp độ &amp; Phong cách chuyến đi</label>
+          <select id="v49-pace-select" class="form-control" onchange="v49GeneratePlan()">
+            <option value="balanced">⚖️ Khoa học &amp; Cân bằng (Vui chơi + Ăn + Nghỉ)</option>
+            <option value="relax">🌿 Nghỉ dưỡng &amp; Thư giãn nhẹ nhàng</option>
+            <option value="explore">📸 Khám phá nhiều điểm di sản &amp; check-in</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="v49-origin-banner" class="info-box" style="margin-top:10px; background:#f0f9ff; border-color:#bae6fd; font-size:12px;"></div>
+    </div>
+
+    <!-- TỔNG QUAN CUNG ĐƯỜNG, ĂN UỐNG & NGHỈ DƯỠNG GỢI Ý -->
+    <div id="v49-overview-cards" class="v49-summary-grid" style="margin-bottom:14px;"></div>
+
+    <!-- LỊCH TRÌNH CHI TIẾT TỪNG NGÀY -->
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div style="font-size:15.5px; font-weight:800;" id="v49-plan-title">🗓️ Lịch Trình Tour Khoa Học</div>
+          <div style="font-size:12px; color:var(--muted);" id="v49-plan-sub">Sắp xếp theo thứ tự thuận đường di chuyển, xen kẽ giờ ăn uống &amp; nghỉ ngơi hợp lý</div>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <a id="v49-gmaps-all-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-fb btn-sm">🗺️ Mở cung đường Google Maps</a>
+          <button type="button" class="btn btn-soft-jade btn-sm" onclick="v49ShowRouteOnMap()">📍 Xem trên Bản đồ</button>
+        </div>
+      </div>
+      <div id="v49-days-container"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function initV49TourMenuAndPlanner() {
+  let tourState = {
+    days: 1,
+    originGPS: null,
+    originLabel: 'Phường Hoa Lư (Trung tâm)',
+    lastPlanText: '',
+    lastRoutePoints: []
+  };
+
+  function getHotelPool() {
+    if (Array.isArray(db.hotels) && db.hotels.length) {
+      return db.hotels.filter(h => h.visible !== false);
+    }
+    return [
+      { id: 'ht_fb1', name: 'Emeralda Resort Ninh Bình', ward: 'Xã Gia Vân', priceRange: '2.100.000đ - 4.500.000đ/đêm', lat: 20.3910, lng: 105.8820 },
+      { id: 'ht_fb2', name: 'Khách sạn The Reed Hoa Lư', ward: 'Phường Hoa Lư', priceRange: '950.000đ - 1.900.000đ/đêm', lat: 20.2490, lng: 105.9720 },
+      { id: 'ht_fb3', name: 'Khách Xá Tam Chúc', ward: 'Phường Tam Chúc', priceRange: '850.000đ - 1.650.000đ/đêm', lat: 20.5550, lng: 105.8090 },
+      { id: 'ht_fb4', name: 'Khách sạn Nam Cường Nam Định', ward: 'Phường Nam Định', priceRange: '780.000đ - 1.450.000đ/đêm', lat: 20.4260, lng: 106.1680 }
+    ];
+  }
+
+  function findNearest(list, lat, lng, usedIds = new Set()) {
+    const candidates = list.filter(x => !usedIds.has(x.id));
+    const pool = candidates.length ? candidates : list;
+    if (!pool.length) return null;
+    return [...pool]
+      .map(item => ({ item, km: calcKm(lat, lng, Number(item.lat) || 20.2539, Number(item.lng) || 105.9750) }))
+      .sort((a, b) => a.km - b.km)[0];
+  }
+
+  function mountTourMenuButtons() {
+    const navD = document.querySelector('.nav-desktop');
+    if (navD && !document.getElementById('nd-tour')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'nd-tour';
+      btn.className = 'nav-btn';
+      btn.innerHTML = '🧭 Tour Du lịch';
+      btn.onclick = () => switchTab('tour');
+      const mapBtn = document.getElementById('nd-map');
+      if (mapBtn && mapBtn.nextSibling) navD.insertBefore(btn, mapBtn.nextSibling);
+      else navD.appendChild(btn);
+    }
+
+    const navM = document.querySelector('.nav-mobile');
+    if (navM && !document.getElementById('nm-tour')) {
+      const btnM = document.createElement('button');
+      btnM.type = 'button';
+      btnM.id = 'nm-tour';
+      btnM.className = 'nav-btn';
+      btnM.innerHTML = '<span>🧭</span><span>Tour</span>';
+      btnM.onclick = () => switchTab('tour');
+      const mapBtnM = document.getElementById('nm-map');
+      if (mapBtnM && mapBtnM.nextSibling) navM.insertBefore(btnM, mapBtnM.nextSibling);
+      else navM.appendChild(btnM);
+    }
+  }
+
+  function populateTourSelectors() {
+    const lmSel = document.getElementById('v49-main-landmark');
+    const orgSel = document.getElementById('v49-origin-select');
+    if (!lmSel || !orgSel) return;
+
+    const prevLm = lmSel.value;
+    const lms = (db.landmarks || []).filter(l => l.visible !== false);
+    lmSel.innerHTML = lms.map(l => `<option value="${esc(l.id)}">🏛️ ${esc(l.name)} (${esc(l.ward || '')})</option>`).join('');
+    if (prevLm && [...lmSel.options].some(o => o.value === prevLm)) lmSel.value = prevLm;
+    else if (ui.selected?.type === 'landmark' && [...lmSel.options].some(o => o.value === ui.selected.id)) lmSel.value = ui.selected.id;
+
+    const prevOrg = orgSel.value;
+    const origins = [
+      { val: 'gps', lbl: '🎯 Vị trí hiện tại của tôi (GPS)' },
+      { val: 'ward:Phường Hoa Lư', lbl: '📍 Trung tâm Phường Hoa Lư' },
+      { val: 'ward:Phường Tây Hoa Lư', lbl: '📍 Khu vực Tây Hoa Lư (Tràng An – Bái Đính)' },
+      { val: 'ward:Phường Tam Chúc', lbl: '📍 Khu vực Tam Chúc' },
+      { val: 'ward:Phường Nam Định', lbl: '📍 Trung tâm Thành Nam' },
+      { val: 'ward:Xã Gia Vân', lbl: '📍 Khu vực Vân Long – Gia Vân' }
+    ];
+    (db.wards || []).slice(0, 45).forEach(w => {
+      const v = `ward:${w.name}`;
+      if (!origins.some(o => o.val === v)) origins.push({ val: v, lbl: `📍 ${w.name}` });
+    });
+    orgSel.innerHTML = origins.map(o => `<option value="${esc(o.val)}">${esc(o.lbl)}</option>`).join('');
+    if (prevOrg && [...orgSel.options].some(o => o.value === prevOrg)) orgSel.value = prevOrg;
+    else if (ui.userGPS) orgSel.value = 'gps';
+  }
+
+  window.v49SelectDays = function(d) {
+    tourState.days = Math.max(1, Number(d) || 1);
+    document.querySelectorAll('#v49-dur-pills .v49-dur-btn').forEach(btn => {
+      btn.classList.toggle('active', Number(btn.dataset.days) === tourState.days);
+    });
+    v49GeneratePlan();
+  };
+
+  window.v49LocateCurrentGPS = function() {
+    if (!navigator.geolocation) {
+      toast('Trình duyệt không hỗ trợ GPS.', 'error');
+      return;
+    }
+    toast('⏳ Đang xác định vị trí hiện tại của bạn...', 'info');
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const lat = Number(pos.coords.latitude.toFixed(5));
+        const lng = Number(pos.coords.longitude.toFixed(5));
+        ui.userGPS = { lat, lng };
+        tourState.originGPS = { lat, lng };
+        tourState.originLabel = `Vị trí GPS (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        const orgSel = document.getElementById('v49-origin-select');
+        if (orgSel) orgSel.value = 'gps';
+        v49GeneratePlan();
+        toast('✅ Đã cập nhật vị trí hiện tại & tối ưu lại tour!');
+      },
+      () => {
+        if (ui.userGPS) {
+          tourState.originGPS = { lat: ui.userGPS.lat, lng: ui.userGPS.lng };
+          tourState.originLabel = `Vị trí GPS (${ui.userGPS.lat.toFixed(4)}, ${ui.userGPS.lng.toFixed(4)})`;
+        } else {
+          tourState.originGPS = { lat: 20.2539, lng: 105.9750 };
+          tourState.originLabel = 'Phường Hoa Lư (Mặc định)';
+        }
+        v49GeneratePlan();
+        toast('Đang dùng vị trí tham chiếu để lập lịch tour.', 'info');
+      },
+      { enableHighAccuracy: true, timeout: 6500 }
+    );
+  };
+
+  window.v49OnOriginChange = function() {
+    const val = document.getElementById('v49-origin-select')?.value || 'ward:Phường Hoa Lư';
+    if (val === 'gps') {
+      if (ui.userGPS) {
+        tourState.originGPS = { lat: ui.userGPS.lat, lng: ui.userGPS.lng };
+        tourState.originLabel = `Vị trí GPS (${ui.userGPS.lat.toFixed(4)}, ${ui.userGPS.lng.toFixed(4)})`;
+        v49GeneratePlan();
+      } else {
+        v49LocateCurrentGPS();
+      }
+      return;
+    }
+    const wardName = val.replace(/^ward:/, '');
+    const w = (db.wards || []).find(x => x.name === wardName);
+    if (w) {
+      tourState.originGPS = { lat: Number(w.lat), lng: Number(w.lng) };
+      tourState.originLabel = w.name;
+    } else {
+      tourState.originGPS = { lat: 20.2539, lng: 105.9750 };
+      tourState.originLabel = 'Phường Hoa Lư';
+    }
+    v49GeneratePlan();
+  };
+
+  window.v49GeneratePlan = function() {
+    const days = tourState.days || 1;
+    const lms = (db.landmarks || []).filter(l => l.visible !== false);
+    const rss = (db.restaurants || []).filter(r => r.visible !== false);
+    const hts = getHotelPool();
+    const sps = (db.specialties || []).filter(s => s.visible !== false);
+
+    if (!lms.length) return;
+
+    const mainId = document.getElementById('v49-main-landmark')?.value || lms[0].id;
+    const mainLm = lms.find(l => l.id === mainId) || lms[0];
+
+    if (!tourState.originGPS) {
+      if (ui.userGPS) {
+        tourState.originGPS = { lat: ui.userGPS.lat, lng: ui.userGPS.lng };
+        tourState.originLabel = `Vị trí GPS (${ui.userGPS.lat.toFixed(4)}, ${ui.userGPS.lng.toFixed(4)})`;
+      } else {
+        tourState.originGPS = { lat: 20.2539, lng: 105.9750 };
+        tourState.originLabel = 'Phường Hoa Lư';
+      }
+    }
+
+    const pace = document.getElementById('v49-pace-select')?.value || 'balanced';
+    const curPos = { lat: tourState.originGPS.lat, lng: tourState.originGPS.lng };
+    const distOriginToMain = calcKm(curPos.lat, curPos.lng, mainLm.lat, mainLm.lng);
+
+    const bannerEl = document.getElementById('v49-origin-banner');
+    if (bannerEl) {
+      bannerEl.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span>📍 <b>Vị trí hiện tại:</b> ${esc(tourState.originLabel)} &nbsp;→&nbsp; 🏛️ <b>Điểm chính:</b> <b>${esc(mainLm.name)}</b> (${distOriginToMain.toFixed(1)} km)</span>
+          <span class="tag tag-jade">⏱️ Tour ${days} ngày</span>
+        </div>`;
+    }
+
+    const usedLm = new Set();
+    const usedRs = new Set();
+    const usedHt = new Set();
+    const usedSp = new Set();
+
+    const routeCoords = [{ lat: curPos.lat, lng: curPos.lng, name: tourState.originLabel }];
+    const allSuggestedEat = [];
+    const allSuggestedStay = [];
+    const dayPlans = [];
+    let textLines = [
+      `🧭 LỊCH TRÌNH TOUR ${days} NGÀY — NINH BÌNH - KẾT NỐI`,
+      `📍 Xuất phát: ${tourState.originLabel}`,
+      `🏛️ Điểm chính: ${mainLm.name} (${mainLm.ward || ''})`,
+      ''
+    ];
+
+    for (let d = 1; d <= days; d++) {
+      let anchorLat = curPos.lat, anchorLng = curPos.lng;
+      if (d === 1) {
+        anchorLat = Number(mainLm.lat) || 20.2539;
+        anchorLng = Number(mainLm.lng) || 105.9750;
+      } else {
+        const prevStay = allSuggestedStay[allSuggestedStay.length - 1];
+        if (prevStay) {
+          anchorLat = Number(prevStay.lat) || anchorLat;
+          anchorLng = Number(prevStay.lng) || anchorLng;
+        }
+      }
+
+      // Điểm vui chơi / tham quan chính & lân cận
+      let morningPlay = null;
+      if (d === 1 && !usedLm.has(mainLm.id)) {
+        morningPlay = { item: mainLm, km: distOriginToMain };
+        usedLm.add(mainLm.id);
+      } else {
+        morningPlay = findNearest(lms, anchorLat, anchorLng, usedLm);
+        if (morningPlay) usedLm.add(morningPlay.item.id);
+      }
+
+      const afternoonPlay = findNearest(
+        lms,
+        morningPlay ? morningPlay.item.lat : anchorLat,
+        morningPlay ? morningPlay.item.lng : anchorLng,
+        usedLm
+      );
+      if (afternoonPlay) usedLm.add(afternoonPlay.item.id);
+
+      const extraPlay = (pace === 'explore' || days >= 3)
+        ? findNearest(lms, afternoonPlay ? afternoonPlay.item.lat : anchorLat, afternoonPlay ? afternoonPlay.item.lng : anchorLng, usedLm)
+        : null;
+      if (extraPlay) usedLm.add(extraPlay.item.id);
+
+      // Quán ăn trưa & tối gần điểm tham quan
+      const lunchSpot = findNearest(rss, morningPlay ? morningPlay.item.lat : anchorLat, morningPlay ? morningPlay.item.lng : anchorLng, usedRs);
+      if (lunchSpot) { usedRs.add(lunchSpot.item.id); allSuggestedEat.push(lunchSpot.item); }
+
+      const dinnerSpot = findNearest(rss, afternoonPlay ? afternoonPlay.item.lat : anchorLat, afternoonPlay ? afternoonPlay.item.lng : anchorLng, usedRs);
+      if (dinnerSpot) { usedRs.add(dinnerSpot.item.id); allSuggestedEat.push(dinnerSpot.item); }
+
+      // Đặc sản gợi ý mua quà gần nhất
+      const specSpot = findNearest(sps, afternoonPlay ? afternoonPlay.item.lat : anchorLat, afternoonPlay ? afternoonPlay.item.lng : anchorLng, usedSp);
+      if (specSpot) usedSp.add(specSpot.item.id);
+
+      // Nghỉ dưỡng cho các tour từ 2 ngày trở lên (trừ đêm cuối nếu muốn về sớm, hoặc giữ nghỉ ngơi khoa học)
+      let staySpot = null;
+      if (days > 1 && d < days) {
+        staySpot = findNearest(hts, dinnerSpot ? dinnerSpot.item.lat : anchorLat, dinnerSpot ? dinnerSpot.item.lng : anchorLng, usedHt);
+        if (staySpot) { usedHt.add(staySpot.item.id); allSuggestedStay.push(staySpot.item); }
+      }
+
+      const slots = [];
+      slots.push({
+        time: '07:30 - 08:30',
+        cat: 'move',
+        catLabel: '🚗 Di chuyển',
+        title: d === 1 ? `Xuất phát từ ${tourState.originLabel}` : `Khởi động Ngày ${d} & ăn sáng nhẹ`,
+        detail: d === 1
+          ? `Di chuyển về cụm ${mainLm.name} (${mainLm.ward || ''}) — khoảng ${distOriginToMain.toFixed(1)} km, tránh nắng gắt và khung giờ đông.`
+          : `Nạp năng lượng buổi sáng và chuẩn bị hành trang khám phá cụm điểm lân cận.`
+      });
+
+      if (morningPlay) {
+        routeCoords.push({ lat: morningPlay.item.lat, lng: morningPlay.item.lng, name: morningPlay.item.name });
+        slots.push({
+          time: '08:30 - 11:30',
+          cat: 'play',
+          catLabel: '🏛️ Vui chơi / Tham quan',
+          title: morningPlay.item.name,
+          detail: `📍 ${morningPlay.item.ward || ''} • 🎟️ ${morningPlay.item.ticket || 'Liên hệ'} • Thời điểm lý tưởng để tham quan và chụp ảnh khi trời còn mát.`
+        });
+      }
+
+      if (lunchSpot) {
+        routeCoords.push({ lat: lunchSpot.item.lat, lng: lunchSpot.item.lng, name: lunchSpot.item.name });
+        slots.push({
+          time: '11:45 - 13:30',
+          cat: 'eat',
+          catLabel: '🍽️ Ăn trưa',
+          title: lunchSpot.item.name,
+          detail: `📍 ${lunchSpot.item.ward || ''} (${lunchSpot.km.toFixed(1)} km) • 💰 ${lunchSpot.item.priceRange || ''} • 🔥 ${lunchSpot.item.signature || ''}`
+        });
+      }
+
+      if (afternoonPlay) {
+        routeCoords.push({ lat: afternoonPlay.item.lat, lng: afternoonPlay.item.lng, name: afternoonPlay.item.name });
+        slots.push({
+          time: pace === 'relax' ? '14:30 - 16:30' : '13:45 - 16:45',
+          cat: 'play',
+          catLabel: '✨ Vui chơi / Khám phá',
+          title: afternoonPlay.item.name,
+          detail: `📍 ${afternoonPlay.item.ward || ''} (${afternoonPlay.km.toFixed(1)} km) • ${pace === 'relax' ? 'Nghỉ ngơi thư giãn nhẹ nhàng sau bữa trưa.' : 'Tham quan trọn vẹn cảnh quan & di tích.'}`
+        });
+      }
+
+      if (extraPlay) {
+        routeCoords.push({ lat: extraPlay.item.lat, lng: extraPlay.item.lng, name: extraPlay.item.name });
+        slots.push({
+          time: '16:45 - 17:45',
+          cat: 'play',
+          catLabel: '📸 Trải nghiệm thêm',
+          title: extraPlay.item.name,
+          detail: `📍 ${extraPlay.item.ward || ''} (${extraPlay.km.toFixed(1)} km) • Dạo mát, ngắm cảnh chiều trước giờ ăn tối.`
+        });
+      }
+
+      if (specSpot) {
+        slots.push({
+          time: '17:45 - 18:15',
+          cat: 'eat',
+          catLabel: '🎁 Đặc sản / Quà',
+          title: `Gợi ý đặc sản: ${specSpot.item.name}`,
+          detail: `🏪 ${specSpot.item.shop || ''} (${specSpot.km.toFixed(1)} km) • 💰 ${getSpecialtyPriceInfo(specSpot.item).pText}`
+        });
+      }
+
+      if (dinnerSpot) {
+        routeCoords.push({ lat: dinnerSpot.item.lat, lng: dinnerSpot.item.lng, name: dinnerSpot.item.name });
+        slots.push({
+          time: '18:30 - 20:30',
+          cat: 'eat',
+          catLabel: '🍲 Ăn tối',
+          title: dinnerSpot.item.name,
+          detail: `📍 ${dinnerSpot.item.ward || ''} (${dinnerSpot.km.toFixed(1)} km) • 💰 ${dinnerSpot.item.priceRange || ''} • Thưởng thức đặc sản địa phương.`
+        });
+      }
+
+      if (staySpot) {
+        routeCoords.push({ lat: staySpot.item.lat, lng: staySpot.item.lng, name: staySpot.item.name });
+        slots.push({
+          time: '20:45 - Sáng hôm sau',
+          cat: 'stay',
+          catLabel: '🏨 Nghỉ dưỡng',
+          title: staySpot.item.name,
+          detail: `📍 ${staySpot.item.ward || ''} (${staySpot.km.toFixed(1)} km) • 💰 ${staySpot.item.priceRange || ''} • Nhận phòng nghỉ ngơi tái tạo năng lượng cho ngày tiếp theo.`
+        });
+      } else if (days === 1) {
+        slots.push({
+          time: '20:45 trở đi',
+          cat: 'stay',
+          catLabel: '🏡 Kết thúc hành trình',
+          title: `Trở về ${tourState.originLabel} hoặc lưu trú nghỉ đêm`,
+          detail: 'Kết thúc lịch trình 1 ngày khoa học, an toàn và thuận tiện di chuyển.'
+        });
+      }
+
+      dayPlans.push({ day: d, mainSpot: morningPlay?.item?.name || mainLm.name, slots });
+
+      textLines.push(`--- NGÀY ${d}: ${morningPlay?.item?.name || mainLm.name} ---`);
+      slots.forEach(s => textLines.push(`[${s.time}] ${s.catLabel}: ${s.title} — ${s.detail}`));
+      textLines.push('');
+    }
+
+    tourState.lastPlanText = textLines.join('\n');
+    tourState.lastRoutePoints = routeCoords;
+
+    // Render 3 thẻ tổng quan (Cung đường - Ăn uống - Nghỉ dưỡng)
+    const ovEl = document.getElementById('v49-overview-cards');
+    if (ovEl) {
+      const uniqueEat = [...new Map(allSuggestedEat.map(x => [x.id, x])).values()].slice(0, 3);
+      const uniqueStay = [...new Map(allSuggestedStay.map(x => [x.id, x])).values()].slice(0, 3);
+      const stayFallback = hts.slice(0, 2);
+      const stayDisplay = uniqueStay.length ? uniqueStay : stayFallback;
+
+      ovEl.innerHTML = `
+        <div class="info-box" style="background:#fff; border-color:#bae6fd;">
+          <b style="color:#0369a1; font-size:13px;">🛣️ Cung Đường Khoa Học (${days} ngày)</b>
+          <div style="font-size:12px; color:var(--text);">Từ <b>${esc(tourState.originLabel)}</b> → <b>${esc(mainLm.name)}</b> và các điểm lân cận theo trục di chuyển gần nhất.</div>
+        </div>
+        <div class="info-box" style="background:#fff; border-color:#e9d5ff;">
+          <b style="color:#6b21a8; font-size:13px;">🍽️ Ăn Uống Gợi Ý Gần Tuyến</b>
+          ${uniqueEat.map(e => `<div style="font-size:12px;">• <b>${esc(e.name)}</b> (${esc(e.ward || '')}) — <span style="color:#b45309;font-weight:700;">${esc(e.priceRange || '')}</span></div>`).join('') || '<div style="font-size:12px;color:var(--muted);">Đang cập nhật</div>'}
+        </div>
+        <div class="info-box" style="background:#fff; border-color:#bbf7d0;">
+          <b style="color:#166534; font-size:13px;">🏨 Nghỉ Dưỡng Phù Hợp</b>
+          ${stayDisplay.map(s => `<div style="font-size:12px;">• <b>${esc(s.name)}</b> (${esc(s.ward || '')}) — <span style="color:#047857;font-weight:700;">${esc(s.priceRange || '')}</span></div>`).join('')}
+        </div>`;
+    }
+
+    // Render lịch trình từng ngày
+    const daysEl = document.getElementById('v49-days-container');
+    if (daysEl) {
+      daysEl.innerHTML = dayPlans.map(dp => `
+        <div class="v49-day-card">
+          <div class="v49-day-head">
+            <div>
+              <span class="tag tag-fb">NGÀY ${dp.day}</span>
+              <b style="font-size:14.5px; margin-left:6px;">Trọng tâm: ${esc(dp.mainSpot)}</b>
+            </div>
+            <span style="font-size:11.5px; color:var(--muted); font-weight:700;">${dp.slots.length} mốc hoạt động khoa học</span>
+          </div>
+          <div class="v49-slot-list">
+            ${dp.slots.map(sl => {
+              const cls = sl.cat === 'eat' ? 'v49-cat-eat' : (sl.cat === 'stay' ? 'v49-cat-stay' : (sl.cat === 'move' ? 'v49-cat-move' : 'v49-cat-play'));
+              return `
+                <div class="v49-slot-item">
+                  <div class="v49-slot-time">${esc(sl.time)}</div>
+                  <div>
+                    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:2px;">
+                      <span class="tag ${cls}">${esc(sl.catLabel)}</span>
+                      <b style="font-size:13.5px; color:var(--text);">${esc(sl.title)}</b>
+                    </div>
+                    <div style="font-size:12px; color:var(--muted);">${esc(sl.detail)}</div>
+                  </div>
+                </div>`;
+            }).join('')}
+          </div>
+        </div>`).join('');
+    }
+
+    const gmapsBtn = document.getElementById('v49-gmaps-all-btn');
+    if (gmapsBtn && routeCoords.length >= 2) {
+      gmapsBtn.href = gMapsMulti(routeCoords.slice(0, 8));
+    }
+  };
+
+  window.v49CopyTourPlan = function() {
+    if (!tourState.lastPlanText) v49GeneratePlan();
+    copyText(tourState.lastPlanText || 'Chưa có lịch trình.', 'Đã sao chép toàn bộ lịch trình tour!');
+  };
+
+  window.v49ShowRouteOnMap = function() {
+    const ids = [];
+    (tourState.lastRoutePoints || []).forEach(p => {
+      const found = (db.landmarks || []).find(l => l.name === p.name);
+      if (found && !ids.includes(found.id)) ids.push(found.id);
+    });
+    if (ids.length < 2) {
+      const mainId = document.getElementById('v49-main-landmark')?.value;
+      const second = (db.landmarks || []).find(l => l.id !== mainId);
+      if (mainId) ids.push(mainId);
+      if (second) ids.push(second.id);
+    }
+    switchTab('map');
+    if (ids.length >= 2 && typeof drawRoute === 'function') {
+      drawRoute(ids, `Lộ trình Tour ${tourState.days} ngày`);
+    }
+  };
+
+  // Mở rộng switchTab để hỗ trợ tab 'tour'
+  if (typeof window.switchTab === 'function') {
+    const _origSwitchTab = window.switchTab;
+    window.switchTab = function(t) {
+      if (t === 'tour') {
+        ui.tab = 'tour';
+        document.querySelectorAll('.tab-panel').forEach(el => {
+          el.classList.toggle('active', el.id === 'tab-tour');
+        });
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.id === 'nd-tour' || btn.id === 'nm-tour');
+        });
+        populateTourSelectors();
+        v49GeneratePlan();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      document.getElementById('tab-tour')?.classList.remove('active');
+      document.getElementById('nd-tour')?.classList.remove('active');
+      document.getElementById('nm-tour')?.classList.remove('active');
+      return _origSwitchTab.apply(this, arguments);
+    };
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    mountTourMenuButtons();
+    setTimeout(() => {
+      mountTourMenuButtons();
+      populateTourSelectors();
+      v49GeneratePlan();
+    }, 350);
+  });
+})();
+</script>
+
 </body>
 </html>
