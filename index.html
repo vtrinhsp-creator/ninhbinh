@@ -1453,7 +1453,7 @@
         <div class="stat-box"><div class="num" id="st-lm">47</div><div class="lbl">Danh thắng</div></div>
         <div class="stat-box"><div class="num" id="st-sp">24</div><div class="lbl">Đặc sản</div></div>
         <div class="stat-box"><div class="num" id="st-rs">12</div><div class="lbl">Nhà hàng</div></div>
-        <div class="stat-box"><div class="num" id="st-ht">20</div><div class="lbl">Lưu trú</div></div>
+        <div class="stat-box"><div class="num" id="st-ht">38</div><div class="lbl">Lưu trú</div></div>
         <div class="stat-box"><div class="num" id="st-wd">129</div><div class="lbl">Phường/Xã</div></div>
       </div>
     </div>
@@ -1480,7 +1480,7 @@
           <button class="layer-chip on-lm" id="ly-lm" onclick="toggleLayer('landmarks')">🏛️ Danh thắng (<span id="cnt-lm">47</span>)</button>
           <button class="layer-chip on-sp" id="ly-sp" onclick="toggleLayer('specialties')">🎁 Đặc sản (<span id="cnt-sp">24</span>)</button>
           <button class="layer-chip on-rs" id="ly-rs" onclick="toggleLayer('restaurants')">🍽️ Nhà hàng (<span id="cnt-rs">12</span>)</button>
-          <button class="layer-chip on-ht" id="ly-ht" onclick="toggleLayer('hotels')" style="background:#e0f2fe; color:#0369a1; border-color:#7dd3fc;">🏨 Lưu trú (<span id="cnt-ht">20</span>)</button>
+          <button class="layer-chip on-ht" id="ly-ht" onclick="toggleLayer('hotels')" style="background:#e0f2fe; color:#0369a1; border-color:#7dd3fc;">🏨 Lưu trú (<span id="cnt-ht">38</span>)</button>
         </div>
         <div class="chip-bar">
           <button class="reg-chip active" id="rc-all" onclick="setMapRegion('all')">Tất cả 3 phân khu</button>
@@ -1625,7 +1625,7 @@
           <button class="reg-chip active" id="mk-t-all" onclick="setMarketType('all')">✨ Tất cả</button>
           <button class="reg-chip" id="mk-t-sp" onclick="setMarketType('specialty')">🎁 Đặc sản (<span id="mk-cnt-sp">24</span>)</button>
           <button class="reg-chip" id="mk-t-rs" onclick="setMarketType('restaurant')">🍽️ Nhà hàng (<span id="mk-cnt-rs">12</span>)</button>
-          <button class="reg-chip" id="mk-t-ht" onclick="setMarketHotelFilter()">🏨 Lưu trú / KS (<span id="mk-cnt-ht">20</span>)</button>
+          <button class="reg-chip" id="mk-t-ht" onclick="setMarketHotelFilter()">🏨 Lưu trú / KS (<span id="mk-cnt-ht">38</span>)</button>
           <button class="btn btn-soft-jade btn-xs" onclick="locateGPS()">🎯 Sắp xếp theo gần bạn nhất</button>
         </div>
         <span id="market-note-txt" style="font-size:12px; color:var(--muted);">💬 Dữ liệu đã rà soát xác thực SĐT, giá tham khảo, Facebook, Website &amp; tọa độ 129 Phường/Xã</span>
@@ -2607,7 +2607,19 @@ const DEFAULT_RESTAURANTS = [
   { id:'rs30', name:'Đồ Ăn Vặt Nhiều Nhiều (Cơ sở Phủ Lý)', region:'tamchuc', ward:'Phường Phủ Lý', address:'153 Lê Công Thanh, Phường Phủ Lý, Ninh Bình', priceRange:'20k - 55k/người', hours:'08:00 - 23:00 (Hằng ngày)', ratingInfo:'5.0/5 ★ (8 đánh giá)', signature:'Cá viên chiên, Nem rán, Bánh gà, Phô mai que & Trà hoa quả', fb:'', phone:'0919918656', website:'', lat:20.5404, lng:105.9152, category:'snack', visible:true, account:null, desc:'Nằm ngay trục đường trung tâm Lê Công Thanh dễ tìm, đồ chiên nóng giòn, phục vụ nhanh.' },
   { id:'rs31', name:'Bánh Mì Pate Hà Bơ - Đặc sản Nam Định', region:'thanhnam', ward:'Phường Nam Định', address:'3 Hàng Thao, Phường Nam Định, Ninh Bình', priceRange:'15k - 35k/người', hours:'12:30 - 22:30 (T2-T6) | 12:30 - 22:00 (T7-CN)', ratingInfo:'4.5/5 ★ (1.500 đánh giá)', signature:'Bánh mì pate gan béo ngậy, Xá xíu, Chả, Ruốc & rau thơm', fb:'', phone:'0832020987', website:'', lat:20.4232, lng:106.1765, category:'snack', visible:true, account:null, desc:'Quán ăn vặt "huyền thoại" ngay khu vực chân cầu Đò Quan, thường xuyên xếp hàng đông khách; lưu ý quán chủ yếu thanh toán tiền mặt.' },
   { id:'rs32', name:'Pate Bảy Ngân Chân Cầu Đò Quan', region:'thanhnam', ward:'Phường Nam Định', address:'5 Hàng Thao, Phường Nam Định, Ninh Bình', priceRange:'15k - 80k/người', hours:'06:00 - 20:30 (Hằng ngày)', ratingInfo:'4.6/5 ★ (77 đánh giá)', signature:'Bánh mì pate truyền thống & Pate hộp mua về làm quà', fb:'', phone:'0888669090', website:'', lat:20.4234, lng:106.1768, category:'snack', visible:true, account:null, desc:'Nằm ngay cạnh Hà Bơ, mở từ sáng sớm (06:00) nên rất tiện cho ai muốn ăn bánh mì pate vào buổi sáng hoặc trưa.' },
-  { id:'rs33', name:'Bánh Mỳ Chảo Using', region:'thanhnam', ward:'Phường Nam Định', address:'141 Hùng Vương, Phường Nam Định, Ninh Bình', priceRange:'30k - 60k/người', hours:'07:30 - 22:30 (Hằng ngày)', ratingInfo:'3.9/5 ★ (153 đánh giá)', signature:'Bánh mì chảo (pate, trứng ốp la, xúc xích, xá xíu, sốt đậm đà)', fb:'', phone:'0978893334', website:'', lat:20.4272, lng:106.1652, category:'snack', visible:true, account:null, desc:'Quán quen của học sinh, sinh viên khu vực trung tâm Nam Định, phục vụ xuyên từ sáng tới tối.' }
+  { id:'rs33', name:'Bánh Mỳ Chảo Using', region:'thanhnam', ward:'Phường Nam Định', address:'141 Hùng Vương, Phường Nam Định, Ninh Bình', priceRange:'30k - 60k/người', hours:'07:30 - 22:30 (Hằng ngày)', ratingInfo:'3.9/5 ★ (153 đánh giá)', signature:'Bánh mì chảo (pate, trứng ốp la, xúc xích, xá xíu, sốt đậm đà)', fb:'', phone:'0978893334', website:'', lat:20.4272, lng:106.1652, category:'snack', visible:true, account:null, desc:'Quán quen của học sinh, sinh viên khu vực trung tâm Nam Định, phục vụ xuyên từ sáng tới tối.' },
+  { id:'rs34', name:'Nhà hàng Dê Núi Dung Phố Núi — Hoa Lư', region:'hoalu', ward:'Phường Tây Hoa Lư', address:'Khu vực Ninh Xuân, trục đường Hang Múa – Tràng An, Phường Tây Hoa Lư, Ninh Bình', priceRange:'160k - 280k/người', signature:'Dê tái chanh, Dê nướng tảng, Dê ủ trấu, Cơm cháy sốt dê', fb:'', phone:'', website:'', lat:20.2425, lng:105.9368, visible:true, account:null, desc:'Nhà hàng chuyên thịt dê núi nổi tiếng trên tuyến tham quan Tràng An – Hang Múa, không gian rộng rãi cho gia đình và khách đoàn.' },
+  { id:'rs35', name:'Nhà hàng Chookie\'s Beer Garden — Tam Cốc', region:'hoalu', ward:'Phường Nam Hoa Lư', address:'Khu vực trung tâm Tam Cốc, Phường Nam Hoa Lư, Ninh Bình', priceRange:'120k - 250k/người', signature:'Đồ nướng BBQ, Burger bò, Món Việt hiện đại, Bia thủ công', fb:'', phone:'', website:'', lat:20.2172, lng:105.9358, visible:true, account:null, desc:'Không gian sân vườn trẻ trung tại trung tâm Tam Cốc, phục vụ cả ẩm thực Việt Nam và các món Âu được du khách yêu thích.' },
+  { id:'rs36', name:'Nhà hàng Trung Tuyết — Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', address:'Số 14 Hoàng Hoa Thám, Phường Hoa Lư, Ninh Bình', priceRange:'100k - 200k/người', signature:'Cơm gia đình, Thịt dê xào sả ớt, Cá kho tộ, Cơm cháy ruốc', fb:'', phone:'', website:'', lat:20.2568, lng:105.9722, visible:true, account:null, desc:'Quán cơm gia đình và đặc sản Ninh Bình lâu năm ngay trung tâm Hoa Lư, giá cả hợp lý, phục vụ nhanh.' },
+  { id:'rs37', name:'Nhà hàng Cơm Niêu Việt Xưa — Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', address:'Khu vực đường Tràng An, Phường Hoa Lư, Ninh Bình', priceRange:'120k - 220k/người', signature:'Cơm niêu cháy giòn, Cá bống kho tiêu, Canh cua cà pháo, Thịt kho tàu', fb:'', phone:'', website:'', lat:20.2554, lng:105.9662, visible:true, account:null, desc:'Không gian kiến trúc gỗ ấm cúng chuyên cơm niêu truyền thống Bắc Bộ, rất hợp cho gia đình và khách đoàn.' },
+  { id:'rs38', name:'Nhà hàng Dê Núi Cường Dê — Tràng An', region:'hoalu', ward:'Phường Tây Hoa Lư', address:'Trục đường vào Quần thể danh thắng Tràng An, Phường Tây Hoa Lư, Ninh Bình', priceRange:'170k - 300k/người', signature:'Dê núi 7 món, Lẩu dê thuốc bắc, Dê hấp tía tô, Cơm cháy', fb:'', phone:'', website:'', lat:20.2522, lng:105.9395, visible:true, account:null, desc:'Nhà hàng quy mô lớn gần bến thuyền Tràng An, có bãi đỗ xe rộng và thực đơn đặc sản dê núi phong phú.' },
+  { id:'rs39', name:'Nhà hàng Hoàng Cuisine — Phố Cổ Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', address:'Khu vực đường Trần Hưng Đạo – Phố cổ Hoa Lư, Phường Hoa Lư, Ninh Bình', priceRange:'130k - 260k/người', signature:'Dê nướng ống tre, Cơm cháy sốt dê, Miến lươn, Gỏi cuốn Việt', fb:'', phone:'', website:'', lat:20.2548, lng:105.9702, visible:true, account:null, desc:'Không gian tinh tế ngay trung tâm Hoa Lư, kết hợp hài hòa ẩm thực truyền thống Ninh Bình và cách trình bày hiện đại.' },
+  { id:'rs40', name:'Nhà hàng Hương Mai — Tam Cốc', region:'hoalu', ward:'Phường Nam Hoa Lư', address:'Khu vực bến thuyền Tam Cốc – Bích Động, Phường Nam Hoa Lư, Ninh Bình', priceRange:'120k - 240k/người', signature:'Dê tái chanh, Cá rô Tổng Trường rán giòn, Nem rán, Cơm gia đình', fb:'', phone:'', website:'', lat:20.2160, lng:105.9345, visible:true, account:null, desc:'Điểm dừng ăn trưa thuận tiện ngay khu vực bến đò Tam Cốc, phục vụ các món đặc sản địa phương tươi ngon.' },
+  { id:'rs41', name:'Nhà hàng Bông Lau — Cố Đô Hoa Lư', region:'hoalu', ward:'Phường Tây Hoa Lư', address:'Khu vực Trường Yên, gần Cố đô Hoa Lư – Bái Đính, Phường Tây Hoa Lư, Ninh Bình', priceRange:'150k - 280k/người', signature:'Dê núi hấp gừng, Gà đồi nướng mật ong, Ốc núi hấp sả, Xôi cháy', fb:'', phone:'', website:'', lat:20.2825, lng:105.9045, visible:true, account:null, desc:'Không gian sân vườn thoáng đãng gần Đền Vua Đinh – Vua Lê, phục vụ đặc sản đồng quê và dê núi Ninh Bình.' },
+  { id:'rs42', name:'Nhà hàng Dê Núi Lương Thương — Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', address:'Khu vực đường Lê Thái Tổ, Phường Hoa Lư, Ninh Bình', priceRange:'160k - 290k/người', signature:'Dê tái chanh, Dê nướng tảng, Tiết canh dê, Lẩu dê nhúng mẻ', fb:'', phone:'', website:'', lat:20.2605, lng:105.9628, visible:true, account:null, desc:'Địa chỉ quen thuộc của thực khách địa phương khi muốn thưởng thức thịt dê tươi chế biến chuẩn vị Hoa Lư.' },
+  { id:'rs43', name:'Nhà hàng Cúc Phương Forest — Nho Quan', region:'hoalu', ward:'Xã Cúc Phương', address:'Khu vực cổng Vườn Quốc gia Cúc Phương, Xã Cúc Phương, Ninh Bình', priceRange:'130k - 250k/người', signature:'Gà đồi nướng lá chanh, Lợn mán hấp lá móc mật, Ốc núi, Măng rừng xào', fb:'', phone:'', website:'', lat:20.2925, lng:105.6820, visible:true, account:null, desc:'Phục vụ ẩm thực núi rừng đặc trưng ngay cửa ngõ Vườn Quốc gia Cúc Phương, thuận tiện cho khách tham quan sinh thái.' },
+  { id:'rs44', name:'Nhà hàng Miến Lươn Bà Phấn — Hoa Lư', region:'hoalu', ward:'Phường Hoa Lư', address:'Đường Trần Hưng Đạo, Phường Hoa Lư, Ninh Bình', priceRange:'40k - 70k/người', signature:'Miến lươn nước cốt xương, Miến lươn trộn, Cháo lươn đồng', fb:'', phone:'', website:'', lat:20.2572, lng:105.9746, visible:true, account:null, desc:'Thương hiệu miến lươn gia truyền nổi tiếng đất Hoa Lư với lươn cốm chắc thịt và nước dùng ninh xương đậm đà.' },
+  { id:'rs45', name:'Nhà hàng Ốc Núi & Đặc Sản Tam Điệp', region:'hoalu', ward:'Phường Tam Điệp', address:'Khu vực trung tâm Phường Tam Điệp, Ninh Bình', priceRange:'120k - 230k/người', signature:'Ốc núi Tam Điệp hấp sả gừng, Ốc xào me, Dê núi, Gà đồi', fb:'', phone:'', website:'', lat:20.1518, lng:105.9218, visible:true, account:null, desc:'Điểm thưởng thức ốc núi đá vôi Tam Điệp và đặc sản địa phương thuận tiện trên tuyến Quốc lộ 1A.' }
 ];
 
 // 6 CUNG ĐƯỜNG DI SẢN LIÊN VÙNG GỢI Ý
@@ -8725,6 +8737,451 @@ const DEFAULT_HOTELS = [
       { id: 'rm_ht20_2', name: 'Phòng Đôi Gia Đình', price: 400000, capacity: '4 khách', bed: '2 giường đôi' }
     ],
     desc: 'Thuận tiện cho du khách thập phương về lễ hội Phủ Dầy và tham quan vùng văn hóa Sơn Nam Hạ.'
+  },
+  // ==================== BỔ SUNG MỞ RỘNG KHU VỰC NINH BÌNH (18 CƠ SỞ: ht21 - ht38) ====================
+  {
+    id: 'ht21',
+    name: 'Khách sạn Ninh Bình Legend',
+    hotelType: 'hotel',
+    starLabel: 'Khách sạn 5★ Trung tâm',
+    region: 'hoalu',
+    ward: 'Phường Hoa Lư',
+    address: 'Số 177 Lê Thái Tổ, Khu đô thị Xuân Thành, Phường Hoa Lư, Ninh Bình',
+    priceRange: '1.800.000đ - 4.500.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng Âu - Á 5★', 'Bể bơi ngoài trời & 4 mùa', 'Buffet sáng', 'Spa & Massage', 'Sân Tennis & Gym', 'Hội nghị sự kiện'],
+    phone: '02293899880',
+    fb: 'NinhBinhLegendHotel',
+    website: 'https://ninhbinhlegendhotel.com/',
+    lat: 20.2648,
+    lng: 105.9612,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht21_1', name: 'Phòng Superior (36m²)', price: 1800000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King hoặc 2 giường đơn' },
+      { id: 'rm_ht21_2', name: 'Phòng Deluxe View Núi/Bể bơi', price: 2350000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King cỡ lớn' },
+      { id: 'rm_ht21_3', name: 'Legend Suite Cao Cấp (72m²)', price: 4500000, capacity: '2 người lớn + 2 trẻ em', bed: '1 giường King + Phòng khách' }
+    ],
+    desc: 'Khách sạn 5 sao tiêu chuẩn quốc tế tại trung tâm Hoa Lư, tích hợp hệ thống nhà hàng sang trọng, hồ bơi lớn và vị trí thuận tiện đi Tràng An, Bái Đính.'
+  },
+  {
+    id: 'ht22',
+    name: 'Aravinda Resort Ninh Bình',
+    hotelType: 'resort',
+    starLabel: 'Resort 4★ Boutique',
+    region: 'hoalu',
+    ward: 'Phường Nam Hoa Lư',
+    address: 'Thôn Hải Nham, trục Tam Cốc – Thung Nham, Phường Nam Hoa Lư, Ninh Bình',
+    priceRange: '2.100.000đ - 4.200.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng Le Fleur', 'Bể bơi hướng núi đá vôi', 'Buffet sáng', 'Xe đạp miễn phí', 'Spa thảo dược', 'Đầm sen tự nhiên'],
+    phone: '02293626699',
+    fb: 'aravindaresortninhbinh',
+    website: 'https://aravinda-resort.com/',
+    lat: 20.2092,
+    lng: 105.9155,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht22_1', name: 'Classic Mountain View', price: 2100000, capacity: '2 người lớn', bed: '1 giường King hoặc 2 giường đơn' },
+      { id: 'rm_ht22_2', name: 'Lotus Lake Side Villa', price: 2900000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King view hồ sen' },
+      { id: 'rm_ht22_3', name: 'Aravinda Villa Sân Vườn', price: 4200000, capacity: '3 người lớn', bed: '1 giường King lớn + Sân hiên riêng' }
+    ],
+    desc: 'Khu nghỉ dưỡng boutique yên bình ẩn mình bên hồ sen và dãy núi đá vôi Hải Nham, nổi bật với kiến trúc tinh tế và nhà hàng ẩm thực địa phương.'
+  },
+  {
+    id: 'ht23',
+    name: 'Ninh Bình Hidden Charm Hotel & Resort',
+    hotelType: 'resort',
+    starLabel: 'Khách sạn & Resort 5★',
+    region: 'hoalu',
+    ward: 'Phường Nam Hoa Lư',
+    address: 'Số 9, Trung tâm du lịch Tam Cốc – Bích Động, Phường Nam Hoa Lư, Ninh Bình',
+    priceRange: '1.750.000đ - 3.900.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng Sunrise & Lantern', 'Bể bơi ngoài trời', 'Buffet sáng', 'Spa & Xông hơi', 'Phòng Gym', 'Khu vui chơi trẻ em'],
+    phone: '02293888555',
+    fb: 'NinhBinhHiddenCharmHotelAndResort',
+    website: 'https://hiddencharmresort.com/',
+    lat: 20.2178,
+    lng: 105.9362,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht23_1', name: 'Phòng Superior', price: 1750000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King hoặc 2 giường Twin' },
+      { id: 'rm_ht23_2', name: 'Phòng Deluxe View Đồng Lúa', price: 2250000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King lớn' },
+      { id: 'rm_ht23_3', name: 'Fine Art Luxury Suite', price: 3900000, capacity: '3 người lớn', bed: '1 giường King + Phòng khách riêng' }
+    ],
+    desc: 'Khu nghỉ dưỡng 5 sao ngay sát bến thuyền Tam Cốc – Bích Động, nổi tiếng với kiến trúc thủ công mỹ nghệ tinh xảo và hệ thống nhà hàng cao cấp.'
+  },
+  {
+    id: 'ht24',
+    name: 'Lalita Boutique Hotel & Spa Ninh Bình',
+    hotelType: 'hotel',
+    starLabel: 'Khách sạn 4★ Tam Cốc',
+    region: 'hoalu',
+    ward: 'Phường Nam Hoa Lư',
+    address: 'Đường vào bến thuyền Tam Cốc, Phường Nam Hoa Lư, Ninh Bình',
+    priceRange: '1.250.000đ - 2.600.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng & Sky Bar', 'Bể bơi sân vườn', 'Buffet sáng', 'Spa thư giãn', 'Xe đạp miễn phí', 'Đỗ xe ô tô'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2195,
+    lng: 105.9388,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht24_1', name: 'Deluxe City / Garden View', price: 1250000, capacity: '2 người lớn', bed: '1 giường Queen hoặc 2 giường đơn' },
+      { id: 'rm_ht24_2', name: 'Executive Balcony View Núi', price: 1750000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King + Ban công rộng' },
+      { id: 'rm_ht24_3', name: 'Family Suite Tam Cốc', price: 2600000, capacity: '4 người lớn', bed: '2 giường đôi lớn' }
+    ],
+    desc: 'Khách sạn boutique phong cách hiện đại pha nét Á Đông tại khu vực Tam Cốc, dễ dàng di chuyển tới Hang Múa và bến thuyền.'
+  },
+  {
+    id: 'ht25',
+    name: 'Jiva Hoa Lư Retreat',
+    hotelType: 'resort',
+    starLabel: 'Resort 5★ Nghỉ dưỡng',
+    region: 'hoalu',
+    ward: 'Phường Nam Hoa Lư',
+    address: 'Thôn Hải Nham, Phường Nam Hoa Lư, Ninh Bình',
+    priceRange: '2.900.000đ - 6.500.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng Hạt Gạo', 'Bể bơi vô cực view núi', 'Lớp Yoga & Thiền', 'Spa chăm sóc sức khỏe', 'Xe đạp miễn phí', 'Buffet sáng'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2072,
+    lng: 105.9108,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht25_1', name: 'Deluxe Valley View', price: 2900000, capacity: '2 người lớn', bed: '1 giường King' },
+      { id: 'rm_ht25_2', name: 'Junior Suite View Núi Đá', price: 4200000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King + Bồn tắm đá' },
+      { id: 'rm_ht25_3', name: 'Two-Bedroom Pool Villa', price: 6500000, capacity: '4 người lớn', bed: '2 phòng ngủ + Bể bơi riêng' }
+    ],
+    desc: 'Khu nghỉ dưỡng cao cấp mang đậm cảm hứng di sản văn hóa Cố đô, bao quanh bởi núi đá vôi hùng vĩ và không gian xanh biệt lập.'
+  },
+  {
+    id: 'ht26',
+    name: 'Tam Cốc Rice Fields Resort',
+    hotelType: 'resort',
+    starLabel: 'Resort Sinh thái Đồng lúa',
+    region: 'hoalu',
+    ward: 'Phường Nam Hoa Lư',
+    address: 'Thôn Hải Nham, tuyến đường Bích Động – Thung Nham, Phường Nam Hoa Lư, Ninh Bình',
+    priceRange: '950.000đ - 2.100.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng sân vườn', 'Bể bơi ngoài trời', 'Ăn sáng miễn phí', 'Xe đạp dạo đồng lúa', 'Bungalow tre gỗ'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2128,
+    lng: 105.9185,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht26_1', name: 'Bungalow View Vườn', price: 950000, capacity: '2 người lớn', bed: '1 giường đôi' },
+      { id: 'rm_ht26_2', name: 'Bungalow View Đồng Lúa', price: 1350000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King + Ban công' },
+      { id: 'rm_ht26_3', name: 'Family Bungalow 2 Giường Đôi', price: 2100000, capacity: '4 người lớn', bed: '2 giường đôi lớn' }
+    ],
+    desc: 'Các căn bungalow mái lá thân thiện thiên nhiên nhìn thẳng ra cánh đồng lúa Tam Cốc và núi đá vôi, cực đẹp vào mùa lúa chín.'
+  },
+  {
+    id: 'ht27',
+    name: 'Khách sạn The Vissai Ninh Bình',
+    hotelType: 'hotel',
+    starLabel: 'Khách sạn 4★ Trung tâm',
+    region: 'hoalu',
+    ward: 'Phường Hoa Lư',
+    address: 'Số 848 Trần Hưng Đạo, Phường Hoa Lư, Ninh Bình',
+    priceRange: '1.100.000đ - 2.500.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng tiệc & đặc sản', 'Bể bơi ngoài trời', 'Buffet sáng', 'Phòng hội nghị lớn', 'Sky Bar', 'Bãi đỗ xe đoàn'],
+    phone: '02293894567',
+    fb: '',
+    website: '',
+    lat: 20.2582,
+    lng: 105.9738,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht27_1', name: 'Deluxe City View', price: 1100000, capacity: '2 người lớn', bed: '1 giường King hoặc 2 giường đơn' },
+      { id: 'rm_ht27_2', name: 'Executive Suite', price: 1850000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King + Sofa' },
+      { id: 'rm_ht27_3', name: 'President / Family Suite', price: 2500000, capacity: '4 người lớn', bed: '2 giường lớn' }
+    ],
+    desc: 'Khách sạn 4 sao vị trí đắc địa ngay trục đường chính Trần Hưng Đạo, thuận tiện đi Phố cổ Hoa Lư, Núi Non Nước và đón khách đoàn.'
+  },
+  {
+    id: 'ht28',
+    name: 'Khách sạn MT Collection Ninh Bình',
+    hotelType: 'hotel',
+    starLabel: 'Khách sạn 4★ Hiện đại',
+    region: 'hoalu',
+    ward: 'Phường Hoa Lư',
+    address: 'Trục đường Tràng An, Phường Hoa Lư, Ninh Bình',
+    priceRange: '980.000đ - 2.200.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng phục vụ 3 bữa', 'Buffet sáng', 'Quầy Coffee Lounge', 'Thang máy', 'Đỗ xe ô tô miễn phí'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2562,
+    lng: 105.9655,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht28_1', name: 'Superior Double/Twin', price: 980000, capacity: '2 người lớn', bed: '1 giường đôi hoặc 2 giường đơn' },
+      { id: 'rm_ht28_2', name: 'Deluxe Panorama View', price: 1450000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King' },
+      { id: 'rm_ht28_3', name: 'Family Connecting Room', price: 2200000, capacity: '4 người lớn', bed: '2 giường lớn' }
+    ],
+    desc: 'Khách sạn phong cách trẻ trung gần Phố cổ Hoa Lư và trục đường chính đi Quần thể danh thắng Tràng An.'
+  },
+  {
+    id: 'ht29',
+    name: 'Khách sạn Mường Thanh Ninh Bình',
+    hotelType: 'hotel',
+    starLabel: 'Khách sạn 4★ Trung tâm',
+    region: 'hoalu',
+    ward: 'Phường Hoa Lư',
+    address: 'Khu vực đường Lê Thái Tổ – Quảng trường Đinh Tiên Hoàng, Phường Hoa Lư, Ninh Bình',
+    priceRange: '1.050.000đ - 2.400.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng sức chứa lớn', 'Buffet sáng', 'Hội nghị & Tiệc đoàn', 'Spa & Massage', 'Sân đỗ xe khách 45 chỗ'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2618,
+    lng: 105.9642,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht29_1', name: 'Deluxe King / Twin', price: 1050000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King hoặc 2 giường đơn' },
+      { id: 'rm_ht29_2', name: 'Deluxe Triple (3 khách)', price: 1500000, capacity: '3 người lớn', bed: '3 giường đơn' },
+      { id: 'rm_ht29_3', name: 'Executive Suite', price: 2400000, capacity: '2 người lớn + 2 trẻ em', bed: '1 giường King + Phòng khách' }
+    ],
+    desc: 'Thuận tiện cho khách công tác, gia đình và các đoàn du lịch tham quan Tràng An, Bái Đính, Phố cổ Hoa Lư.'
+  },
+  {
+    id: 'ht30',
+    name: 'Tam Cốc La Montagne Resort & Spa',
+    hotelType: 'resort',
+    starLabel: 'Resort 4★ Sinh thái',
+    region: 'hoalu',
+    ward: 'Phường Nam Hoa Lư',
+    address: 'Thôn Đam Khê, trục đường Bích Động – Thung Nham, Phường Nam Hoa Lư, Ninh Bình',
+    priceRange: '1.650.000đ - 3.600.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng ẩm thực Việt', 'Bể bơi ngoài trời', 'Spa trị liệu', 'Xe đạp miễn phí', 'Buffet sáng', 'Chèo thuyền kayak'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2088,
+    lng: 105.9212,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht30_1', name: 'Deluxe Garden View', price: 1650000, capacity: '2 người lớn', bed: '1 giường King hoặc 2 giường Twin' },
+      { id: 'rm_ht30_2', name: 'Lake View Bungalow', price: 2300000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King view hồ' },
+      { id: 'rm_ht30_3', name: 'Family Villa View Núi', price: 3600000, capacity: '4 người lớn', bed: '2 giường King' }
+    ],
+    desc: 'Khu nghỉ dưỡng nằm trọn giữa hồ nước và núi đá vôi Đam Khê, phù hợp kỳ nghỉ cuối tuần yên tĩnh cho gia đình và cặp đôi.'
+  },
+  {
+    id: 'ht31',
+    name: 'Khách sạn Tràng An Luxury',
+    hotelType: 'hotel',
+    starLabel: 'Khách sạn 3★ Phố cổ',
+    region: 'hoalu',
+    ward: 'Phường Hoa Lư',
+    address: 'Khu vực Hồ Kỳ Lân – Phố cổ Hoa Lư, Phường Hoa Lư, Ninh Bình',
+    priceRange: '650.000đ - 1.350.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng điểm tâm sáng', 'Gần Phố cổ Hoa Lư đi bộ', 'Thang máy', 'Wi-Fi tốc độ cao', 'Hỗ trợ thuê xe máy'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2535,
+    lng: 105.9688,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht31_1', name: 'Standard Double', price: 650000, capacity: '2 khách', bed: '1 giường đôi' },
+      { id: 'rm_ht31_2', name: 'Deluxe View Thành Phố', price: 890000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King' },
+      { id: 'rm_ht31_3', name: 'Family 2 Giường Đôi', price: 1350000, capacity: '4 khách', bed: '2 giường đôi lớn' }
+    ],
+    desc: 'Khách sạn 3 sao sạch đẹp, giá tốt ngay gần Phố cổ Hoa Lư, thuận tiện dạo bộ ngắm tháp Tứ Ân và thưởng thức ẩm thực đêm.'
+  },
+  {
+    id: 'ht32',
+    name: 'Liberty Hall Tam Cốc Hotel & Villa',
+    hotelType: 'hotel',
+    starLabel: 'Khách sạn 3★ Trung tâm Tam Cốc',
+    region: 'hoalu',
+    ward: 'Phường Nam Hoa Lư',
+    address: 'Trung tâm phố du lịch Tam Cốc, Phường Nam Hoa Lư, Ninh Bình',
+    priceRange: '720.000đ - 1.650.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng & Quầy Bar', 'Bể bơi ngoài trời', 'Ăn sáng miễn phí', 'Đi bộ ra bến thuyền Tam Cốc', 'Hỗ trợ đặt tour'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2165,
+    lng: 105.9352,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht32_1', name: 'Superior Double/Twin', price: 720000, capacity: '2 khách', bed: '1 giường đôi hoặc 2 giường đơn' },
+      { id: 'rm_ht32_2', name: 'Deluxe Pool View', price: 1050000, capacity: '2 người lớn + 1 trẻ em', bed: '1 giường King' },
+      { id: 'rm_ht32_3', name: 'Family Suite', price: 1650000, capacity: '4 khách', bed: '2 giường đôi' }
+    ],
+    desc: 'Vị trí ngay trung tâm khu phố du lịch Tam Cốc, xung quanh đầy đủ nhà hàng, quán cà phê và chỉ vài phút đi bộ tới bến thuyền.'
+  },
+  {
+    id: 'ht33',
+    name: 'Ninh Bình Valley Homestay',
+    hotelType: 'homestay',
+    starLabel: 'Homestay Thung lũng',
+    region: 'hoalu',
+    ward: 'Phường Tây Hoa Lư',
+    address: 'Thôn Đồng Cùng, gần Tràng An – Hang Múa, Phường Tây Hoa Lư, Ninh Bình',
+    priceRange: '550.000đ - 1.250.000đ/đêm',
+    checkInOut: 'Nhận phòng 13:30 • Trả phòng 11:30',
+    amenities: ['Bungalow tre ven hồ', 'Nhà hàng cơm nhà', 'Chèo thuyền miễn phí', 'Câu cá giải trí', 'Xe đạp tham quan'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2442,
+    lng: 105.9315,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht33_1', name: 'Bungalow Ven Hồ (2 khách)', price: 550000, capacity: '2 khách', bed: '1 giường đôi' },
+      { id: 'rm_ht33_2', name: 'Bungalow Gia Đình View Núi', price: 1250000, capacity: '4 khách', bed: '2 giường đôi' }
+    ],
+    desc: 'Homestay sinh thái ẩn mình trong thung lũng núi đá vôi yên tĩnh, có hồ nước tự nhiên và bữa cơm gia đình đặc sản Ninh Bình.'
+  },
+  {
+    id: 'ht34',
+    name: 'Tam Cốc Horizon Bungalow',
+    hotelType: 'homestay',
+    starLabel: 'Homestay Bungalow',
+    region: 'hoalu',
+    ward: 'Phường Nam Hoa Lư',
+    address: 'Khu vực Đam Khê Trong, gần Tam Cốc – Hang Múa, Phường Nam Hoa Lư, Ninh Bình',
+    priceRange: '680.000đ - 1.450.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Bể bơi ngoài trời', 'Nhà hàng phục vụ ăn trưa/tối', 'Ăn sáng miễn phí', 'Xe đạp miễn phí', 'View núi đá vôi'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2215,
+    lng: 105.9312,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht34_1', name: 'Deluxe Bungalow Sân Vườn', price: 680000, capacity: '2 khách', bed: '1 giường đôi' },
+      { id: 'rm_ht34_2', name: 'Family Bungalow View Bể Bơi', price: 1450000, capacity: '4 khách', bed: '2 giường đôi' }
+    ],
+    desc: 'Khu bungalow gỗ ấm cúng có bể bơi thoáng đãng, thuận tiện di chuyển giữa Tam Cốc, Hang Múa và Đền Thái Vi.'
+  },
+  {
+    id: 'ht35',
+    name: 'Vân Long Family Homestay',
+    hotelType: 'homestay',
+    starLabel: 'Homestay Sinh thái Gia Vân',
+    region: 'hoalu',
+    ward: 'Xã Gia Vân',
+    address: 'Gần bến đò Đầm Vân Long & Nhà thờ Lãng Vân, Xã Gia Vân, Ninh Bình',
+    priceRange: '420.000đ - 850.000đ/đêm',
+    checkInOut: 'Nhận phòng 13:00 • Trả phòng 12:00',
+    amenities: ['Sân vườn thoáng mát', 'Phục vụ cơm đặc sản địa phương', 'Xe đạp dạo đê Vân Long', 'Đỗ xe ô tô miễn phí'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.3915,
+    lng: 105.8812,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht35_1', name: 'Phòng Đôi Sân Vườn', price: 420000, capacity: '2 khách', bed: '1 giường đôi' },
+      { id: 'rm_ht35_2', name: 'Phòng Gia Đình 4 Khách', price: 850000, capacity: '4 khách', bed: '2 giường đôi' }
+    ],
+    desc: 'Điểm dừng chân thân thiện, yên bình dành cho du khách khám phá Khu bảo tồn đất ngập nước Vân Long và Nhà thờ Lãng Vân.'
+  },
+  {
+    id: 'ht36',
+    name: 'Khách sạn Tam Điệp Central',
+    hotelType: 'hotel',
+    starLabel: 'Khách sạn 3★ Tam Điệp',
+    region: 'hoalu',
+    ward: 'Phường Tam Điệp',
+    address: 'Trục đường Quang Trung (Quốc lộ 1A), Phường Tam Điệp, Ninh Bình',
+    priceRange: '500.000đ - 1.050.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Nhà hàng phục vụ khách đoàn', 'Thang máy', 'Điều hòa 2 chiều', 'Bãi đỗ xe rộng', 'Tiện đi Nông trường Đồng Giao'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.1525,
+    lng: 105.9235,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht36_1', name: 'Phòng Standard 2 Khách', price: 500000, capacity: '2 khách', bed: '1 giường đôi hoặc 2 giường đơn' },
+      { id: 'rm_ht36_2', name: 'Phòng VIP Gia Đình', price: 1050000, capacity: '4 khách', bed: '2 giường đôi lớn' }
+    ],
+    desc: 'Khách sạn trung tâm khu vực Tam Điệp, thuận tiện cho khách công tác và du khách tham quan đồi dứa Đồng Giao, Đền Dâu – Đền Quán Cháo.'
+  },
+  {
+    id: 'ht37',
+    name: 'Kênh Gà Hot Spring Resort & Hotel',
+    hotelType: 'resort',
+    starLabel: 'Nghỉ dưỡng Khoáng nóng',
+    region: 'hoalu',
+    ward: 'Xã Gia Viễn',
+    address: 'Khu vực Suối khoáng nóng Kênh Gà, ven sông Hoàng Long, Xã Gia Viễn, Ninh Bình',
+    priceRange: '850.000đ - 1.950.000đ/đêm',
+    checkInOut: 'Nhận phòng 14:00 • Trả phòng 12:00',
+    amenities: ['Bể tắm khoáng nóng tự nhiên', 'Nhà hàng ẩm thực sông Hoàng Long', 'Spa & Ngâm thảo dược', 'Khuôn viên ven sông'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.3238,
+    lng: 105.8712,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht37_1', name: 'Phòng Deluxe Khoáng Nóng', price: 850000, capacity: '2 người lớn', bed: '1 giường đôi + Vé tắm khoáng' },
+      { id: 'rm_ht37_2', name: 'Bungalow Gia Đình Ven Sông', price: 1950000, capacity: '4 người lớn', bed: '2 giường đôi + Bồn khoáng riêng' }
+    ],
+    desc: 'Khu lưu trú kết hợp trải nghiệm tắm suối khoáng nóng thiên nhiên Kênh Gà, lý tưởng để nghỉ dưỡng và phục hồi sức khỏe cuối tuần.'
+  },
+  {
+    id: 'ht38',
+    name: 'Nhà nghỉ Tràng An Eco (Gần Bến Thuyền)',
+    hotelType: 'motel',
+    starLabel: 'Nhà nghỉ gần Tràng An',
+    region: 'hoalu',
+    ward: 'Phường Tây Hoa Lư',
+    address: 'Trục đường Tràng An – Trường Yên, Phường Tây Hoa Lư, Ninh Bình',
+    priceRange: '280.000đ - 500.000đ/đêm',
+    checkInOut: 'Nhận phòng 12:30 • Trả phòng 12:00',
+    amenities: ['Điều hòa 2 chiều', 'Nóng lạnh', 'Sân đỗ ô tô miễn phí', 'Gần bến thuyền Tràng An & Cố đô Hoa Lư', 'Hỗ trợ thuê xe máy'],
+    phone: '',
+    fb: '',
+    website: '',
+    lat: 20.2548,
+    lng: 105.9342,
+    visible: true,
+    account: null,
+    rooms: [
+      { id: 'rm_ht38_1', name: 'Phòng Đơn Tiêu Chuẩn', price: 280000, capacity: '2 khách', bed: '1 giường đôi' },
+      { id: 'rm_ht38_2', name: 'Phòng Đôi Gia Đình', price: 500000, capacity: '4 khách', bed: '2 giường đôi' }
+    ],
+    desc: 'Nhà nghỉ sạch sẽ, giá bình dân nằm sát trục đường vào bến thuyền Tràng An và Cố đô Hoa Lư, phù hợp cho gia đình và nhóm bạn trẻ.'
   }
 ];
 
@@ -15560,6 +16017,38 @@ service cloud.firestore {
         if (typeof applySiteTitles === 'function') applySiteTitles();
       }
     } catch (e) {}
+  });
+})();
+</script>
+
+
+<!-- ==================== MÔ-ĐUN v37: TỰ ĐỘNG HỢP NHẤT NHÀ HÀNG & LƯU TRÚ NINH BÌNH MỞ RỘNG ==================== -->
+<script>
+(function initV37NinhBinhExpansion() {
+  window.mergeNewNinhBinhRestaurantsIfNeeded = function(doSave = true) {
+    if (!Array.isArray(db.restaurants) || !Array.isArray(DEFAULT_RESTAURANTS)) return 0;
+    const deleted = Array.isArray(db._deletedIds) ? db._deletedIds : [];
+    const existingIds = new Set(db.restaurants.map(r => r.id));
+    let added = 0;
+    DEFAULT_RESTAURANTS.forEach(defR => {
+      if (!existingIds.has(defR.id) && !deleted.includes(defR.id)) {
+        db.restaurants.push(JSON.parse(JSON.stringify(defR)));
+        added++;
+      }
+    });
+    if (added > 0 && doSave && typeof saveDB === 'function') {
+      saveDB();
+    }
+    return added;
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const addedRs = window.mergeNewNinhBinhRestaurantsIfNeeded(true);
+    if (addedRs > 0) {
+      if (typeof updateCounts === 'function') updateCounts();
+      if (typeof renderMap === 'function') renderMap();
+      if (typeof renderMarket === 'function') renderMarket();
+    }
   });
 })();
 </script>
