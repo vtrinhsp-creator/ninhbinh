@@ -5988,6 +5988,7 @@ window.addEventListener('DOMContentLoaded', () => {
       restaurantPosts: db.restaurantPosts || [],
       wards: db.wards || [],
       reviews: db.reviews || [],
+      serviceFeedbacks: db.serviceFeedbacks || [],
       orders: (db.orders || []).slice(0, 200),
       _meta: {
         updatedAt: Date.now(),
@@ -6050,6 +6051,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (Array.isArray(data.restaurantPosts)) db.restaurantPosts = data.restaurantPosts;
       if (Array.isArray(data.wards)) db.wards = data.wards;
       if (Array.isArray(data.reviews)) db.reviews = data.reviews;
+      if (Array.isArray(data.serviceFeedbacks)) db.serviceFeedbacks = data.serviceFeedbacks;
       if (Array.isArray(data.orders)) db.orders = typeof window.mergeCompatibleOrders === 'function' ? window.mergeCompatibleOrders(db.orders, data.orders) : data.orders;
       db.cart = localCart;
 
@@ -17739,6 +17741,50 @@ service cloud.firestore {
         <div id="v45-items-grid" class="v45-item-grid"></div>
       </div>
 
+      <!-- Thông tin hình thức & vị trí bàn riêng cho Nhà hàng (v47) -->
+      <div id="v47-table-box" class="info-box hidden" style="background:#faf5ff; border-color:#d8b4fe; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+          <b style="color:var(--food-dark); font-size:13px;">🪑 Hình Thức Phục Vụ &amp; Vị Trí Bàn Tại Quán</b>
+          <div style="display:flex; gap:6px;">
+            <label style="display:inline-flex; align-items:center; gap:4px; cursor:pointer; font-size:12px; font-weight:700; background:#fff; padding:4px 9px; border-radius:999px; border:1px solid #c4b5fd;">
+              <input type="radio" name="v47-dining-mode" value="dinein" checked onchange="v47ToggleDiningMode()"> 🍽️ Ăn tại quán
+            </label>
+            <label style="display:inline-flex; align-items:center; gap:4px; cursor:pointer; font-size:12px; font-weight:700; background:#fff; padding:4px 9px; border-radius:999px; border:1px solid #c4b5fd;">
+              <input type="radio" name="v47-dining-mode" value="takeaway" onchange="v47ToggleDiningMode()"> 🥡 Mang về
+            </label>
+          </div>
+        </div>
+        <div id="v47-table-fields">
+          <div class="row-2" style="margin-bottom:6px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">🏡 Khu vực ngồi</label>
+              <select id="v47-table-zone" class="form-control">
+                <option value="Sảnh chính">🏠 Sảnh chính</option>
+                <option value="Sân vườn thoáng mát">🌿 Sân vườn thoáng mát</option>
+                <option value="Phòng lạnh / VIP">❄️ Phòng lạnh / VIP</option>
+                <option value="Tầng 2 / View đẹp">🏞️ Tầng 2 / View đẹp</option>
+                <option value="Khu vực ngoài trời">🌤️ Khu vực ngoài trời</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">🪑 Số bàn / Vị trí bàn cụ thể</label>
+              <input id="v47-table-num" class="form-control" placeholder="VD: Bàn 05, Bàn cạnh cửa sổ...">
+            </div>
+          </div>
+          <div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">
+            <span style="font-size:11px; color:var(--muted); font-weight:700;">Chọn nhanh bàn:</span>
+            <button type="button" class="btn btn-xs btn-soft" onclick="v47PickTable('Bàn 01')">Bàn 01</button>
+            <button type="button" class="btn btn-xs btn-soft" onclick="v47PickTable('Bàn 02')">Bàn 02</button>
+            <button type="button" class="btn btn-xs btn-soft" onclick="v47PickTable('Bàn 03')">Bàn 03</button>
+            <button type="button" class="btn btn-xs btn-soft" onclick="v47PickTable('Bàn 04')">Bàn 04</button>
+            <button type="button" class="btn btn-xs btn-soft" onclick="v47PickTable('Bàn 05')">Bàn 05</button>
+            <button type="button" class="btn btn-xs btn-soft" onclick="v47PickTable('Bàn 06')">Bàn 06</button>
+            <button type="button" class="btn btn-xs btn-soft" onclick="v47PickTable('Phòng VIP 1')">VIP 1</button>
+            <button type="button" class="btn btn-xs btn-soft" onclick="v47PickTable('Phòng VIP 2')">VIP 2</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Thông tin đặt phòng riêng cho Nghỉ dưỡng / Khách sạn -->
       <div id="v45-hotel-dates" class="row-3 hidden">
         <div class="form-group" style="margin-bottom:0;">
@@ -17967,6 +18013,11 @@ service cloud.firestore {
       availBadge.textContent = `Còn ${availItems.length} món`;
       if (cfSpec) cfSpec.textContent = '⭐ Món ăn đặc biệt';
       if (cfDaily) cfDaily.textContent = '🍲 Món ăn thường ngày';
+      document.getElementById('v47-table-box')?.classList.remove('hidden');
+      const rDine = document.querySelector('input[name="v47-dining-mode"][value="dinein"]');
+      if (rDine) rDine.checked = true;
+      if (document.getElementById('v47-table-num')) document.getElementById('v47-table-num').value = '';
+      if (typeof v47ToggleDiningMode === 'function') v47ToggleDiningMode();
       hotelDates.classList.add('hidden');
       extraRow.classList.remove('hidden');
       lbl1.textContent = '👥 Số lượng khách ăn';
@@ -17982,6 +18033,7 @@ service cloud.firestore {
       availBadge.textContent = `Còn ${availItems.length} loại`;
       if (cfSpec) cfSpec.textContent = '⭐ Loại đặc biệt / Quà biếu';
       if (cfDaily) cfDaily.textContent = '📦 Loại tiêu chuẩn';
+      document.getElementById('v47-table-box')?.classList.add('hidden');
       hotelDates.classList.add('hidden');
       extraRow.classList.remove('hidden');
       lbl1.textContent = '🏠 Địa chỉ nhận hàng / Giao tận nơi';
@@ -17997,6 +18049,7 @@ service cloud.firestore {
       availBadge.textContent = `Còn ${availItems.length} hạng phòng`;
       if (cfSpec) cfSpec.textContent = '⭐ Phòng VIP / Villa';
       if (cfDaily) cfDaily.textContent = '🛏️ Phòng tiêu chuẩn';
+      document.getElementById('v47-table-box')?.classList.add('hidden');
       hotelDates.classList.remove('hidden');
       extraRow.classList.remove('hidden');
       const todayIso = new Date().toISOString().slice(0, 10);
@@ -18173,7 +18226,21 @@ service cloud.firestore {
     });
 
     const itemsSummary = orderItems.map(i => `${i.name} x${i.qty}`).join(', ');
+    let diningMode = '';
+    let tableLocation = '';
     const noteParts = [];
+    if (type === 'restaurant') {
+      diningMode = document.querySelector('input[name="v47-dining-mode"]:checked')?.value || 'dinein';
+      if (diningMode === 'dinein') {
+        const zone = document.getElementById('v47-table-zone')?.value || 'Sảnh chính';
+        const tbl = (document.getElementById('v47-table-num')?.value || '').trim();
+        tableLocation = tbl ? `${zone} - ${tbl}` : zone;
+        noteParts.push(`🪑 Ăn tại quán (${tableLocation})`);
+      } else {
+        tableLocation = 'Mang về';
+        noteParts.push('🥡 Mang về');
+      }
+    }
     if (type === 'hotel' && checkin) noteParts.push(`Nhận phòng: ${checkin} (${nights} đêm, ${extra1})`);
     if (type === 'specialty' && extra1) noteParts.push(`Giao tới: ${extra1}`);
     if (extra2) noteParts.push(extra2);
@@ -18194,6 +18261,8 @@ service cloud.firestore {
       totalAmount: finalAmount,
       finalAmount,
       totalText: fmtVND(finalAmount),
+      diningMode,
+      tableLocation,
       note: noteParts.join(' • '),
       status: 'Mới đặt',
       paymentStatus: 'Chưa thanh toán',
@@ -18504,6 +18573,1209 @@ service cloud.firestore {
 
   window.addEventListener('DOMContentLoaded', () => {
     setTimeout(renderMerchantDailyMenuPanel, 520);
+  });
+})();
+</script>
+
+
+<!-- ==================== MÔ-ĐUN v47: VỊ TRÍ BÀN TẠI QUÁN & TRUNG TÂM GÓP Ý DỊCH VỤ - ĐÁNH GIÁ NHÀ HÀNG / KHÁCH SẠN / CỬA HÀNG ==================== -->
+<style>
+  .v47-fb-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    background: #eaf0f6;
+    padding: 4px;
+    border-radius: 12px;
+  }
+  .v47-fb-tab {
+    padding: 8px 10px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--muted);
+    background: transparent;
+    transition: all 0.16s ease;
+    text-align: center;
+  }
+  .v47-fb-tab.active {
+    background: #fff;
+    color: var(--fb);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  .v47-star-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .v47-star-group {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+  }
+  .v47-star {
+    font-size: 22px;
+    line-height: 1;
+    color: #cbd5e1;
+    padding: 2px;
+    transition: transform 0.12s ease, color 0.12s ease;
+  }
+  .v47-star.on { color: #f59e0b; }
+  .v47-star:hover { transform: scale(1.15); }
+  .v47-mood-bar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .v47-mood-btn {
+    padding: 8px 6px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    font-size: 11.8px;
+    font-weight: 700;
+    color: var(--muted);
+    text-align: center;
+  }
+  .v47-mood-btn.active {
+    border-color: var(--fb);
+    background: var(--fb-light);
+    color: var(--fb);
+  }
+  .v47-fb-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .v47-float-btn {
+    background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3);
+  }
+  .v47-float-btn:hover { filter: brightness(1.06); }
+  @media (max-width: 680px) {
+    .v47-mood-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
+
+<!-- MODAL TRUNG TÂM GÓP Ý DỊCH VỤ & ĐÁNH GIÁ NHÀ HÀNG / KHÁCH SẠN / CỬA HÀNG -->
+<div id="v47-feedback-modal" class="modal-bg" onclick="if(event.target===this)closeModal('v47-feedback-modal')">
+  <div class="modal-box" style="max-width:680px;">
+    <div class="modal-head" style="background:linear-gradient(135deg,#d97706 0%,#f59e0b 55%,#0b6e63 100%); color:#fff;">
+      <div>
+        <div id="v47-fbm-title" style="font-size:16px; font-weight:800;">⭐ Đánh Giá &amp; Góp Ý Dịch Vụ</div>
+        <div id="v47-fbm-sub" style="font-size:12px; opacity:0.94;">Đánh giá Nhà hàng, Khách sạn, Cửa hàng đặc sản &amp; Góp ý nâng cao chất lượng phục vụ</div>
+      </div>
+      <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,0.22); color:#fff;" onclick="closeModal('v47-feedback-modal')">✕</button>
+    </div>
+
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+      <!-- Thanh chuyển 2 tab -->
+      <div class="v47-fb-tabs">
+        <button type="button" id="v47-tab-review" class="v47-fb-tab active" onclick="switchV47FeedbackTab('review')">⭐ Đánh Giá Cơ Sở</button>
+        <button type="button" id="v47-tab-suggest" class="v47-fb-tab" onclick="switchV47FeedbackTab('suggest')">💌 Góp Ý Dịch Vụ</button>
+      </div>
+
+      <!-- TAB 1: ĐÁNH GIÁ NHÀ HÀNG / KHÁCH SẠN / CỬA HÀNG ĐẶC SẢN -->
+      <div id="v47-pane-review" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="row-2">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">🏷️ Loại hình cơ sở</label>
+            <select id="v47-rv-type" class="form-control" onchange="populateV47ReviewTargets()">
+              <option value="restaurant">🍽️ Nhà hàng &amp; Quán ăn</option>
+              <option value="hotel">🏨 Khách sạn &amp; Nghỉ dưỡng</option>
+              <option value="specialty">🎁 Cửa hàng Đặc sản</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">🏪 Chọn cơ sở đánh giá</label>
+            <select id="v47-rv-target" class="form-control" onchange="renderV47ReviewTargetDetail()"></select>
+          </div>
+        </div>
+
+        <!-- Điểm tổng quan của cơ sở đang chọn -->
+        <div id="v47-rv-summary" class="info-box" style="background:#fffbeb; border-color:#fcd34d;"></div>
+
+        <!-- Form gửi đánh giá -->
+        <form id="v47-rv-form" onsubmit="submitV47Review(event)" class="info-box" style="background:#f8fafc; gap:8px;">
+          <div style="font-weight:800; color:var(--text); font-size:13px;">✍️ Gửi Đánh Giá Của Bạn</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div class="v47-star-row">
+              <span id="v47-lbl-c1" style="font-size:12.5px; font-weight:700;">🤝 Thái độ phục vụ</span>
+              <div class="v47-star-group" id="v47-stars-c1"></div>
+            </div>
+            <div class="v47-star-row">
+              <span id="v47-lbl-c2" style="font-size:12.5px; font-weight:700;">🍲 Chất lượng món ăn</span>
+              <div class="v47-star-group" id="v47-stars-c2"></div>
+            </div>
+            <div class="v47-star-row">
+              <span id="v47-lbl-c3" style="font-size:12.5px; font-weight:700;">🪑 Không gian &amp; Vệ sinh</span>
+              <div class="v47-star-group" id="v47-stars-c3"></div>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">👤 Tên của bạn *</label>
+              <input id="v47-rv-name" class="form-control" required placeholder="VD: Anh Minh, Chị Hoa...">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">📞 SĐT (tùy chọn)</label>
+              <input id="v47-rv-phone" class="form-control" placeholder="Để cơ sở phản hồi / tri ân...">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">💬 Nhận xét &amp; góp ý chi tiết *</label>
+            <textarea id="v47-rv-comment" class="form-control" rows="2" required placeholder="Chia sẻ trải nghiệm thực tế của bạn về món ăn, phòng nghỉ, đặc sản hoặc thái độ phục vụ..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-gold btn-sm" style="width:100%;">⭐ Gửi Đánh Giá Ngay</button>
+        </form>
+
+        <!-- Danh sách đánh giá của cơ sở -->
+        <div>
+          <div style="font-size:13px; font-weight:800; margin-bottom:6px;">💬 Đánh giá gần đây (<span id="v47-rv-count">0</span>)</div>
+          <div id="v47-rv-list" style="display:flex; flex-direction:column; gap:7px; max-height:240px; overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: GÓP Ý DỊCH VỤ -->
+      <div id="v47-pane-suggest" class="hidden" style="display:flex; flex-direction:column; gap:10px;">
+        <form id="v47-sg-form" onsubmit="submitV47ServiceFeedback(event)" class="info-box" style="background:#f0fdfa; border-color:#99f6e4; gap:9px;">
+          <div style="font-weight:800; color:var(--jade-dark); font-size:13.5px;">💌 Gửi Góp Ý Cải Thiện Chất Lượng Dịch Vụ</div>
+
+          <div class="row-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">🎯 Đối tượng góp ý</label>
+              <select id="v47-sg-scope" class="form-control" onchange="populateV47SuggestTargets()">
+                <option value="system">🌐 Hệ thống Ninh Bình - Kết nối</option>
+                <option value="restaurant">🍽️ Một Nhà hàng cụ thể</option>
+                <option value="hotel">🏨 Một Khách sạn / Nghỉ dưỡng</option>
+                <option value="specialty">🎁 Một Cửa hàng Đặc sản</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">📌 Chủ đề góp ý</label>
+              <select id="v47-sg-topic" class="form-control">
+                <option value="Chất lượng phục vụ">🤝 Chất lượng phục vụ &amp; Nhân viên</option>
+                <option value="Chất lượng món ăn / sản phẩm">🍲 Chất lượng món ăn / Đặc sản / Phòng</option>
+                <option value="Vệ sinh & Không gian">✨ Vệ sinh &amp; Không gian</option>
+                <option value="Giá cả & Niêm yết">💰 Giá cả &amp; Niêm yết minh bạch</option>
+                <option value="Góp ý tính năng ứng dụng">📱 Góp ý nâng cấp ứng dụng</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="v47-sg-target-wrap" class="form-group hidden" style="margin-bottom:0;">
+            <label class="form-label">🏪 Chọn cơ sở nhận góp ý</label>
+            <select id="v47-sg-target" class="form-control"></select>
+          </div>
+
+          <div>
+            <label class="form-label">😊 Mức độ hài lòng của bạn</label>
+            <div class="v47-mood-bar">
+              <button type="button" class="v47-mood-btn active" data-mood="Rất hài lòng" onclick="setV47Mood(this)">😍 Rất hài lòng</button>
+              <button type="button" class="v47-mood-btn" data-mood="Hài lòng" onclick="setV47Mood(this)">🙂 Hài lòng</button>
+              <button type="button" class="v47-mood-btn" data-mood="Bình thường" onclick="setV47Mood(this)">😐 Bình thường</button>
+              <button type="button" class="v47-mood-btn" data-mood="Cần cải thiện" onclick="setV47Mood(this)">⚠️ Cần cải thiện</button>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">👤 Tên người góp ý *</label>
+              <input id="v47-sg-name" class="form-control" required placeholder="Nhập tên của bạn...">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">📞 Số điện thoại (tùy chọn)</label>
+              <input id="v47-sg-phone" class="form-control" placeholder="Để BQL phản hồi khi cần...">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">📝 Nội dung góp ý dịch vụ *</label>
+            <textarea id="v47-sg-content" class="form-control" rows="3" required placeholder="Nhập ý kiến đóng góp, đề xuất cải thiện dịch vụ hoặc phản ánh của bạn..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-jade btn-sm" style="width:100%;">📩 Gửi Góp Ý Dịch Vụ</button>
+        </form>
+
+        <!-- Lịch sử góp ý gần đây -->
+        <div>
+          <div style="font-size:13px; font-weight:800; margin-bottom:6px;">📋 Góp ý dịch vụ đã tiếp nhận (<span id="v47-sg-count">0</span>)</div>
+          <div id="v47-sg-list" style="display:flex; flex-direction:column; gap:7px; max-height:220px; overflow-y:auto;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-soft btn-sm" onclick="closeModal('v47-feedback-modal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initV47TableLocationAndFeedbackHub() {
+  let v47Stars = { c1: 5, c2: 5, c3: 5 };
+  let v47Mood = 'Rất hài lòng';
+  let v47ActiveTab = 'review';
+
+  // --- 1. HÀM HỖ TRỢ CHỌN VỊ TRÍ BÀN KHI ĐẶT ĂN TẠI QUÁN ---
+  window.v47ToggleDiningMode = function() {
+    const mode = document.querySelector('input[name="v47-dining-mode"]:checked')?.value || 'dinein';
+    const fields = document.getElementById('v47-table-fields');
+    if (fields) fields.classList.toggle('hidden', mode !== 'dinein');
+  };
+
+  window.v47PickTable = function(lbl) {
+    const inp = document.getElementById('v47-table-num');
+    if (inp) {
+      inp.value = lbl;
+      toast(`🪑 Đã chọn ${lbl}`, 'info');
+    }
+  };
+
+  // --- 2. TIỆN ÍCH LẤY DANH SÁCH CƠ SỞ THEO LOẠI ---
+  function getListByType(type) {
+    if (type === 'hotel') return (db.hotels || []).filter(x => x.visible !== false);
+    if (type === 'specialty') return (db.specialties || []).filter(x => x.visible !== false);
+    return (db.restaurants || []).filter(x => x.visible !== false);
+  }
+
+  function findItemAny(type, id) {
+    const list = getListByType(type);
+    return list.find(x => x.id === id) || null;
+  }
+
+  function ensureReviewsAndFeedbacks() {
+    if (!Array.isArray(db.reviews)) db.reviews = [];
+    if (!Array.isArray(db.serviceFeedbacks)) db.serviceFeedbacks = [];
+  }
+
+  // --- 3. MỞ MODAL GÓP Ý & ĐÁNH GIÁ ---
+  window.openV47FeedbackModal = function(tab = 'review', presetType = null, presetId = null) {
+    ensureReviewsAndFeedbacks();
+    v47Stars = { c1: 5, c2: 5, c3: 5 };
+
+    // Điền sẵn tên & SĐT khách nếu đã từng đặt
+    try {
+      const prof = JSON.parse(localStorage.getItem('nb_customer_order_profile_v1') || '{}');
+      if (prof.name) {
+        if (!document.getElementById('v47-rv-name').value) document.getElementById('v47-rv-name').value = prof.name;
+        if (!document.getElementById('v47-sg-name').value) document.getElementById('v47-sg-name').value = prof.name;
+      }
+      if (prof.phone) {
+        if (!document.getElementById('v47-rv-phone').value) document.getElementById('v47-rv-phone').value = prof.phone;
+        if (!document.getElementById('v47-sg-phone').value) document.getElementById('v47-sg-phone').value = prof.phone;
+      }
+    } catch (e) {}
+
+    if (presetType) {
+      const tSel = document.getElementById('v47-rv-type');
+      if (tSel) tSel.value = presetType;
+    }
+    populateV47ReviewTargets(presetId);
+    populateV47SuggestTargets();
+    renderV47StarPickers();
+    renderV47SuggestList();
+    switchV47FeedbackTab(tab === 'suggest' ? 'suggest' : 'review');
+    document.getElementById('v47-feedback-modal').classList.add('open');
+  };
+
+  // Override openReviewModal để dùng luôn giao diện mới hỗ trợ đầy đủ Nhà hàng, Khách sạn, Cửa hàng
+  window.openReviewModal = function(type, id) {
+    window.openV47FeedbackModal('review', type || 'restaurant', id || null);
+  };
+
+  window.switchV47FeedbackTab = function(tab) {
+    v47ActiveTab = tab === 'suggest' ? 'suggest' : 'review';
+    document.getElementById('v47-tab-review')?.classList.toggle('active', v47ActiveTab === 'review');
+    document.getElementById('v47-tab-suggest')?.classList.toggle('active', v47ActiveTab === 'suggest');
+    document.getElementById('v47-pane-review')?.classList.toggle('hidden', v47ActiveTab !== 'review');
+    document.getElementById('v47-pane-suggest')?.classList.toggle('hidden', v47ActiveTab !== 'suggest');
+  };
+
+  window.populateV47ReviewTargets = function(presetId = null) {
+    const type = document.getElementById('v47-rv-type')?.value || 'restaurant';
+    const sel = document.getElementById('v47-rv-target');
+    if (!sel) return;
+    const list = getListByType(type);
+    sel.innerHTML = list.map(x => `<option value="${esc(x.id)}">${esc(x.name)}${x.ward ? ' (' + esc(x.ward) + ')' : ''}</option>`).join('');
+    if (presetId && list.some(x => x.id === presetId)) sel.value = presetId;
+
+    // Cập nhật nhãn 3 tiêu chí chấm sao theo loại hình
+    const l1 = document.getElementById('v47-lbl-c1');
+    const l2 = document.getElementById('v47-lbl-c2');
+    const l3 = document.getElementById('v47-lbl-c3');
+    if (type === 'hotel') {
+      if (l1) l1.textContent = '🤝 Thái độ phục vụ & Lễ tân';
+      if (l2) l2.textContent = '🛏️ Phòng nghỉ & Tiện nghi';
+      if (l3) l3.textContent = '📍 Vị trí & Không gian';
+    } else if (type === 'specialty') {
+      if (l1) l1.textContent = '🤝 Tư vấn & Phục vụ';
+      if (l2) l2.textContent = '🎁 Chất lượng đặc sản';
+      if (l3) l3.textContent = '📦 Đóng gói & Giá cả';
+    } else {
+      if (l1) l1.textContent = '🤝 Thái độ phục vụ';
+      if (l2) l2.textContent = '🍲 Chất lượng món ăn';
+      if (l3) l3.textContent = '🪑 Không gian & Vệ sinh';
+    }
+
+    renderV47ReviewTargetDetail();
+  };
+
+  window.setV47Star = function(crit, val) {
+    v47Stars[crit] = val;
+    renderV47StarPickers();
+  };
+
+  function renderV47StarPickers() {
+    ['c1', 'c2', 'c3'].forEach(k => {
+      const box = document.getElementById(`v47-stars-${k}`);
+      if (!box) return;
+      const cur = v47Stars[k] || 5;
+      box.innerHTML = [1, 2, 3, 4, 5].map(n =>
+        `<button type="button" class="v47-star ${n <= cur ? 'on' : ''}" onclick="setV47Star('${k}', ${n})">★</button>`
+      ).join('') + `<span style="font-size:12px; font-weight:800; color:#b45309; margin-left:4px;">${cur}/5</span>`;
+    });
+  }
+
+  window.renderV47ReviewTargetDetail = function() {
+    ensureReviewsAndFeedbacks();
+    const type = document.getElementById('v47-rv-type')?.value || 'restaurant';
+    const id = document.getElementById('v47-rv-target')?.value;
+    const item = findItemAny(type, id);
+    const sumBox = document.getElementById('v47-rv-summary');
+    const listBox = document.getElementById('v47-rv-list');
+    const cntEl = document.getElementById('v47-rv-count');
+    if (!item || !sumBox || !listBox) return;
+
+    const list = db.reviews.filter(r => r.targetType === type && r.targetId === id);
+    if (cntEl) cntEl.textContent = list.length;
+
+    if (list.length) {
+      const avg = list.reduce((s, r) => s + ((Number(r.serviceStars) + Number(r.qualityStars) + Number(r.spaceStars || r.qualityStars)) / 3), 0) / list.length;
+      sumBox.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+          <div>
+            <b style="font-size:14px;">${esc(item.name)}</b>
+            <div style="font-size:11.5px; color:var(--muted);">📍 ${esc(item.ward || '')}</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:19px; font-weight:900; color:#b45309;">⭐ ${avg.toFixed(1)} / 5.0</span>
+            <div style="font-size:11px; color:#78350f; font-weight:700;">${list.length} đánh giá từ du khách</div>
+          </div>
+        </div>`;
+    } else {
+      sumBox.innerHTML = `
+        <div><b>${esc(item.name)}</b> (${esc(item.ward || '')})</div>
+        <div style="font-size:12px; color:#78350f;">⭐ Chưa có đánh giá nào. Hãy là người đầu tiên chia sẻ trải nghiệm của bạn!</div>`;
+    }
+
+    if (!list.length) {
+      listBox.innerHTML = '<div style="text-align:center; padding:18px; color:var(--muted); font-size:12.5px;">Chưa có nhận xét nào cho cơ sở này.</div>';
+      return;
+    }
+
+    listBox.innerHTML = list.slice(0, 25).map(r => {
+      const s1 = Number(r.serviceStars) || 5;
+      const s2 = Number(r.qualityStars) || 5;
+      const s3 = Number(r.spaceStars || r.qualityStars) || 5;
+      const avgOne = ((s1 + s2 + s3) / 3).toFixed(1);
+      return `
+        <div class="v47-fb-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+            <div>
+              <b>👤 ${esc(r.author || 'Du khách')}</b>
+              ${r.orderCode ? `<span class="rv-verified-pill">✅ Đã đặt (${esc(r.orderCode)})</span>` : ''}
+            </div>
+            <span style="font-size:11px; color:var(--muted);">🕒 ${esc(r.createdAt || '')}</span>
+          </div>
+          <div style="font-size:11.5px; color:#b45309; font-weight:800;">
+            ⭐ ${avgOne}/5 • Phục vụ ${s1}★ • Chất lượng ${s2}★ • Không gian ${s3}★
+          </div>
+          <div style="font-size:12.5px; color:var(--text);">${esc(r.comment || '')}</div>
+        </div>`;
+    }).join('');
+  };
+
+  window.submitV47Review = function(e) {
+    e.preventDefault();
+    ensureReviewsAndFeedbacks();
+    const type = document.getElementById('v47-rv-type')?.value || 'restaurant';
+    const id = document.getElementById('v47-rv-target')?.value;
+    const item = findItemAny(type, id);
+    if (!item) return;
+
+    const author = document.getElementById('v47-rv-name').value.trim();
+    const phone = sanitizePhone(document.getElementById('v47-rv-phone').value.trim());
+    const comment = document.getElementById('v47-rv-comment').value.trim();
+    if (!author || !comment) {
+      toast('Vui lòng nhập tên và nội dung đánh giá.', 'error');
+      return;
+    }
+
+    const verified = typeof getVerifiedOrderInfo === 'function' ? getVerifiedOrderInfo(type, id) : null;
+    db.reviews.unshift({
+      id: 'rv_' + Date.now().toString(36),
+      targetType: type,
+      targetId: id,
+      targetName: item.name,
+      author,
+      phone,
+      serviceStars: v47Stars.c1,
+      qualityStars: v47Stars.c2,
+      spaceStars: v47Stars.c3,
+      comment,
+      orderCode: verified?.code || '',
+      createdAt: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN')
+    });
+
+    document.getElementById('v47-rv-comment').value = '';
+    saveDB();
+    renderV47ReviewTargetDetail();
+    renderMerchantFeedbackPanel();
+    toast(`⭐ Cảm ơn ${author} đã gửi đánh giá cho ${item.name}!`);
+  };
+
+  // --- 4. GÓP Ý DỊCH VỤ ---
+  window.populateV47SuggestTargets = function() {
+    const scope = document.getElementById('v47-sg-scope')?.value || 'system';
+    const wrap = document.getElementById('v47-sg-target-wrap');
+    const sel = document.getElementById('v47-sg-target');
+    if (!wrap || !sel) return;
+    if (scope === 'system') {
+      wrap.classList.add('hidden');
+      return;
+    }
+    wrap.classList.remove('hidden');
+    const list = getListByType(scope);
+    sel.innerHTML = list.map(x => `<option value="${esc(x.id)}">${esc(x.name)}${x.ward ? ' (' + esc(x.ward) + ')' : ''}</option>`).join('');
+  };
+
+  window.setV47Mood = function(btn) {
+    v47Mood = btn.dataset.mood || 'Rất hài lòng';
+    document.querySelectorAll('.v47-mood-btn').forEach(b => b.classList.toggle('active', b === btn));
+  };
+
+  window.submitV47ServiceFeedback = function(e) {
+    e.preventDefault();
+    ensureReviewsAndFeedbacks();
+    const scope = document.getElementById('v47-sg-scope')?.value || 'system';
+    const targetId = scope === 'system' ? 'system' : (document.getElementById('v47-sg-target')?.value || '');
+    const targetItem = scope === 'system' ? null : findItemAny(scope, targetId);
+    const targetName = scope === 'system' ? 'Hệ thống Ninh Bình - Kết nối' : (targetItem?.name || 'Cơ sở đối tác');
+
+    const topic = document.getElementById('v47-sg-topic')?.value || 'Chất lượng phục vụ';
+    const author = document.getElementById('v47-sg-name').value.trim();
+    const phone = sanitizePhone(document.getElementById('v47-sg-phone').value.trim());
+    const content = document.getElementById('v47-sg-content').value.trim();
+    if (!author || !content) {
+      toast('Vui lòng nhập tên và nội dung góp ý.', 'error');
+      return;
+    }
+
+    db.serviceFeedbacks.unshift({
+      id: 'sg_' + Date.now().toString(36),
+      scope,
+      targetId,
+      targetName,
+      topic,
+      mood: v47Mood,
+      author,
+      phone,
+      content,
+      createdAt: typeof formatNowVN === 'function' ? formatNowVN() : new Date().toLocaleString('vi-VN')
+    });
+
+    document.getElementById('v47-sg-content').value = '';
+    saveDB();
+    renderV47SuggestList();
+    renderMerchantFeedbackPanel();
+    toast('💌 Đã tiếp nhận góp ý dịch vụ của bạn. Xin cảm ơn!');
+  };
+
+  function renderV47SuggestList() {
+    ensureReviewsAndFeedbacks();
+    const listBox = document.getElementById('v47-sg-list');
+    const cntEl = document.getElementById('v47-sg-count');
+    if (!listBox) return;
+    const list = db.serviceFeedbacks || [];
+    if (cntEl) cntEl.textContent = list.length;
+
+    if (!list.length) {
+      listBox.innerHTML = '<div style="text-align:center; padding:16px; color:var(--muted); font-size:12.5px;">Chưa có góp ý nào. Ý kiến của bạn giúp dịch vụ Ninh Bình - Kết nối ngày càng tốt hơn!</div>';
+      return;
+    }
+
+    listBox.innerHTML = list.slice(0, 20).map(f => `
+      <div class="v47-fb-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+          <div>
+            <b>👤 ${esc(f.author)}</b> • <span class="tag tag-jade">${esc(f.topic)}</span>
+            <span class="tag ${f.mood === 'Cần cải thiện' ? 'tag-red' : 'tag-gold'}">${esc(f.mood)}</span>
+          </div>
+          <span style="font-size:11px; color:var(--muted);">🕒 ${esc(f.createdAt || '')}</span>
+        </div>
+        <div style="font-size:11.5px; color:var(--fb); font-weight:700;">🎯 Gửi tới: ${esc(f.targetName)}</div>
+        <div style="font-size:12.5px; color:var(--text);">${esc(f.content)}</div>
+      </div>`).join('');
+  }
+
+  // --- 5. HIỂN THỊ BẢNG ĐÁNH GIÁ & GÓP Ý RIÊNG TRONG CỔNG ĐỐI TÁC ---
+  window.renderMerchantFeedbackPanel = function() {
+    const dash = document.getElementById('merchant-dashboard');
+    if (!dash) return;
+    let panel = document.getElementById('v47-mc-feedback-panel');
+    if (typeof ui === 'undefined' || !ui.merchantRestaurantId) {
+      if (panel) panel.remove();
+      return;
+    }
+    ensureReviewsAndFeedbacks();
+    const pid = ui.merchantRestaurantId;
+    const myReviews = (db.reviews || []).filter(r => r.targetId === pid);
+    const myFeedbacks = (db.serviceFeedbacks || []).filter(f => f.targetId === pid);
+
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'v47-mc-feedback-panel';
+      panel.className = 'panel';
+      dash.appendChild(panel);
+    }
+
+    const avgStr = myReviews.length
+      ? (myReviews.reduce((s, r) => s + ((Number(r.serviceStars) + Number(r.qualityStars) + Number(r.spaceStars || r.qualityStars)) / 3), 0) / myReviews.length).toFixed(1)
+      : '—';
+
+    panel.innerHTML = `
+      <div class="panel-head">
+        <div>
+          <div style="font-size:15.5px; font-weight:800;">⭐ Đánh Giá &amp; 💌 Góp Ý Dịch Vụ Của Khách Hàng (${myReviews.length} đánh giá • ${myFeedbacks.length} góp ý)</div>
+          <div style="font-size:12px; color:var(--muted);">Điểm trung bình hiện tại: <b style="color:#b45309;">⭐ ${avgStr}/5.0</b> • Lắng nghe góp ý giúp cải thiện chất lượng phục vụ.</div>
+        </div>
+      </div>
+      <div class="row-2">
+        <div style="display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto;">
+          <div style="font-size:12.5px; font-weight:800; color:#b45309;">⭐ Đánh giá gần đây (${myReviews.length})</div>
+          ${myReviews.length ? myReviews.slice(0, 10).map(r => `
+            <div class="v47-fb-card">
+              <div style="display:flex; justify-content:space-between; font-size:11.5px;">
+                <b>👤 ${esc(r.author)}</b><span style="color:var(--muted);">${esc(r.createdAt || '')}</span>
+              </div>
+              <div style="font-size:11px; color:#b45309; font-weight:800;">Phục vụ ${r.serviceStars}★ • Chất lượng ${r.qualityStars}★ • Không gian ${r.spaceStars || r.qualityStars}★</div>
+              <div style="font-size:12px;">${esc(r.comment)}</div>
+            </div>`).join('') : '<div style="font-size:12px; color:var(--muted); padding:10px;">Chưa có đánh giá nào.</div>'}
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto;">
+          <div style="font-size:12.5px; font-weight:800; color:var(--jade-dark);">💌 Góp ý dịch vụ gửi riêng (${myFeedbacks.length})</div>
+          ${myFeedbacks.length ? myFeedbacks.slice(0, 10).map(f => `
+            <div class="v47-fb-card">
+              <div style="display:flex; justify-content:space-between; font-size:11.5px;">
+                <b>👤 ${esc(f.author)}</b><span class="tag ${f.mood === 'Cần cải thiện' ? 'tag-red' : 'tag-gold'}">${esc(f.mood)}</span>
+              </div>
+              <div style="font-size:11px; color:var(--jade-dark); font-weight:700;">📌 ${esc(f.topic)} • ${esc(f.createdAt || '')}</div>
+              <div style="font-size:12px;">${esc(f.content)}</div>
+            </div>`).join('') : '<div style="font-size:12px; color:var(--muted); padding:10px;">Chưa có góp ý riêng nào.</div>'}
+        </div>
+      </div>
+    `;
+  };
+
+  // --- 6. GẮN NÚT "⭐ GÓP Ý & ĐÁNH GIÁ" VÀO HEADER (DESKTOP & MOBILE) ---
+  function mountFeedbackButtons() {
+    const navD = document.querySelector('.nav-desktop');
+    if (navD && !document.getElementById('nd-feedback')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'nd-feedback';
+      btn.className = 'nav-btn';
+      btn.innerHTML = '⭐ Góp ý &amp; Đánh giá';
+      btn.onclick = () => openV47FeedbackModal('review');
+      navD.appendChild(btn);
+    }
+
+    const navM = document.querySelector('.nav-mobile');
+    if (navM && !document.getElementById('nm-feedback')) {
+      const btnM = document.createElement('button');
+      btnM.type = 'button';
+      btnM.id = 'nm-feedback';
+      btnM.className = 'nav-btn';
+      btnM.innerHTML = '<span>⭐</span><span>Góp ý</span>';
+      btnM.onclick = () => openV47FeedbackModal('review');
+      navM.appendChild(btnM);
+    }
+  }
+
+  ['renderMerchantPortal', 'loginMerchant', 'logoutMerchant'].forEach(fnName => {
+    if (typeof window[fnName] === 'function') {
+      const _orig = window[fnName];
+      window[fnName] = function() {
+        const res = _orig.apply(this, arguments);
+        renderMerchantFeedbackPanel();
+        return res;
+      };
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    mountFeedbackButtons();
+    setTimeout(() => {
+      mountFeedbackButtons();
+      renderMerchantFeedbackPanel();
+    }, 550);
+  });
+})();
+</script>
+
+
+<!-- ==================== MÔ-ĐUN v48: THIẾT KẾ GIAO DIỆN ADMIN HÀI HÒA, GIAO DIỆN KHÁCH HÀNG BẮT MẮT & CHUYỂN ĐỒNG BỘ FB + POSTER XUỐNG QUẢN TRỊ NHÀ HÀNG/KHÁCH SẠN ==================== -->
+<style>
+  /* =========================================================================
+     A. GIAO DIỆN KHÁCH HÀNG BẮT MẮT (VIBRANT & MODERN CUSTOMER UI)
+     ========================================================================= */
+  body {
+    background: radial-gradient(circle at 0% 0%, #eaf4ff 0%, #f4f8fc 42%, #f1fbf8 100%);
+    background-attachment: fixed;
+  }
+
+  .app-header {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(203, 213, 225, 0.72);
+    box-shadow: 0 4px 20px rgba(15, 35, 65, 0.06);
+  }
+  .nav-desktop {
+    background: #eef3f9;
+    padding: 5px;
+    border-radius: 16px;
+    border: 1px solid rgba(203, 213, 225, 0.65);
+  }
+  .nav-desktop .nav-btn {
+    padding: 8.5px 14px;
+    border-radius: 11px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .nav-desktop .nav-btn.active {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+    color: var(--fb);
+    box-shadow: 0 3px 10px rgba(24, 119, 242, 0.14);
+  }
+  .cart-trigger {
+    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    color: #fff;
+    padding: 8.5px 14px;
+    border-radius: 13px;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+  }
+  .cart-trigger:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.34);
+  }
+  .cart-badge {
+    background: #fde047;
+    color: #0f172a;
+    font-weight: 900;
+  }
+
+  /* Hero Banner rực rỡ & sang trọng */
+  #tab-map .hero {
+    background: linear-gradient(125deg, #0b3b75 0%, #1d4ed8 34%, #0284c7 66%, #0d9488 100%);
+    border-radius: 22px;
+    padding: 24px 26px;
+    box-shadow: 0 16px 36px rgba(15, 58, 122, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+  }
+  #tab-map .hero h2 {
+    font-size: 22.5px;
+    letter-spacing: -0.35px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
+  }
+  #tab-map .stat-box {
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.30);
+    border-radius: 14px;
+    padding: 9px 14px;
+    transition: transform 0.18s ease, background 0.18s ease;
+  }
+  #tab-map .stat-box:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.24);
+  }
+
+  /* Thanh thông báo hàng mới nổi bật */
+  .live-alert-bar {
+    background: linear-gradient(120deg, #fffbeb 0%, #fef3c7 48%, #f5f3ff 100%);
+    border: 1.5px solid #fbbf24;
+    border-radius: 18px;
+    box-shadow: 0 8px 22px rgba(217, 119, 6, 0.12);
+  }
+  .live-alert-item {
+    border-radius: 14px;
+    border: 1px solid #fde68a;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .live-alert-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(124, 58, 237, 0.14);
+    border-color: #a855f7;
+  }
+
+  /* Khung bản đồ, thẻ sản phẩm, nhà hàng, danh thắng, bài đăng */
+  .map-card {
+    border-radius: 22px;
+    border: 1px solid rgba(186, 214, 240, 0.85);
+    box-shadow: 0 12px 30px rgba(15, 40, 75, 0.08);
+  }
+  .smart-card {
+    border-radius: 18px;
+    border: 1px solid rgba(216, 226, 234, 0.92);
+    box-shadow: 0 6px 18px rgba(15, 35, 65, 0.06);
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+  }
+  .smart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 34px rgba(15, 35, 65, 0.13);
+    border-color: #93c5fd;
+  }
+  .smart-card .card-head {
+    padding: 15px 16px;
+  }
+  .lm-card {
+    border-radius: 15px;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #f59e0b;
+    background: linear-gradient(180deg, #ffffff 0%, #fffdf6 100%);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .lm-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(217, 119, 6, 0.13);
+  }
+  .route-item {
+    border-radius: 16px;
+    border: 1px solid #d5ebe5;
+    border-left: 4px solid #0d9488;
+    background: linear-gradient(180deg, #ffffff 0%, #f4fcfa 100%);
+    box-shadow: 0 4px 12px rgba(11, 110, 99, 0.06);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .route-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(11, 110, 99, 0.12);
+  }
+  .post-card {
+    border-radius: 16px;
+    border: 1px solid #e5ddf5;
+    border-top: 3.5px solid #8b5cf6;
+    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.07);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .post-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px rgba(124, 58, 237, 0.13);
+  }
+
+  /* =========================================================================
+     B. GIAO DIỆN QUẢN TRỊ ADMIN HÀI HÒA & CHUYÊN NGHIỆP (HARMONIOUS ADMIN UI)
+     ========================================================================= */
+  #tab-admin #admin-login-box {
+    border-radius: 22px;
+    border: 1px solid #dbe5f0;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.10);
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  }
+
+  #admin-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* KPI Grid hài hòa, đồng bộ */
+  #admin-panel .kpi-grid {
+    gap: 14px;
+    margin-bottom: 0;
+  }
+  #admin-panel .kpi-card {
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 16px 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #fafcff 100%);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.045);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+  }
+  #admin-panel .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  }
+  #admin-panel .kpi-card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: #2563eb;
+  }
+  #admin-panel .kpi-card:nth-child(1)::before { background: #d97706; }
+  #admin-panel .kpi-card:nth-child(2)::before { background: #0d9488; }
+  #admin-panel .kpi-card:nth-child(3)::before { background: #7c3aed; }
+  #admin-panel .kpi-card:nth-child(4)::before { background: #2563eb; }
+  #admin-panel .kpi-ic {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    font-size: 22px;
+  }
+
+  /* Thanh trạng thái Admin tinh gọn, cân đối */
+  #adm-status-bar {
+    border-radius: 18px !important;
+    border: 1px solid #d9e6f5 !important;
+    background: linear-gradient(135deg, #f8fbff 0%, #ffffff 55%, #f2fbf9 100%) !important;
+    box-shadow: 0 6px 18px rgba(15, 35, 65, 0.05) !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Bảng điều khiển chính Admin */
+  #admin-panel > .panel {
+    border-radius: 18px;
+    border: 1px solid #dde6f0;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+    padding: 18px 20px;
+    margin-bottom: 0;
+  }
+  #admin-panel > .panel > .panel-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #e8eef5;
+  }
+  #admin-panel > .panel > .panel-head > .chip-bar {
+    background: #f1f5f9;
+    padding: 6px;
+    border-radius: 13px;
+    border: 1px solid #e2e8f0;
+    gap: 6px;
+  }
+  #admin-panel > .panel > .panel-head > .chip-bar .reg-chip {
+    background: transparent;
+    color: #475569;
+    padding: 7px 12px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.16s ease;
+  }
+  #admin-panel > .panel > .panel-head > .chip-bar .reg-chip:hover {
+    background: rgba(255, 255, 255, 0.75);
+    color: #0f172a;
+  }
+  #admin-panel > .panel > .panel-head > .chip-bar .reg-chip.active {
+    background: #ffffff;
+    color: #1d4ed8;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  }
+  #admin-panel > .panel > .panel-head > div:last-child {
+    justify-content: flex-start;
+    gap: 7px;
+  }
+
+  /* Bảng dữ liệu Admin sạch sẽ, thoáng mắt */
+  #admin-panel .table-wrap {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+  }
+  #admin-panel table.data-table th {
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 11px 12px;
+    border-bottom: 1.5px solid #cbd5e1;
+  }
+  #admin-panel table.data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #edf2f7;
+  }
+  #admin-panel table.data-table tbody tr:nth-child(even) {
+    background: #fafcff;
+  }
+  #admin-panel table.data-table tbody tr:hover {
+    background: #eff6ff;
+  }
+
+  /* =========================================================================
+     C. KHỐI ĐỒNG BỘ FB & POSTER NẰM DƯỚI QUẢN TRỊ NHÀ HÀNG / KHÁCH SẠN
+     ========================================================================= */
+  #v48-merchant-fb-section {
+    margin-top: 16px;
+    border-radius: 18px;
+    border: 1.5px solid #bfdbfe;
+    background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 100%);
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(24, 119, 242, 0.08);
+  }
+  #v48-merchant-fb-section .v48-fb-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #93c5fd;
+  }
+  #v48-merchant-fb-section #tab-fb {
+    display: block !important;
+    animation: none;
+  }
+  #v48-merchant-fb-section #tab-fb > .panel:first-child {
+    margin-bottom: 12px;
+    background: #ffffff;
+  }
+
+  /* Ẩn nút FB & Poster khỏi thanh điều hướng chính của khách hàng */
+  #nd-fb, #nm-fb {
+    display: none !important;
+  }
+</style>
+
+<script>
+(function initV48HarmoniousUIAndRelocateFB() {
+  // 1. Di chuyển khối Đồng bộ FB & Poster (#tab-fb) xuống dưới phần Quản trị Nhà hàng / Khách sạn (#merchant-dashboard)
+  function relocateFBSectionIntoMerchant() {
+    const dash = document.getElementById('merchant-dashboard');
+    const tabFb = document.getElementById('tab-fb');
+    if (!dash || !tabFb) return;
+
+    let wrapper = document.getElementById('v48-merchant-fb-section');
+    if (!wrapper) {
+      wrapper = document.createElement('div');
+      wrapper.id = 'v48-merchant-fb-section';
+      wrapper.innerHTML = `
+        <div class="v48-fb-banner">
+          <div>
+            <div style="font-size:15.5px; font-weight:800; color:#1d4ed8;">🚀 Đồng Bộ Facebook, Xưởng Poster &amp; Mã QR (Quản Trị Nhà Hàng / Khách Sạn)</div>
+            <div style="font-size:12px; color:var(--muted);">Tự động chọn đúng Nhà hàng / Khách sạn / Cửa hàng của bạn để vẽ Poster PNG, soạn bài Facebook &amp; tải mã QR chốt đơn.</div>
+          </div>
+          <span class="tag tag-fb">📌 Tích hợp riêng cho Đối tác</span>
+        </div>
+      `;
+      dash.appendChild(wrapper);
+    }
+
+    if (tabFb.parentElement !== wrapper) {
+      tabFb.classList.remove('tab-panel');
+      tabFb.classList.add('v48-embedded-fb');
+      wrapper.appendChild(tabFb);
+    } else {
+      // Đảm bảo luôn nằm ở cuối #merchant-dashboard (dưới các bảng quản trị khác)
+      if (dash.lastElementChild !== wrapper) {
+        dash.appendChild(wrapper);
+      }
+    }
+
+    // Thêm nút cuộn nhanh tới mục FB & Poster trên banner Cổng Đối Tác
+    const bannerBtns = document.querySelector('#merchant-dashboard .merchant-banner > div:last-child');
+    if (bannerBtns && !document.getElementById('v48-jump-fb-btn')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'v48-jump-fb-btn';
+      btn.className = 'btn btn-fb btn-sm';
+      btn.textContent = '🚀 FB & Poster';
+      btn.onclick = () => {
+        syncMerchantIntoFBHub();
+        document.getElementById('v48-merchant-fb-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+      bannerBtns.insertBefore(btn, bannerBtns.firstChild);
+    }
+  }
+
+  // 2. Mở rộng populateFBSelect, getSelectedFBItem, renderFBHub & drawPosterCanvas hỗ trợ thêm Khách sạn / Lưu trú (ht:)
+  window.populateFBSelect = function() {
+    const sel = document.getElementById('fb-item-select');
+    if (!sel) return;
+    const prev = sel.value;
+    const opts = [];
+    (db.restaurants || []).forEach(r => opts.push(`<option value="rs:${r.id}">🍽️ ${esc(r.name)} — ${esc(r.ward || '')}</option>`));
+    (db.hotels || []).forEach(h => opts.push(`<option value="ht:${h.id}">🏨 ${esc(h.name)} — ${esc(h.ward || '')}</option>`));
+    (db.specialties || []).forEach(s => opts.push(`<option value="sp:${s.id}">🎁 ${esc(s.name)} — ${esc(s.ward || '')}</option>`));
+    (db.landmarks || []).forEach(l => opts.push(`<option value="lm:${l.id}">🏛️ ${esc(l.name)} — ${esc(l.ward || '')}</option>`));
+    sel.innerHTML = opts.join('');
+    if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+  };
+
+  window.getSelectedFBItem = function() {
+    const sel = document.getElementById('fb-item-select');
+    const v = sel?.value || `rs:${db.restaurants[0]?.id || ''}`;
+    const [t, id] = v.split(':');
+    if (t === 'ht') return { type: 'ht', item: (db.hotels || []).find(x => x.id === id) || (db.hotels || [])[0] };
+    if (t === 'sp') return { type: 'sp', item: (db.specialties || []).find(x => x.id === id) || (db.specialties || [])[0] };
+    if (t === 'rs') return { type: 'rs', item: (db.restaurants || []).find(x => x.id === id) || (db.restaurants || [])[0] };
+    return { type: 'lm', item: (db.landmarks || []).find(x => x.id === id) || (db.landmarks || [])[0] };
+  };
+
+  const _origRenderFBHub = window.renderFBHub;
+  window.renderFBHub = function() {
+    const { type, item } = window.getSelectedFBItem();
+    if (!item) return;
+    if (type !== 'ht') {
+      if (typeof _origRenderFBHub === 'function') _origRenderFBHub();
+      return;
+    }
+
+    const mapsLink = gMaps(item.lat || 20.2539, item.lng || 105.9750);
+    const slug = extractFbSlug(item.fb);
+    const cleanPhone = sanitizePhone(item.phone);
+    const cleanSite = normalizeWebsiteUrl(item.website);
+    const mUrl = slug ? buildMessengerUrl(item.fb, `Chào ${item.name}, mình muốn hỏi đặt phòng!`) : '';
+    const qrLink = mUrl || cleanSite || mapsLink;
+
+    const post = `🏨 LƯU TRÚ & NGHỈ DƯỠNG NINH BÌNH - KẾT NỐI — ${String(item.name || '').toUpperCase()} ✨\n` +
+      `⭐ Hạng lưu trú: ${item.stars ? item.stars + ' sao' : (item.category || 'Khách sạn / Homestay')}\n` +
+      `💰 Giá tham khảo: ${item.priceRange || (item.priceNum ? fmtVND(item.priceNum) + '/đêm' : 'Liên hệ')}\n` +
+      `📍 Địa chỉ: ${item.address ? item.address + ', ' : ''}${item.ward || ''}, Ninh Bình\n` +
+      (item.desc ? `📝 ${item.desc}\n` : '') +
+      (cleanPhone ? `📞 Hotline đặt phòng: ${formatPhoneDisplay(cleanPhone)}\n` : '') +
+      (mUrl ? `💬 Đặt phòng Messenger: ${mUrl}\n` : '') +
+      (cleanSite ? `🌐 Website: ${cleanSite}\n` : '') +
+      `🗺️ Chỉ đường Google Maps: ${mapsLink}\n#NinhBinhKetNoi #LuuTruNinhBinh #DuLichNinhBinh`;
+
+    const postBox = document.getElementById('fb-post-box');
+    const qrLbl = document.getElementById('qr-label');
+    const qrUrl = document.getElementById('qr-url');
+    const qrOpen = document.getElementById('qr-open');
+    if (postBox) postBox.value = post;
+    if (qrLbl) qrLbl.textContent = item.name;
+    if (qrUrl) qrUrl.value = qrLink;
+    if (qrOpen) qrOpen.href = qrLink;
+
+    // Vẽ Poster cho Khách sạn / Nghỉ dưỡng
+    const cv = document.getElementById('poster-canvas');
+    if (cv && typeof rRect === 'function' && typeof wrapCanvas === 'function') {
+      const ctx = cv.getContext('2d'), W = 900, H = 900;
+      const g = ctx.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, '#0369a1'); g.addColorStop(1, '#0d9488');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+      ctx.strokeStyle = 'rgba(253,230,138,0.65)'; ctx.lineWidth = 4;
+      rRect(ctx, 26, 26, W-52, H-52, 28); ctx.stroke();
+      rRect(ctx, 56, 56, W-112, H-112, 26); ctx.fillStyle = '#fffdf9'; ctx.fill();
+
+      rRect(ctx, 135, 92, 630, 48, 24); ctx.fillStyle = '#0369a1'; ctx.fill();
+      ctx.fillStyle = '#fde68a'; ctx.font = '800 18.5px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('🏨 LƯU TRÚ NINH BÌNH - KẾT NỐI', W/2, 123);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#0b6e63'; ctx.font = '700 22px sans-serif';
+      ctx.fillText(`📍 ${item.ward || ''}  •  ${REGIONS[item.region]?.short || ''}`, 96, 200);
+
+      ctx.fillStyle = '#14222b'; ctx.font = '800 42px sans-serif';
+      const ny = wrapCanvas(ctx, item.name, 96, 270, W-192, 52, 2);
+
+      ctx.fillStyle = '#475569'; ctx.font = '500 24px sans-serif';
+      wrapCanvas(ctx, item.desc || item.address || '', 96, ny + 18, W-192, 36, 4);
+
+      rRect(ctx, 96, 540, W-192, 115, 20); ctx.fillStyle = '#e0f2fe'; ctx.fill();
+      ctx.strokeStyle = '#0284c7'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.fillStyle = '#0369a1'; ctx.font = '800 34px sans-serif';
+      const hl = item.priceRange || (item.priceNum ? fmtVND(item.priceNum) + ' / đêm' : 'Liên hệ đặt phòng');
+      ctx.fillText(String(hl).slice(0, 34), 124, 608);
+
+      ctx.fillStyle = '#14222b'; ctx.font = '700 20px monospace';
+      const phoneTxt = cleanPhone ? `  •  📞 ${formatPhoneDisplay(cleanPhone)}` : '';
+      ctx.fillText(`🛰️ GPS: ${Number(item.lat||20.2539).toFixed(4)}, ${Number(item.lng||105.9750).toFixed(4)}${phoneTxt}`, 96, 706);
+
+      rRect(ctx, 96, 742, W-192, 64, 16); ctx.fillStyle = '#0284c7'; ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = '800 22px sans-serif'; ctx.textAlign = 'center';
+      const ctaTxt = slug
+        ? `💬 Đặt phòng ngay: https://m.me/${slug}`
+        : (cleanSite ? `🌐 Website: ${formatWebsiteDisplay(cleanSite)}` : '🗺️ Quét mã QR để xem vị trí & đặt phòng');
+      ctx.fillText(ctaTxt, W/2, 782);
+    }
+
+    if (typeof drawPureQR === 'function' && document.getElementById('qr-canvas')) {
+      drawPureQR(qrLink, document.getElementById('qr-canvas'));
+    }
+  };
+
+  // 3. Tự động đồng bộ đúng cơ sở đang đăng nhập vào khu vực FB & Poster dưới Quản trị Nhà hàng / Khách sạn
+  function syncMerchantIntoFBHub() {
+    relocateFBSectionIntoMerchant();
+    if (typeof ui === 'undefined' || !ui.merchantRestaurantId) return;
+    window.populateFBSelect();
+    const sel = document.getElementById('fb-item-select');
+    if (sel) {
+      const pid = ui.merchantRestaurantId;
+      const prefix = (db.hotels || []).some(h => h.id === pid)
+        ? 'ht'
+        : ((db.specialties || []).some(s => s.id === pid) ? 'sp' : 'rs');
+      const targetVal = `${prefix}:${pid}`;
+      if ([...sel.options].some(o => o.value === targetVal)) {
+        sel.value = targetVal;
+      }
+    }
+    window.renderFBHub();
+  }
+
+  // 4. Bọc switchTab để nếu có lời gọi switchTab('fb') cũ sẽ tự động chuyển sang tab Đối Tác & cuộn tới mục FB & Poster
+  if (typeof window.switchTab === 'function') {
+    const _origSwitchTab = window.switchTab;
+    window.switchTab = function(t) {
+      if (t === 'fb') {
+        _origSwitchTab('merchant');
+        if (ui.merchantRestaurantId) {
+          syncMerchantIntoFBHub();
+          setTimeout(() => {
+            document.getElementById('v48-merchant-fb-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 120);
+        } else {
+          toast('🚀 Mục Đồng bộ FB & Poster nằm trong Cổng Đối Tác Nhà hàng / Khách sạn. Vui lòng đăng nhập!', 'info');
+        }
+        return;
+      }
+      const res = _origSwitchTab.apply(this, arguments);
+      if (t === 'merchant') {
+        setTimeout(syncMerchantIntoFBHub, 60);
+      }
+      return res;
+    };
+  }
+
+  // Hook vào renderMerchantPortal & loginMerchant để luôn giữ khối FB & Poster nằm gọn ở dưới cùng và tự vẽ đúng cơ sở
+  ['renderMerchantPortal', 'loginMerchant', 'logoutMerchant'].forEach(fnName => {
+    if (typeof window[fnName] === 'function') {
+      const _orig = window[fnName];
+      window[fnName] = function() {
+        const res = _orig.apply(this, arguments);
+        setTimeout(syncMerchantIntoFBHub, 50);
+        return res;
+      };
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    relocateFBSectionIntoMerchant();
+    setTimeout(syncMerchantIntoFBHub, 600);
   });
 })();
 </script>
