@@ -20436,5 +20436,702 @@ service cloud.firestore {
 })();
 </script>
 
+
+<!-- ==================== MÔ-ĐUN v50: THỐNG KÊ ĐÁNH GIÁ NHẬN XÉT, MẪU NHẬN XÉT TÍCH NHANH & THIẾT KẾ LẠI BANNER MENU ĐẲNG CẤP ==================== -->
+<style>
+  /* =========================================================================
+     1. THIẾT KẾ LẠI BANNER MENU & HERO — SANG TRỌNG, RỰC RỠ, BỐ CỤC CÂN ĐỐI
+     ========================================================================= */
+  .app-header {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 250, 255, 0.96) 100%) !important;
+    border-bottom: 1px solid rgba(186, 214, 240, 0.85) !important;
+    box-shadow: 0 8px 28px rgba(12, 42, 82, 0.08) !important;
+  }
+  .app-header::before {
+    height: 4px !important;
+    background: linear-gradient(90deg, #0ea5e9 0%, #10b981 30%, #f59e0b 65%, #ec4899 100%) !important;
+  }
+  .header-inner {
+    padding: 11px 18px !important;
+    gap: 14px !important;
+  }
+  .brand-logo {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 15px !important;
+    background: linear-gradient(135deg, #0284c7 0%, #0d9488 55%, #f59e0b 100%) !important;
+    box-shadow: 0 6px 16px rgba(2, 132, 199, 0.32) !important;
+    font-size: 23px !important;
+  }
+  .brand-text h1 {
+    font-size: 16.5px !important;
+    letter-spacing: -0.35px !important;
+    color: #0f172a !important;
+  }
+  .brand-text h1 span {
+    background: linear-gradient(90deg, #0284c7, #0d9488);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .brand-text p {
+    font-size: 11.2px !important;
+    color: #475569 !important;
+  }
+
+  /* Thanh Menu Desktop dạng viên nang cao cấp, tách nhóm rõ ràng */
+  .nav-desktop {
+    background: linear-gradient(135deg, #eaf2fb 0%, #e7f6f2 100%) !important;
+    padding: 5px 6px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(148, 197, 233, 0.65) !important;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.85) !important;
+    gap: 5px !important;
+  }
+  .nav-desktop .nav-btn {
+    padding: 8.5px 13px !important;
+    border-radius: 11px !important;
+    font-size: 12.8px !important;
+    font-weight: 800 !important;
+    color: #334155 !important;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+  .nav-desktop .nav-btn:hover {
+    background: rgba(255, 255, 255, 0.72) !important;
+    color: #0369a1 !important;
+    transform: translateY(-1px);
+  }
+  .nav-desktop .nav-btn.active {
+    background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 5px 14px rgba(2, 132, 199, 0.28) !important;
+  }
+  .nav-desktop #nd-quickbook {
+    background: linear-gradient(135deg, #fef3c7 0%, #ffedd5 100%) !important;
+    color: #9a3412 !important;
+    border: 1px solid #fcd34d !important;
+  }
+  .nav-desktop #nd-quickbook:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
+    color: #fff !important;
+  }
+  .nav-desktop #nd-feedback {
+    background: linear-gradient(135deg, #fdf4ff 0%, #fce7f3 100%) !important;
+    color: #86198f !important;
+    border: 1px solid #f0abfc !important;
+  }
+  .nav-desktop #nd-feedback:hover {
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%) !important;
+    color: #fff !important;
+  }
+
+  /* Thiết kế lại Hero Banner Di Sản — Phối màu Ngọc Bích Tràng An + Xanh Hoàng Hôn + Vàng Cố Đô */
+  #tab-map .hero {
+    background: linear-gradient(132deg, #062f4f 0%, #0369a1 32%, #0d9488 68%, #b45309 100%) !important;
+    border-radius: 24px !important;
+    padding: 26px 28px !important;
+    box-shadow: 0 18px 40px rgba(6, 47, 79, 0.24) !important;
+    border: 1px solid rgba(255, 255, 255, 0.26) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.38fr) minmax(290px, 1fr) !important;
+    gap: 20px !important;
+    align-items: center !important;
+  }
+  #tab-map .hero::before {
+    width: 320px !important;
+    height: 320px !important;
+    right: -60px !important;
+    top: -80px !important;
+    background: radial-gradient(circle, rgba(253, 224, 71, 0.34) 0%, transparent 70%) !important;
+  }
+  #tab-map .hero-pill {
+    background: rgba(255, 255, 255, 0.18) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(253, 230, 138, 0.48) !important;
+    padding: 5px 14px !important;
+    font-size: 11.8px !important;
+    color: #fef9c3 !important;
+  }
+  #tab-map .hero h2 {
+    font-size: 24px !important;
+    line-height: 1.26 !important;
+    letter-spacing: -0.4px !important;
+    margin-bottom: 6px !important;
+  }
+  #tab-map .hero p {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+    color: rgba(255, 255, 255, 0.94) !important;
+  }
+  #tab-map .hero-stats {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+  }
+  #tab-map .stat-box {
+    background: rgba(255, 255, 255, 0.16) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.34) !important;
+    border-radius: 15px !important;
+    padding: 10px 8px !important;
+    min-width: 0 !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.10) !important;
+  }
+  #tab-map .stat-box .num {
+    font-size: 20px !important;
+    color: #fde047 !important;
+  }
+  #tab-map .stat-box .lbl {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+  }
+
+  /* =========================================================================
+     2. MẪU NHẬN XÉT SẴN CÓ (QUICK REVIEW TAGS) — TÍCH CHỌN 1 CHẠM
+     ========================================================================= */
+  .v50-preset-wrap {
+    background: #ffffff;
+    border: 1px solid #dbeafe;
+    border-radius: 11px;
+    padding: 8px 10px;
+  }
+  .v50-preset-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+  }
+  .v50-preset-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1.5px solid #cbd5e1;
+    cursor: pointer;
+    transition: all 0.14s ease;
+    user-select: none;
+  }
+  .v50-preset-chip:hover {
+    border-color: #38bdf8;
+    background: #f0f9ff;
+  }
+  .v50-preset-chip.checked {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border-color: #f59e0b;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.22);
+  }
+
+  /* =========================================================================
+     3. BẢNG THỐNG KÊ ĐÁNH GIÁ & NHẬN XÉT TỪ KHÁCH HÀNG
+     ========================================================================= */
+  .v50-rv-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .v50-rv-kpi {
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 11px 13px;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .v50-rv-kpi .lbl { font-size: 11px; color: var(--muted); font-weight: 700; }
+  .v50-rv-kpi .val { font-size: 20px; font-weight: 900; line-height: 1.2; margin-top: 2px; }
+  .v50-rv-kpi .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .v50-star-dist-row {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) 56px;
+    gap: 8px;
+    align-items: center;
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+  .v50-bar-track {
+    width: 100%;
+    height: 9px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+  }
+  .v50-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #f59e0b, #ea580c);
+  }
+
+  @media (max-width: 960px) {
+    #tab-map .hero {
+      grid-template-columns: 1fr !important;
+      padding: 18px 16px !important;
+    }
+    .v50-rv-kpi-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+
+<script>
+(function initV50ReviewStatsPresetsAndHeroDesign() {
+  // 1. Bộ mẫu nhận xét sẵn có theo từng loại hình để du khách tích chọn 1 chạm
+  const REVIEW_PRESETS = {
+    restaurant: [
+      'Đồ ăn tươi ngon, đậm đà chuẩn vị Ninh Bình',
+      'Thịt dê mềm ngọt, chế biến hấp dẫn',
+      'Nhân viên phục vụ nhiệt tình, lên món nhanh',
+      'Không gian quán rộng rãi, sạch sẽ, thoáng mát',
+      'Giá cả hợp lý, niêm yết rõ ràng',
+      'Rất phù hợp đi gia đình và khách đoàn',
+      'Cơm cháy giòn rụm, nước sốt rất vừa miệng',
+      'Sẽ quay lại ủng hộ nhà hàng lần sau!'
+    ],
+    hotel: [
+      'Phòng nghỉ sạch sẽ, thơm tho, đầy đủ tiện nghi',
+      'View núi non / cảnh quan cực kỳ đẹp và yên bình',
+      'Lễ tân thân thiện, hỗ trợ nhận phòng nhanh chóng',
+      'Vị trí thuận tiện đi Tràng An, Tam Cốc, Bái Đính',
+      'Bữa sáng ngon miệng, đa dạng món',
+      'Không gian nghỉ dưỡng thư giãn, yên tĩnh',
+      'Giá phòng xứng đáng với chất lượng dịch vụ',
+      'Chắc chắn sẽ giới thiệu cho bạn bè!'
+    ],
+    specialty: [
+      'Đặc sản chuẩn gốc, hương vị thơm ngon tự nhiên',
+      'Đóng gói cẩn thận, sạch đẹp, rất hợp làm quà biếu',
+      'Chủ cửa hàng tư vấn nhiệt tình, thân thiện',
+      'Hàng mới sản xuất trong ngày, hạn sử dụng rõ ràng',
+      'Giá bán niêm yết hợp lý, đúng chất lượng',
+      'Giao hàng nhanh, đúng hẹn, đủ số lượng',
+      'Đặc sản ngon hơn mong đợi, cả nhà đều khen',
+      'Sẽ tiếp tục đặt hàng online lần tới!'
+    ]
+  };
+
+  let selectedPresetTags = new Set();
+
+  // Chèn khu vực mẫu nhận xét tích chọn vào form đánh giá #v47-rv-form
+  function mountReviewPresetSelector() {
+    const form = document.getElementById('v47-rv-form');
+    const commentBox = document.getElementById('v47-rv-comment');
+    if (!form || !commentBox) return;
+
+    let wrap = document.getElementById('v50-preset-container');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'v50-preset-container';
+      wrap.className = 'v50-preset-wrap';
+      const commentGroup = commentBox.closest('.form-group');
+      if (commentGroup) {
+        form.insertBefore(wrap, commentGroup);
+      }
+    }
+
+    const type = document.getElementById('v47-rv-type')?.value || 'restaurant';
+    const presets = REVIEW_PRESETS[type] || REVIEW_PRESETS.restaurant;
+
+    wrap.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+        <span style="font-size:12px; font-weight:800; color:#0369a1;">⚡ Chọn nhanh mẫu nhận xét có sẵn (Tích vào để thêm):</span>
+        ${selectedPresetTags.size > 0
+          ? `<button type="button" class="btn btn-xs btn-soft" style="color:var(--danger);" onclick="v50ClearPresetTags()">✕ Bỏ chọn (${selectedPresetTags.size})</button>`
+          : `<span style="font-size:11px; color:var(--muted);">Có thể chọn nhiều mẫu</span>`}
+      </div>
+      <div class="v50-preset-chips">
+        ${presets.map(txt => {
+          const checked = selectedPresetTags.has(txt);
+          return `<button type="button" class="v50-preset-chip ${checked ? 'checked' : ''}" onclick="v50TogglePresetTag(${JSON.stringify(txt).replace(/"/g, '&quot;')})">
+            <span>${checked ? '☑️' : '⬜'}</span><span>${esc(txt)}</span>
+          </button>`;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  window.v50TogglePresetTag = function(txt) {
+    if (selectedPresetTags.has(txt)) selectedPresetTags.delete(txt);
+    else selectedPresetTags.add(txt);
+
+    // Đồng bộ nội dung các mẫu đã tích vào ô nhận xét
+    const commentBox = document.getElementById('v47-rv-comment');
+    if (commentBox) {
+      const joined = [...selectedPresetTags].join('. ');
+      commentBox.value = joined ? joined + '.' : '';
+    }
+    mountReviewPresetSelector();
+  };
+
+  window.v50ClearPresetTags = function() {
+    selectedPresetTags.clear();
+    const commentBox = document.getElementById('v47-rv-comment');
+    if (commentBox) commentBox.value = '';
+    mountReviewPresetSelector();
+  };
+
+  // Hook vào populateV47ReviewTargets & submitV47Review để làm mới mẫu nhận xét theo loại cơ sở
+  if (typeof window.populateV47ReviewTargets === 'function') {
+    const _origPop = window.populateV47ReviewTargets;
+    window.populateV47ReviewTargets = function() {
+      selectedPresetTags.clear();
+      const res = _origPop.apply(this, arguments);
+      mountReviewPresetSelector();
+      return res;
+    };
+  }
+  if (typeof window.submitV47Review === 'function') {
+    const _origSub = window.submitV47Review;
+    window.submitV47Review = function(e) {
+      const res = _origSub.apply(this, arguments);
+      selectedPresetTags.clear();
+      mountReviewPresetSelector();
+      if (ui.adminLoggedIn && ui.adminTab === 'reviews') renderAdminReviewsAnalytics();
+      return res;
+    };
+  }
+
+  // 2. Thống kê đánh giá & nhận xét từ khách hàng (dùng chung cho Admin và Đối tác)
+  function computeReviewAnalytics(reviewsList, feedbacksList) {
+    const rvs = Array.isArray(reviewsList) ? reviewsList : [];
+    const fbs = Array.isArray(feedbacksList) ? feedbacksList : [];
+
+    const starBuckets = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    const tagCounts = new Map();
+    const targetMap = new Map();
+
+    let sumAll = 0, sumSrv = 0, sumQual = 0, sumSpace = 0;
+
+    rvs.forEach(r => {
+      const s1 = Number(r.serviceStars) || 5;
+      const s2 = Number(r.qualityStars) || 5;
+      const s3 = Number(r.spaceStars || r.qualityStars) || 5;
+      const avgOne = (s1 + s2 + s3) / 3;
+      const rounded = Math.max(1, Math.min(5, Math.round(avgOne)));
+      starBuckets[rounded]++;
+
+      sumAll += avgOne;
+      sumSrv += s1;
+      sumQual += s2;
+      sumSpace += s3;
+
+      // Đếm các mẫu nhận xét / cụm từ phổ biến
+      String(r.comment || '').split(/[.!;\n]+/).map(s => s.trim()).filter(s => s.length >= 6).forEach(phrase => {
+        tagCounts.set(phrase, (tagCounts.get(phrase) || 0) + 1);
+      });
+
+      // Gom nhóm theo từng cơ sở
+      const key = `${r.targetType || 'restaurant'}:${r.targetId || r.targetName}`;
+      if (!targetMap.has(key)) {
+        targetMap.set(key, {
+          targetType: r.targetType || 'restaurant',
+          targetId: r.targetId || '',
+          targetName: r.targetName || 'Cơ sở đối tác',
+          count: 0,
+          sumScore: 0,
+          sumSrv: 0,
+          sumQual: 0,
+          latestAt: r.createdAt || ''
+        });
+      }
+      const tm = targetMap.get(key);
+      tm.count++;
+      tm.sumScore += avgOne;
+      tm.sumSrv += s1;
+      tm.sumQual += s2;
+    });
+
+    const total = rvs.length;
+    const avgOverall = total ? (sumAll / total) : 0;
+    const avgService = total ? (sumSrv / total) : 0;
+    const avgQuality = total ? (sumQual / total) : 0;
+    const avgSpace = total ? (sumSpace / total) : 0;
+    const positiveCount = starBuckets[5] + starBuckets[4];
+    const positiveRate = total ? Math.round((positiveCount / total) * 100) : 100;
+
+    const topTags = [...tagCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8);
+
+    const ranking = [...targetMap.values()]
+      .map(t => ({
+        ...t,
+        avg: t.count ? (t.sumScore / t.count) : 0,
+        avgSrv: t.count ? (t.sumSrv / t.count) : 0,
+        avgQual: t.count ? (t.sumQual / t.count) : 0
+      }))
+      .sort((a, b) => b.count - a.count || b.avg - a.avg);
+
+    return {
+      totalReviews: total,
+      totalFeedbacks: fbs.length,
+      avgOverall,
+      avgService,
+      avgQuality,
+      avgSpace,
+      positiveRate,
+      starBuckets,
+      topTags,
+      ranking
+    };
+  }
+
+  // 3. Bổ sung Tab "⭐ Thống kê Đánh giá" vào Quản trị Admin
+  function ensureAdminReviewsTab() {
+    const chipBar = document.querySelector('#admin-panel > .panel > .panel-head > .chip-bar');
+    if (chipBar && !document.getElementById('at-rv')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'reg-chip';
+      btn.id = 'at-rv';
+      btn.innerHTML = `⭐ Thống kê Đánh giá (<span id="at-cnt-rv">${(db.reviews || []).length}</span>)`;
+      btn.onclick = () => setAdminTab('reviews');
+      chipBar.appendChild(btn);
+    }
+
+    const parentPanel = document.querySelector('#admin-panel > .panel');
+    if (parentPanel && !document.getElementById('admin-reviews-area')) {
+      const div = document.createElement('div');
+      div.id = 'admin-reviews-area';
+      div.className = 'hidden';
+      parentPanel.appendChild(div);
+    }
+  }
+
+  window.renderAdminReviewsAnalytics = function() {
+    ensureAdminReviewsTab();
+    const box = document.getElementById('admin-reviews-area');
+    if (!box) return;
+
+    const rvs = Array.isArray(db.reviews) ? db.reviews : [];
+    const fbs = Array.isArray(db.serviceFeedbacks) ? db.serviceFeedbacks : [];
+    const an = computeReviewAnalytics(rvs, fbs);
+
+    const typeLabel = t => t === 'hotel' ? '🏨 Khách sạn' : (t === 'specialty' ? '🎁 Đặc sản' : '🍽️ Nhà hàng');
+
+    box.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+        <div>
+          <div style="font-size:15.5px; font-weight:800; color:#b45309;">⭐ Thống Kê Đánh Giá &amp; Nhận Xét Từ Khách Hàng Toàn Hệ Thống</div>
+          <div style="font-size:12px; color:var(--muted);">Tổng hợp điểm hài lòng, phân bố số sao, mẫu nhận xét được tích nhiều nhất và xếp hạng từng cơ sở.</div>
+        </div>
+        <button type="button" class="btn btn-gold btn-sm" onclick="openV47FeedbackModal('review')">+ Mở giao diện Đánh giá</button>
+      </div>
+
+      <!-- KPI Đánh giá -->
+      <div class="v50-rv-kpi-grid">
+        <div class="v50-rv-kpi">
+          <div class="lbl">⭐ Điểm trung bình chung</div>
+          <div class="val" style="color:#b45309;">${an.totalReviews ? an.avgOverall.toFixed(1) + ' / 5.0' : '—'}</div>
+          <div class="sub">Trên tổng ${an.totalReviews} lượt đánh giá</div>
+        </div>
+        <div class="v50-rv-kpi">
+          <div class="lbl">😊 Tỷ lệ hài lòng (4★ - 5★)</div>
+          <div class="val" style="color:var(--success);">${an.totalReviews ? an.positiveRate + '%' : '—'}</div>
+          <div class="sub">${an.starBuckets[5] + an.starBuckets[4]} đánh giá tích cực</div>
+        </div>
+        <div class="v50-rv-kpi">
+          <div class="lbl">🤝 Điểm Phục vụ / Chất lượng</div>
+          <div class="val" style="color:var(--fb);">${an.totalReviews ? `${an.avgService.toFixed(1)}★ / ${an.avgQuality.toFixed(1)}★` : '—'}</div>
+          <div class="sub">Không gian &amp; Vệ sinh: ${an.totalReviews ? an.avgSpace.toFixed(1) + '★' : '—'}</div>
+        </div>
+        <div class="v50-rv-kpi">
+          <div class="lbl">💌 Góp ý dịch vụ tiếp nhận</div>
+          <div class="val" style="color:var(--food-dark);">${an.totalFeedbacks} góp ý</div>
+          <div class="sub">Từ du khách trải nghiệm thực tế</div>
+        </div>
+      </div>
+
+      <!-- Phân bố sao & Nhận xét nổi bật -->
+      <div class="row-2" style="margin-bottom:14px;">
+        <div class="info-box" style="background:#fff;">
+          <div style="font-weight:800; margin-bottom:6px; color:var(--text);">📊 Phân Bố Số Sao Đánh Giá</div>
+          ${[5, 4, 3, 2, 1].map(star => {
+            const cnt = an.starBuckets[star] || 0;
+            const pct = an.totalReviews ? Math.round((cnt / an.totalReviews) * 100) : 0;
+            return `
+              <div class="v50-star-dist-row">
+                <b>${star} sao ★</b>
+                <div class="v50-bar-track"><div class="v50-bar-fill" style="width:${pct}%;"></div></div>
+                <span style="text-align:right; color:var(--muted);"><b>${cnt}</b> (${pct}%)</span>
+              </div>`;
+          }).join('')}
+        </div>
+
+        <div class="info-box" style="background:#fff;">
+          <div style="font-weight:800; margin-bottom:6px; color:var(--jade-dark);">🏷️ Nhận Xét Khách Hàng Chọn Nhiều Nhất</div>
+          ${an.topTags.length
+            ? `<div style="display:flex; flex-wrap:wrap; gap:6px;">
+                ${an.topTags.map(([phrase, c]) => `<span class="tag tag-gold" style="white-space:normal; line-height:1.35;">“${esc(phrase)}” <b>(${c})</b></span>`).join('')}
+              </div>`
+            : '<div style="font-size:12px; color:var(--muted);">Chưa có dữ liệu mẫu nhận xét từ khách hàng.</div>'}
+        </div>
+      </div>
+
+      <!-- Bảng xếp hạng đánh giá theo từng cơ sở -->
+      <div style="font-size:13.5px; font-weight:800; margin-bottom:6px;">🏆 Thống Kê Đánh Giá Theo Từng Nhà Hàng / Khách Sạn / Cửa Hàng</div>
+      <div class="table-wrap" style="margin-bottom:14px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tên cơ sở</th>
+              <th>Loại hình</th>
+              <th>Số lượt đánh giá</th>
+              <th>Điểm phục vụ</th>
+              <th>Điểm chất lượng</th>
+              <th>Điểm TB</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${an.ranking.length ? an.ranking.map((t, i) => `
+              <tr>
+                <td><b>${i + 1}</b></td>
+                <td><b>${esc(t.targetName)}</b></td>
+                <td>${typeLabel(t.targetType)}</td>
+                <td><span class="tag tag-fb">${t.count} lượt</span></td>
+                <td>${t.avgSrv.toFixed(1)} ★</td>
+                <td>${t.avgQual.toFixed(1)} ★</td>
+                <td><b style="color:#b45309;">⭐ ${t.avg.toFixed(1)} / 5.0</b></td>
+              </tr>`).join('')
+              : '<tr><td colspan="7" style="text-align:center; padding:18px; color:var(--muted);">Chưa có đánh giá nào từ khách hàng.</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Danh sách chi tiết nhận xét & góp ý mới nhất -->
+      <div style="font-size:13.5px; font-weight:800; margin-bottom:6px;">💬 Chi Tiết Nhận Xét Mới Nhất Từ Khách Hàng (${rvs.length})</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Thời gian</th>
+              <th>Khách hàng</th>
+              <th>Cơ sở được đánh giá</th>
+              <th>Chấm điểm</th>
+              <th>Nội dung nhận xét</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rvs.length ? rvs.map(r => {
+              const avgOne = (((Number(r.serviceStars)||5) + (Number(r.qualityStars)||5) + (Number(r.spaceStars||r.qualityStars)||5)) / 3).toFixed(1);
+              return `
+                <tr>
+                  <td style="font-size:11px; color:var(--muted); white-space:nowrap;">🕒 ${esc(r.createdAt || '')}</td>
+                  <td><b>${esc(r.author || 'Du khách')}</b>${r.phone ? `<div style="font-size:11px; color:var(--muted);">📞 ${esc(r.phone)}</div>` : ''}</td>
+                  <td><b>${esc(r.targetName || '')}</b><div>${typeLabel(r.targetType)}</div></td>
+                  <td style="white-space:nowrap;"><b style="color:#b45309;">⭐ ${avgOne}/5</b><div style="font-size:10.5px; color:var(--muted);">PV ${r.serviceStars}★ • CL ${r.qualityStars}★</div></td>
+                  <td style="max-width:280px; font-size:12px;">${esc(r.comment || '')}</td>
+                  <td><button type="button" class="btn btn-xs btn-soft" style="color:var(--danger);" onclick="v50DeleteReview('${esc(r.id)}')">Xóa</button></td>
+                </tr>`;
+            }).join('')
+              : '<tr><td colspan="6" style="text-align:center; padding:18px; color:var(--muted);">Chưa có nhận xét nào.</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    `;
+  };
+
+  window.v50DeleteReview = function(id) {
+    openConfirm('Xóa nhận xét này?', 'Nhận xét sẽ bị xóa khỏi thống kê đánh giá của hệ thống.', () => {
+      db.reviews = (db.reviews || []).filter(r => r.id !== id);
+      saveDB();
+      updateCounts();
+      renderAdminReviewsAnalytics();
+      toast('Đã xóa nhận xét!', 'info');
+    });
+  };
+
+  // Mở rộng setAdminTab để hỗ trợ tab 'reviews'
+  if (typeof window.setAdminTab === 'function') {
+    const _origSetAdminTab = window.setAdminTab;
+    window.setAdminTab = function(t) {
+      ensureAdminReviewsTab();
+      const rvArea = document.getElementById('admin-reviews-area');
+      const rvChip = document.getElementById('at-rv');
+      if (t === 'reviews') {
+        ui.adminTab = 'reviews';
+        document.querySelectorAll('#admin-panel > .panel > .panel-head > .chip-bar .reg-chip').forEach(el => {
+          el.classList.toggle('active', el.id === 'at-rv');
+        });
+        document.getElementById('admin-crud-area')?.classList.add('hidden');
+        document.getElementById('admin-titles-area')?.classList.add('hidden');
+        document.getElementById('admin-accounts-area')?.classList.add('hidden');
+        document.getElementById('btn-admin-add')?.classList.add('hidden');
+        document.getElementById('btn-admin-sync')?.classList.add('hidden');
+        rvArea?.classList.remove('hidden');
+        renderAdminReviewsAnalytics();
+        return;
+      }
+      rvChip?.classList.remove('active');
+      rvArea?.classList.add('hidden');
+      return _origSetAdminTab.apply(this, arguments);
+    };
+  }
+
+  // Cập nhật số đếm trên tab đánh giá trong updateCounts
+  if (typeof window.updateCounts === 'function') {
+    const _origUpdateCounts = window.updateCounts;
+    window.updateCounts = function() {
+      const res = _origUpdateCounts.apply(this, arguments);
+      const el = document.getElementById('at-cnt-rv');
+      if (el) el.textContent = (db.reviews || []).length;
+      return res;
+    };
+  }
+
+  // Nâng cấp bảng thống kê đánh giá riêng trong Cổng Đối Tác (#v47-mc-feedback-panel)
+  if (typeof window.renderMerchantFeedbackPanel === 'function') {
+    const _origMcFb = window.renderMerchantFeedbackPanel;
+    window.renderMerchantFeedbackPanel = function() {
+      _origMcFb.apply(this, arguments);
+      const panel = document.getElementById('v47-mc-feedback-panel');
+      if (!panel || !ui.merchantRestaurantId) return;
+      const myReviews = (db.reviews || []).filter(r => r.targetId === ui.merchantRestaurantId);
+      const myFeedbacks = (db.serviceFeedbacks || []).filter(f => f.targetId === ui.merchantRestaurantId);
+      const an = computeReviewAnalytics(myReviews, myFeedbacks);
+
+      // Chèn thanh thống kê sao & từ khóa nhận xét nổi bật lên đầu panel của đối tác
+      const head = panel.querySelector('.panel-head');
+      if (head && !document.getElementById('v50-mc-rv-stats')) {
+        const statsDiv = document.createElement('div');
+        statsDiv.id = 'v50-mc-rv-stats';
+        statsDiv.className = 'info-box';
+        statsDiv.style.cssText = 'margin-bottom:10px; background:#fffbeb; border-color:#fcd34d;';
+        statsDiv.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+            <b>📊 Thống kê chất lượng cơ sở của bạn:</b>
+            <span style="font-size:12px;">
+              ⭐ TB: <b style="color:#b45309;">${an.totalReviews ? an.avgOverall.toFixed(1) + '/5' : '—'}</b> •
+              😊 Hài lòng: <b style="color:var(--success);">${an.totalReviews ? an.positiveRate + '%' : '—'}</b> •
+              🤝 Phục vụ: <b>${an.totalReviews ? an.avgService.toFixed(1) + '★' : '—'}</b> •
+              ✨ Chất lượng: <b>${an.totalReviews ? an.avgQuality.toFixed(1) + '★' : '—'}</b>
+            </span>
+          </div>
+          ${an.topTags.length ? `<div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
+            <span style="font-size:11.5px; color:var(--muted); font-weight:700;">Khách khen nhiều nhất:</span>
+            ${an.topTags.slice(0, 5).map(([p, c]) => `<span class="tag tag-gold">“${esc(p)}” (${c})</span>`).join('')}
+          </div>` : ''}
+        `;
+        head.insertAdjacentElement('afterend', statsDiv);
+      }
+    };
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    mountReviewPresetSelector();
+    setTimeout(() => {
+      mountReviewPresetSelector();
+      ensureAdminReviewsTab();
+    }, 650);
+  });
+})();
+</script>
+
 </body>
 </html>
